@@ -1,0 +1,253 @@
+= Infrastructure Data Gathering with Ansible
+:toc:
+:toc-placement: auto
+
+== Introduction
+
+Gathering comprehensive data about your infrastructure is one of the best starting points for automation with Ansible. While you know you have servers and networks, auditing and collecting all system data can be a massive undertaking. Fortunately, Ansible excels at this task and can scale to handle infrastructure of any size.
+
+This lab will guide you through using Ansible to collect system information, generate reports, and perform compliance audits across your infrastructure.
+
+=== Lab Environment Setup
+
+==== Access Credentials
+
+[cols="1,1"]
+|===
+| Username | Password
+
+| admin
+| ansible123!
+|===
+
+
+== Lab Exercises
+
+=== Exercise 1: Gathering Server Information
+
+Let's start by collecting detailed system facts from individual servers using Ansible's built-in capabilities.
+
+==== Step 1: Access the Inventory
+
+. Navigate to your lab `aap` tab and login using the credentials above
+. Navigate to *Automation Execution* → *Infrastructure* → *Inventories*
+. Select the *Video Platform Inventory*
+. Click on the *Hosts* tab
+
+This inventory contains the systems we'll be automating. You should see several hosts already configured for you.
+
+.Node Setup View
+image::node01-setup.png[Node Setup Interface]
+
+==== Step 2: Run Ad-hoc Commands
+
+We'll use Ansible Automation Platform's ad-hoc command feature to gather system facts:
+
+. Select the host `node01`
+. Click on *Run command*
+. From the module dropdown list, select the *Setup* module
+. Click *Next*
+
+.Setup Module Selection
+image::setup.png[Setup Module Interface]
+
+==== Step 3: Configure Execution Environment
+
+. Select the *Default execution environment* from the dropdown
+. Click *Next*
+
+==== Step 4: Choose Credentials
+
+. Select the *Application Nodes* credential
+. Click *Next*
+. Click *Finish* to execute the command
+
+==== Step 5: Review System Facts
+
+Once the command executes, you'll see comprehensive system facts displayed. This includes all the information Ansible can automatically gather from the target system.
+
+.System Facts Output
+image::setup-output.png[Setup Output Results]
+
+[NOTE]
+====
+The Setup module collects extensive system information including hardware details, network configuration, installed packages, and operating system specifics. This data forms the foundation for infrastructure automation and reporting.
+====
+
+=== Exercise 2: Generating Infrastructure Reports at Scale
+
+Now let's leverage Ansible's templating capabilities to create dynamic reports based on collected facts and task results.
+
+==== Understanding Infrastructure Awareness
+
+Infrastructure awareness is crucial for effective IT operations. Ansible makes this easy by combining fact collection with Jinja templating to generate comprehensive, dynamic reports.
+
+==== Step 1: Generate Application Server Report
+
+. Navigate to *Automation Execution* → *Templates*
+. Execute the *Application Server Report* template
+. When prompted with options, click *All*
+
+This template will collect information from all your application servers and generate a comprehensive report.
+
+==== Step 2: View the Generated Report
+
+. Once the template execution completes, navigate to the *Report Server* tab
+. Refresh the page to see the newly generated report
+
+.Server Report Overview
+image::srv-report.png[Server Report Dashboard]
+
+Notice that the report includes backup information alongside system details, providing a holistic view of your infrastructure status.
+
+.Backup Data Integration
+image::backup-data.png[Backup Report Section]
+
+[TIP]
+====
+You can re-run the report template and select different options to create targeted reports for specific criteria or server subsets.
+====
+
+=== Exercise 3: Compliance Reporting with OpenSCAP
+
+Security compliance is a critical requirement for most organizations. Let's generate a compliance report using OpenSCAP integration.
+
+==== Background: Why Compliance Reports Matter
+
+Information Security teams require regular compliance reports to ensure systems meet organizational and regulatory requirements. Ansible can automate OpenSCAP scans to provide these reports consistently and at scale.
+
+==== Step 1: Generate Compliance Report
+
+Security has specifically requested a compliance report for `Node02`. Let's fulfill this request:
+
+. Navigate to *Automation Execution* → *Templates*
+. Execute the *OpenSCAP Report* template
+
+==== Step 2: Access Compliance Results
+
+. Once the job completes, navigate to the *Compliance Report* tab
+. You'll see the generated compliance report files
+
+.Compliance Report Directory
+image::compliance_report_folder.png[Compliance Report Folder]
+
+==== Step 3: Review Detailed Results
+
+Click on the report file to view the detailed compliance results, including:
+
+- Security control assessments
+- Pass/fail status for each check
+- Remediation recommendations
+- Risk severity levels
+
+.Detailed Compliance Report
+image::compliance_report.png[Compliance Report Details]
+
+== Code Reference
+
+=== OpenSCAP Automation Implementation
+
+Here's the key Ansible code used for automated compliance reporting:
+
+[source,yaml]
+----
+tasks:
+  - name: Check if the system is RHEL 8
+    ansible.builtin.debug:
+      msg: "This playbook is not compatible with {{ inventory_hostname }} (not RHEL 8)"
+    when: ansible_distribution != "RedHat" or ansible_distribution_major_version != "8"
+    failed_when: false
+
+  - name: Run compliance tasks on RHEL 8 systems only
+    when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"
+    block:
+      - name: Get our facts straight
+        ansible.builtin.set_fact:
+          _profile: '{{ compliance_profile | replace("pci_dss", "pci-dss") }}'
+          _report_dir: /tmp/oscap-reports
+
+      - name: Ensure OpenSCAP tools are installed
+        ansible.builtin.dnf:
+          name: '{{ openscap_packages }}'
+          state: present
+
+      - name: Configure httpd
+        when: use_httpd | bool
+        block:
+          - name: Install httpd
+            ansible.builtin.dnf:
+              name: httpd
+              state: present
+            notify: Restart httpd
+
+          - name: Override report directory
+            ansible.builtin.set_fact:
+              _report_dir: /var/www/html/oscap-reports
+
+          - name: Gather service facts
+            ansible.builtin.service_facts:
+
+          - name: Enable firewall http service
+            ansible.posix.firewalld:
+              service: http
+              state: enabled
+              immediate: true
+              permanent: true
+            when: "'firewalld.service' in ansible_facts.services"
+
+          - name: Disable httpd welcome page
+            ansible.builtin.file:
+              path: /etc/httpd/conf.d/welcome.conf
+              state: absent
+            notify: Restart httpd
+
+      - name: Create report on Report Server
+        block:
+          - name: Ensure report directory exists
+            ansible.builtin.file:
+              path: '{{ _report_dir }}/{{ _profile }}'
+              state: directory
+              owner: root
+              group: root
+              mode: 0755
+
+          - name: Set report name
+            ansible.builtin.set_fact:
+              _report: '{{ _report_dir }}/{{ _profile }}/report-{{ inventory_hostname }}-{{ ansible_date_time.iso8601 }}.html'
+
+          - name: Generate compliance report
+            ansible.builtin.command: >-
+              oscap xccdf eval --profile {{ _profile }} --report {{ _report }}
+              /usr/share/xml/scap/ssg/content/ssg-rhel{{ ansible_distribution_major_version }}-ds.xml
+            args:
+              creates: '{{ _report }}'
+            register: _oscap
+            failed_when: _oscap.rc not in [0, 2]
+
+          - name: Set report permissions
+            ansible.builtin.file:
+              path: '{{ _report }}'
+              owner: root
+              group: root
+              mode: 0644
+----
+
+== Key Takeaways
+
+You've successfully completed the infrastructure data gathering exercises! You now understand how to:
+
+* ✅ **Collect System Facts**: Use Ansible's Setup module to gather comprehensive system information
+* ✅ **Generate Dynamic Reports**: Leverage Jinja templating to create infrastructure reports at scale  
+* ✅ **Automate Compliance Audits**: Implement OpenSCAP integration for security compliance reporting
+* ✅ **Scale Data Collection**: Apply these techniques across multiple systems simultaneously
+
+== Next Steps
+
+With these foundational skills in infrastructure data gathering, you're ready to:
+
+- Implement regular automated reporting schedules
+- Expand compliance scanning to additional security frameworks
+- Create custom reports tailored to your organization's specific needs
+- Build more complex automation workflows using the collected system data
+
+This infrastructure awareness foundation will serve as the basis for more advanced automation scenarios throughout your Ansible journey.

@@ -1,0 +1,54 @@
+---
+
+antora:
+  name: modules
+  dir: www
+  modules:
+    - name: module-01
+      label: "Backup and Snapshots"
+      solveButton: false
+    - name: module-02
+      label: "Infrastructure Reporting"
+      solveButton: false
+    - name: module-03
+      label: "Windows Reporting"
+      solveButton: false
+
+tabs:
+  - name: aap
+    url: https://control-${guid}.${domain}/
+    modules:
+      - module-01
+      - module-02
+      - module-03
+    external: false
+  - name: Report Server
+    url: https://node03-${guid}.${domain}/index.html
+    external: true
+    modules:
+     - module-02
+  - name: Compliance Report
+    url: https://node02-${guid}.${domain}/oscap-reports/ospp/
+    external: true
+    modules:
+     - module-02
+  - name: Windows UI
+    url: https://windows-${guid}.${domain}/
+    external: true
+    modules:
+     - module-03
+
+
+  # - name: Windows RDP
+  #   url: https://windows-ironrdp-${guid}.${domain}/
+  #   external: false
+  # - name: ">_ control"
+  #   url: /wetty
+  # - name: ">_ node01"
+  #   url: /wetty_node01
+  # - name: ">_ node02"
+  #   url: /wetty_node02
+  # - name: ">_ node03"
+  #   url: /wetty_node03
+  # - name: Cloud (PoC)
+  #   url: /cloud
