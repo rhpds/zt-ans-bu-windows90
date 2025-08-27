@@ -218,4 +218,4 @@ sudo dnf clean all
 sudo dnf install -y ansible-navigator
 sudo dnf install -y ansible-lint
 sudo dnf install -y nc
-pip3.9 install yamllint
+pip3 install yamllint
