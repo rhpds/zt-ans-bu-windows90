@@ -1,165 +1,224 @@
-= Ansible Automation Platform Lab Guide
-:toc:
-:toc-placement: auto
+= 1. Controller
 
-== Welcome to the Team!
+There are a number of constructs in the Automation Controller UI that enable
+multi-tenancy, notifications, scheduling, etc. However, we are only
+going to focus on a few of the key constructs that are required for this
+workshop today.
 
-Congratulations on joining the team! This lab will introduce you to automation using Ansible Automation Platform. We'll start with read-only tasks that are safe to automate, helping you build confidence before moving to more complex automation scenarios.
+* *Credentials*
+* *Projects*
+* *Inventory*
+* *Job Template*
 
-=== Lab Environment Setup
+== ☑️ Logging into Controller
 
-==== Access Credentials
+Your Automation Controller instance can be found in the tab called `controller`
+Your login credentials are:
 
-[cols="1,1"]
+....
+Controller Details:
+
+Username: student
+Password: learn_ansible
+....
+
+Your Automation Controller subscription has already been applied for you, so after
+logging in, you should now see the Dashboard.
+
+== ☑️ Creating Machine Credentials
+
+Credentials are utilized by Controller for authentication when launching jobs
+against machines, synchronizing with inventory sources, and importing
+project content from a version control system.
+
+There are many link:https://docs.ansible.com/automation-controller/latest/html/userguide/credentials.html#credential-types[types of credentials] including machine, network, and various cloud providers. For this
+workshop, we are using *machine* and *source control* credentials.
+
+=== Step 1
+
+Select CREDENTIALS from the left hand panel under resources
+
+image::../assets/1-controller-credentials.png[Cred]
+
+=== Step 2
+
+Click the image:../assets/add.png[Add] icon and add new credential
+
+=== Step 3
+
+Complete the form using the following entries:
+
+[cols="1,1",options="header"]
 |===
-| Username | Password
-
-| admin
-| ansible123!
+| Key | Value
+| Name | Windows Credential
+| Organization | Default
+| Type | Machine
+| Username | instruqt
+| Password | Passw0rd!
 |===
 
+image::../assets/1-controller-add-machine-credential.png[Add Machine Credential]
 
+=== Step 4
 
-== Lab Exercises
+Select SAVE image:../assets/at_save.png[Save]
 
-=== Exercise 1: Backing up Linux File Systems
+== ☑️ Create SCM Credentials
 
-Managing backups across multiple Linux servers is a common operational task. Ansible can automate various snapshot mechanisms whether your infrastructure is cloud-based, virtualized, or bare metal.
+Our first credential was to access our Windows machines over WinRM. We need another
+to access our source code repository where our automation projects will live. Repeat the process as above, but
+with the following details:
 
-==== Step 1: Check Current Backup Status
+[cols="1,2,2",options="header"]
+|===
+| Key | Value |
+| Name | Git Credential |
+| Description | SCM credential for project sync |
+| Organization | Default |
+| Credential Type | Source Control |
+| Username | student | Replace # with your student number
+| Password | learn_ansible | Replace with your student password
+|===
 
-. Navigate to the `aap` tab and login using the credentials above (`admin/ansible123!`)
-. Click on the Menu dropdown icon (hamburger menu)
-. Navigate to *Automation Execution* → *Templates*
-. Launch the template *Check RHEL Backups* by clicking the 🚀 icon
+Select SAVE image:../assets/at_save.png[Save]
 
-You should see that no backups are currently available.
+image::../assets/1-controller-add-scm-credential.png[Add SCM Credential]
 
-.Current Backup Status
-image::/backupcheck.png[Backup Check Results]
+== ☑️ Creating a Project
 
-==== Step 2: Create XFS Backups
+A *Project* is a logical collection of Ansible content, represented in Controller. You can manage projects by placing your ansible content into a source code management (SCM) system supported by Controller, including Git and Subversion.
 
-Now let's create backups of the XFS file systems on your RHEL servers:
+=== Step 1
 
-. Navigate back to *Automation Execution* → *Templates*
-. Launch the *Server Backup - XFS/RHEL* template
-. This process will backup your three RHEL nodes using XFS dumps
+In this environment, playbooks are stored in a git repository available on the workshop Gitea instance. Before a *Project* can be created in Automation Controller, the git URL for the repository is needed. In order to obtain the URL of your project, login to the Gitea instance, found on the `gitea` tab. You can login to gitea with the following credentials:
 
-[NOTE]
-====
-This backup process takes approximately 6-7 minutes. Feel free to proceed with other tasks while it runs - Ansible jobs can run in parallel safely!
-====
+....
+Gitea Details:
 
-.XFS Backup Process
-image::xfsbackup.png[XFS Backup in Progress]
+Username: student
+Password: learn_ansible
+....
 
-==== Step 3: Verify Backup Creation
+Then select your workshop project and copy the `https` url presented after clicking the "Copy" button.
 
-Once the backup completes:
+image::../assets/1-gitea-project.png[Proj]
+image::../assets/1-gitea-clone.png[Clone]
 
-. Launch the *Check RHEL Backups* template again
-. Verify that backups are now available on each server
+The repo url will be used in *Step 3*
 
-.Backup Verification
-image::afterbackupcheck.png[Backup Check After Creation]
+=== Step 2
 
-=== Exercise 2: Windows System Snapshots
+Click *Projects* on the left hand panel.
 
-Windows systems have built-in Volume Shadow Copy Service (VSS) snapshotting capabilities. While your organization may use third-party backup tools, VSS snapshots are essential for database systems as they allow backups without locking active files.
+image::../assets/1-controller-project.png[Proj]
 
-==== Step 1: Create VSS Snapshots
+Click the image:../assets/add.png[Add] icon and add new project
 
-. Navigate to *Automation Execution* → *Templates*
-. Launch the *Server Snapshot - VSS/Windows* template
+=== Step 3
 
-.Windows VSS Snapshot
-image::vss-snap.png[Windows VSS Snapshot Creation]
+Complete the form using the following entries (*using your student
+number in SCM URL*)
 
-==== Step 2: Verify Snapshot Creation
+[cols="1,2,2",options="header"]
+|===
+| Key | Value |
+| Name | Ansible Workshop Project |
+| Description | Windows Workshop Project |
+| Organization | Default |
+| Default Execution Environment | Windows Workshop Execution Environment |
+| SCM Type | Git |
+| SCM URL | http://gitea:3000/student/workshop_project.git | URL obtained from Step 1
+| SCM BRANCH | | Intentionally blank
+| SCM CREDENTIAL | Git Credential |
+|===
 
-. Navigate to *Automation Execution* → *Templates*
-. Execute the *Check Windows Backups* template
+OPTIONS
 
-.VSS Snapshot Verification
-image::vss-snap-check.png[VSS Snapshot Check]
+* [ ] Clean
+* [ ] Delete
+* [ ] Track submodules
+* [x] Update Revision on Launch
+* [ ] Allow Branch Override
 
-Great! The VSS snapshot has been successfully created.
+image::../assets/1-controller-create-project.png[Defining a Project]
 
-==== Step 3: Schedule Automated Snapshots
+=== Step 4
 
-To automate recurring snapshots without manual intervention:
+Select SAVE image:../assets/at_save.png[Save]
 
-. Navigate to *Automation Execution* → *Templates*
-. Select *Server Backup - VSS/Windows*
-. Click on the *Schedules* tab
-. Click *Create schedule*
+=== Step 5
 
-.Schedule Configuration
-image::win-shed.png[Windows Schedule Setup]
+Scroll down and validate that the project has been successfully synchronized
+against the source control repository upon saving. You should see a green icon displaying "Successful"
+next to the project name in the list view. If the status does not show as "Successful", try pressing the "Sync Project" button again re-check the status.
 
-===== Schedule Configuration Details:
+image::../assets/1-controller-project-success.png[Succesfull Sync]
 
-* *Schedule Name:* `5 Min Snappy`
-* *Description:* `Automated VSS Snaps`
-* *Start date/time:* Leave as default
-* *Time Zone:* Leave as default
+== ☑️ Inventories
 
-===== Frequency Settings:
+An inventory is a collection of hosts against which jobs may be
+launched. Inventories are divided into groups and these groups contain hosts. Inventories may be sourced manually, by entering host
+names into Controller, or from one of Automation Controller’s supported cloud
+providers or inventory plugins from Certified Content Collections on Automation Hub.
 
-. Click *Next*
-. Set *Frequency* to `Minutely`
-. Set *Interval* to `5`
-. Select *Save rule* and click *Next*
-. Skip exceptions (click *Next*)
-. Click *Finish*
+A static Inventory has already been created for you today. Let's take a look at this inventory and highlight some properties and configuration parameters.
 
-.Schedule Details
-image::shed-details.png[Schedule Configuration Details]
+=== Step 1
 
-Perfect! Your automated snapshot schedule is now configured.
+Click *Inventories* from the left hand panel. You will see the
+preconfigured Inventory listed. Click the Inventories' name *Workshop Inventory* or the Edit button. image:../assets/at_edit.png[Edit]
 
-== Code Reference
+=== Step 2
 
-=== XFS Backup Automation
+You are now viewing the Inventory. From here, you can add Hosts,
+Groups, or even Variables specific to this Inventory.
 
-Here's the key Ansible code used for XFS backups:
+image::../assets/1-controller-edit-inventory.png[Edit Inventory]
 
-[source,yaml]
-----
-tasks:
-  - name: Check if xfsdump is installed
-    ansible.builtin.yum:
-      name: xfsdump
-      state: present
-    when: ansible_facts.os_family == "RedHat"
+We will be viewing the hosts, so click the *HOSTS* button.
 
-  - name: Ensure the backup directory exists
-    ansible.builtin.file:
-      path: "{{ backup_file | dirname }}"
-      state: directory
-      mode: '0755'
+=== Step 3
 
-  - name: Perform xfsdump backup
-    ansible.builtin.command:
-      cmd: >
-        xfsdump -l 0 -L {{ backup_label }}
-        -f {{ backup_file }} {{ xfs_mount_point }}
-    register: backup_result
-    ignore_errors: no
+In the Hosts view, we can see every host associated with this
+inventory. You will also see which groups a host is associated with.
+Hosts can be associated with multiple groups. These groups can later be used to narrow down the exact hosts we will later run our
+automation on.
 
-  - name: Verify xfsdump success
-    ansible.builtin.debug:
-      msg: "Backup completed successfully: {{ backup_result.stdout }}"
-----
+image::../assets/1-controller-hosts-view.png[Hosts View]
 
-== Next Steps
+=== Step 4
 
-You've successfully completed the backup automation exercises! You now have:
+If you click the *GROUPS* button and then select the *Windows* group, you can inspect variables set at the group level that will apply to all hosts in that group.
 
-* ✅ Automated Linux XFS backups
-* ✅ Windows VSS snapshots
-* ✅ Scheduled recurring snapshots
-* ✅ Verification procedures for both systems
+image::../assets/1-controller-group-edit.png[Group Edit]
 
-This foundation in read-only automation tasks will help you build confidence for more complex automation scenarios in the future.
+Today, we have already defined a handful of variables to tell Controller how to connect to hosts in this group. You do not have to define these variables as
+a Group variable here, they could also be Host variables or reside
+directly in your Template or Playbook. However, because these variables will be the same for *ALL* windows hosts in our environment, we defined them for the entire windows group.
+
+By default, Ansible will attempt to use SSH to connect to any Host, so
+for Windows we need to tell it utilize a different connection method, in
+this case,
+link:https://docs.ansible.com/ansible/latest/user_guide/windows_winrm.html[WinRM].
+
+....
+ansible_connection: winrm
+....
+
+We also instruct Ansible to connect to the WinRM SSL port 5986 (the
+non-SSL port runs on 5985 but is unencrypted).
+
+....
+ansible_port: 5986
+....
+
+We also tell Ansible to ignore the WinRM cert, since our lab doesn’t
+have a proper certificate store setup.
+
+....
+ansible_winrm_server_cert_validation: ignore
+....
+
+If you click the *HOSTS* button, you can view the hosts belonging to the windows group.
+You can find more information about these and other settings in our link:https://docs.ansible.com/ansible/latest/user_guide/windows.html[Windows Guides]. The authentication settings are particularly important and you will need to review them and decide which method is best for your needs.

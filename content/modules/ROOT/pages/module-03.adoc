@@ -1,192 +1,198 @@
-= Windows Patching Report with Ansible
-:toc:
-:toc-placement: auto
+= 3. Playbooks
 
-== Introduction
+Let’s get started writing our first ansible *playbook*! The playbook is where you list the steps you would like to automate into a repeatable set of *plays* and *tasks*. To begin, we will setup our directory structure for storing our playbooks. This directory structure will sync with a *source control management* (SCM) system to version our playbooks. We will be using *git* as our SCM.
 
-Generating patch reports is a critical operational task for maintaining system security and compliance. When you don't have direct access to Windows systems, Ansible becomes an invaluable tool for gathering patch information and delivering actionable reports to your Windows administration teams.
+A playbook can have multiple plays and a play can have one or more tasks. The goal of a *play* is to map a group of hosts. The goal of a *task* is to implement modules against those hosts.
 
-This lab demonstrates how to use Ansible to scan Windows systems for required patches and generate comprehensive reports that can be easily shared with stakeholders.
+For our first playbook, we are only going to write one play with three tasks.
 
-=== Lab Environment Setup
+All of our playbooks will be stored in a single git *repository*. Multiple users can use the same repository and git will manage file conflicts and versions. In this environment, each student has sole access to a private repository.
 
-==== Access Credentials
+== Overview
 
-[cols="1,1"]
-|===
-| Username | Password
+Starting at this task we are going to use Visual Studio Code as our editor. In addition, we will use Gitea for source code control. This will allow us to minimize development work on the linux command line. Other editors or source code solutions can be used, but this will show the general workflow.
 
-| admin
-| ansible123!
-|===
+== ☑️ Creating a Directory Structure & Files for your Playbook
 
+There is a link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html[best practice] on the preferred directory structures for playbooks. We strongly encourage you to read and understand these practices as you develop your Ansible skills. That said, our playbook today is very basic and a complex directory structure is not necessary.
 
+Instead, we are going to create a very simple directory structure for our playbook, and add just a couple of files.
 
-== Lab Exercise
+=== Step 1
 
-=== Exercise 1: Creating a Windows Update Report
+Navigate to the `vscode` tab.
 
-We'll create a dynamic patch report using Ansible's templating capabilities and publish it as a web page directly on the Windows host for easy access.
+For this lab, we have already created a repository for you, and we just need to clone it. Open a new terminal in vscode.
 
-==== Step 1: Access the Windows Update Template
+image::../assets/3-new-term.png[VS Code Terminal]
 
-. Navigate to *Automation Execution* → *Templates*
-. Select the *Windows Update Report* template
+Now clone the repo.
+....
+git clone http://gitea:3000/student/workshop_project.git
+....
 
-Before launching the template, we need to configure a survey to allow users to specify which type of updates they want to scan for.
+Navigate to the `workshop_project` directory, we are going to create our playbooks here.
 
-.Windows Update Template
-image::update-template.png[Update Template Interface]
+=== Step 2
 
-==== Step 2: Configure the Survey
+Create a directory called *iis_basic* and a file called `install_iis.yml`.
 
-. Navigate to the *Survey* tab
-. Create a new survey question with the following details:
+Hover over the *WORKSHOP_PROJECT* section and click the *New Folder* button. Create a folder called `iis_basic`. Then click that folder so it is selected. Right click the new folder you’ve created and create a file
+called `install_iis.yml`.
 
-===== Survey Configuration:
+You should now have an editor open in the right pane that can be used for creating your playbook.
 
-* *Question:* `Which update category are you wanting to search for?`
-* *Description:* `Windows Update Category`
-* *Answer variable name:* `update_category`
-* *Answer type:* `Multiple Choice (single select)`
+image::../assets/3-vscode-create-folders.png[Empty install_iis.yml]
 
-===== Multiple Choice Options:
+== ☑️ Define your play
 
-Add each of the following options (click the + button after entering each option):
-
-* Security Updates
-* Critical Updates  
-* Tools
-* Definition Updates
-* Updates
-
-[NOTE]
-====
-To add each multiple choice option, fill in the field and then click the + button to add it to the list.
-====
-
-.Survey Configuration
-image::survey.png[Survey Setup Interface]
-
-==== Step 3: Enable and Save the Survey
-
-. Click *Create survey question* to save your configuration
-. Enable the survey using the toggle at the top of the panel
-
-.Survey Enablement
-image::survey-enable.png[Survey Enable Toggle]
-
-==== Step 4: Execute the Patch Scan
-
-. Launch the template
-. From the survey dropdown, select *Security Updates*
-. Wait for the template execution to complete
-
-The Ansible playbook will connect to the Windows server, scan for available security updates, and generate a comprehensive HTML report.
-
-==== Step 5: Review the Generated Report
-
-. Once the template completes, navigate to the *Windows Report* tab
-. Review the outstanding updates that are needed for the system
-
-The report will display all available security updates, including:
-- Update titles and descriptions
-- Knowledge Base (KB) numbers
-- Installation requirements
-- Download sizes
-
-.Windows Update Report
-image::update-report.png[Windows Update Report Results]
-
-[TIP]
-====
-You can re-run the template with different update categories to generate focused reports for specific types of patches (Critical Updates, Definition Updates, etc.).
-====
-
-=== Exercise 2: Verifying Scheduled Tasks
-
-Let's verify that our previously scheduled backup tasks are running correctly.
-
-==== Step 1: Check Scheduled Job Execution
-
-. Navigate to *Automation Execution* → *Jobs*
-. Observe that your *Server Backup - VSS/Windows* jobs that were scheduled earlier have been running automatically
-
-==== Step 2: Verify VSS Snapshots
-
-. Execute the *Check Windows Backups* template
-. Confirm that VSS snapshots are being created successfully
-
-.VSS Snapshots Verification
-image::vss-snaps.png[VSS Snapshots Status]
-
-This verification confirms that your automated backup strategy is working correctly alongside your new patch reporting capabilities.
-
-== Code Reference
-
-=== Windows Update Report Implementation
-
-Here's the key Ansible code used for generating Windows patch reports:
+Now that you are editing `install_iis.yml`, let’s begin by defining the
+play and then understanding what each line accomplishes.
 
 [source,yaml]
 ----
-tasks:
-  - name: Create site directory structure
-    ansible.windows.win_file:
-      path: "{{ report_path }}"
-      state: directory
-
-  - name: Show us the updates
-    debug:
-      msg: "{{ update_category }}"
-
-  - name: Check available updates
-    ansible.windows.win_updates:
-      category_names:
-       - "{{ update_category | default(omit) }}"
-      state: searched
-    register: update_result
-
-  - name: Generate HTML report
-    ansible.windows.win_template:
-      src: templates/win_patch_report.html.j2
-      dest: C:\inetpub\wwwroot\index.html
-      force: true
-    notify: restart_iis
-    vars:
-      updates: "{{ update_result.updates }}"
-
-handlers:
-  - name: restart_iis
-    ansible.windows.win_service:
-      name: W3Svc
-      state: restarted
-      start_mode: auto
+---
+- name: Install the iis web service
+  hosts: windows
 ----
 
-=== Key Components Explained
+* `---` Defines the beginning of YAML
+* `name: Install the iis web service` This describes our play
+* `hosts: windows` Defines the host group in your inventory on which this play will run against
 
-**Update Scanning:**
-- Uses `ansible.windows.win_updates` module in search mode
-- Filters by specified update categories
-- Registers results for report generation
+== ☑️ Adding tasks to your play
 
-**Report Generation:**
-- Leverages Jinja2 templating for dynamic HTML creation
-- Publishes reports directly to IIS web server
-- Provides accessible, shareable format for stakeholders
+Now that we’ve defined your play, let’s add some tasks to get some things done. Align (vertically) the *t* in `task` with the *h* in `hosts`.
 
-**Service Management:**
-- Automatically restarts IIS after report publication
-- Ensures web service availability for report access
+Yes, it does actually matter. In fact, you should make sure all of your playbook statements are aligned in the way shown here. You also must use spaces for indentation. Tabs are not valid YAML syntax. If you want to see the entire playbook for reference, skip to the bottom of this exercise.
 
-== Key Takeaways
+[source,yaml]
+----
+  tasks:
+    - name: Install iis
+      ansible.windows.win_feature:
+        name: Web-Server
+        state: present
 
-Congratulations! You've successfully automated multiple critical IT operations tasks:
+    - name: Start iis service
+      ansible.windows.win_service:
+        name: W3Svc
+        state: started
 
-* ✅ **Automated Backup Operations**: Implemented XFS backups for Linux and VSS snapshots for Windows
-* ✅ **Infrastructure Data Collection**: Gathered comprehensive system facts and generated dynamic reports
-* ✅ **Security Compliance**: Automated OpenSCAP compliance scanning and reporting
-* ✅ **Patch Management**: Created dynamic Windows update reports with configurable survey options
-* ✅ **Scheduled Automation**: Configured recurring tasks that run without manual intervention
+    - name: Create website index.html
+      ansible.windows.win_copy:
+        content: "{{ iis_test_message }}"
+        dest: C:\Inetpub\wwwroot\index.html
 
+    - name: Show website address
+      ansible.builtin.debug:
+        msg: http://{{ ansible_host }}
+----
+
+* `tasks:` This denotes that one or more tasks are about to be defined
+* `- name:` Each task requires a name which will print to standard output when you run your playbook. Therefore, give your tasks a name that is short, sweet, and to the point
+
+[source,yaml]
+----
+    - name: Install iis
+      ansible.windows.win_feature:
+        name: Web-Server
+        state: present
+----
+
+* These three lines are calling the Ansible module *`win_feature`* to install the IIS Web Server. link:https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_feature_module.html[Click here] to see all options for the `win_feature` module.
+
+[source,yaml]
+----
+    - name: Start iis service
+      ansible.windows.win_service:
+        name: W3Svc
+        state: started
+----
+
+* The next few lines are using the ansible module *win_service* to start the IIS service. The `win_service` module is the preferred way of controlling services on remote hosts. link:https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_service_module.html[Click here] to learn more about the *`win_service`* module.
+
+[source,yaml]
+----
+    - name: Create website index.html
+      ansible.windows.win_copy:
+        content: "{{ iis_test_message }}"
+        dest: C:\Inetpub\wwwroot\index.html
+----
+
+* In this task, we use the win_copy module to create a file with specific contents in it. We are getting a little more complex here as we are using a variable to source the contents. We won’t go into the variables just yet, since they will be showcased in a later lesson.
+
+[source,yaml]
+----
+    - name: Show website address
+      ansible.builtin.debug:
+        msg: http://{{ ansible_host }}
+----
+
+* This task uses the `debug` module to post a message at the end of playbook execution. This particular message prints out `http://` + the variable name that contains the IP address of the host we're running the playbook on (our Windows IIS server)
+
+== ☑️ Saving your playbook
+
+Now that you’ve completed writing your playbook, it would be a shame not to keep it. Click `File > Save` from the menu.
+
+And that should do it. You should now have a fully written playbook called `install_iis.yml`.
+
+But wait!!! We haven’t committed our changes from our *local* copy to *git*. We need to setup our identity for git! so enter the following in terminal:
+
+....
+git config --global user.email "student@ansible.com"
+git config --global user.name "Student"
+....
+
+Now we have our default identity, we can push our newly created playbook into our git repository.
+
+....
+git add *
+git commit -m "adding install_iis.yml"
+git push
+....
+
+We will have a a popup in vscode for us to authenticate:
+
+image::../assets/3-vs-auth.png[VS Code AUTH]
+
+....
+Username: student
+Password: learn_ansible
+....
+
+Once the push is complete, you are ready to automate!
+
+[NOTE]
+====
+Ansible (well, YAML really) can be a bit particular about formatting
+especially around indentation/spacing. When you get back to the
+office, read up on this link:https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html[YAML Syntax] a bit more and it will save you some headaches later. In the meantime, your completed playbook should look like this. Take note of the spacing and alignment.
+====
+
+[source,yaml]
+----
+---
+- name: Install the iis web service
+  hosts: windows
+
+  tasks:
+    - name: Install iis
+      ansible.windows.win_feature:
+        name: Web-Server
+        state: present
+
+    - name: Start iis service
+      ansible.windows.win_service:
+        name: W3Svc
+        state: started
+
+    - name: Create website index.html
+      ansible.windows.win_copy:
+        content: "{{ iis_test_message }}"
+        dest: C:\Inetpub\wwwroot\index.html
+
+    - name: Show website address
+      ansible.builtin.debug:
+        msg: http://{{ ansible_host }}
+----

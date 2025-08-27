@@ -1,0 +1,135 @@
+= 4. Projects
+
+A job template is a definition and set of parameters for running an
+Ansible job. Job templates are useful to execute the same job many
+times.
+
+== ☑️ Syncing your Project
+
+Before you can create a job template with a new playbook, you must first
+sync your Project so that Controller knows about it. To do this, visit Controller, click
+*Projects* and then click the sync icon next to your project. Once
+this is complete, you can create the job template.
+
+image::../assets/4-project-sync.png[Project Sync]
+
+== ☑️ Creating your Job Template
+
+=== Step 1
+
+Select *Templates*.
+
+=== Step 2
+
+Click the image:../assets/add.png[Add] icon, and select Job Template.
+
+=== Step 3
+
+Complete the form using the following values:
+
+[cols="1,2,1",options="header"]
+|===
+| Key | Value | Note
+| Name | IIS Basic Job Template |
+| Description | Template for the iis-basic playbook |
+| JOB TYPE | Run |
+| INVENTORY | Workshop Inventory |
+| PROJECT | Ansible Workshop Project |
+| Execution Environment | windows workshop execution environment |
+| PLAYBOOK | `iis_basic/install_iis.yml` |
+| CREDENTIAL | Name: *Windows Credential* |
+| LIMIT | windows |
+| OPTIONS | [x] ENABLE FACT STORAGE |
+|===
+
+image::../assets/4-create-job-template.png[Create Job Template]
+
+=== Step 4
+
+Click SAVE image:../assets/at_save.png[Save]. On the resulting page, select the *Survey* tab and press the *Add* button.
+image::../assets/4-create-survey.png[Create Survey]
+
+=== Step 5
+
+Complete the survey form with following values:
+
+[cols="1,2,1",options="header"]
+|===
+| Key | Value | Note
+| PROMPT | Please enter a test message for your new website |
+| DESCRIPTION | Website test message prompt |
+| ANSWER VARIABLE NAME | `iis_test_message` |
+| ANSWER TYPE | Text |
+| MINIMUM/MAXIMUM LENGTH | | Use the defaults
+| DEFAULT ANSWER | _Be creative, keep it clean, we’re all professionals here_ |
+|===
+
+After configuring your survey, click *Save*. On the resulting page, turn on the survey you just created.
+
+image::../assets/4-survey-created.png[Survey creating]
+
+== ☑️ Running the Template
+
+Now that you’ve successfully created your Job Template, you are ready to
+launch it. Once you do, you will be redirected to a job screen which is
+refreshing in real time showing you the status of the job.
+
+=== Step 1
+
+Select TEMPLATES.
+
+=== Step 2
+
+Click the rocketship icon image:../assets/at_launch_icon.png[Launch] for the *IIS Basic Job Template*.
+
+=== Step 3
+
+When prompted, enter your desired test message.
+
+image::../assets/4-survey-prompt.png[Survey Prompt]
+
+=== Step 4
+
+Select *NEXT* and preview the inputs.
+
+=== Step 5
+
+Select LAUNCH image:../assets/4-survey-launch.png[Survey Launch].
+
+=== Step 6
+
+Sit back, watch the magic happen.
+
+Once again you should be presented with a Job log page. Selecting the *Details* tab should show you the variable you passed into the playbook among other details.
+
+image::../assets/4-job-summary-details.png[Job Summary]
+
+Next you will be able to see details on the play and each task in the
+playbook.
+
+image::../assets/4-job-summary-output.png[Play and Task Output]
+
+=== Step 7
+
+When the job has successfully completed, navigate to your `windows` tab. This is your Windows host. Open Microsoft Edge from the Windows desktop and navigate to: http://localhost
+
+If all went well, you should see something like this, but with your own
+custom message of course.
+
+image::../assets/4-website-output.png[New Website with Personalized Test Message]
+
+== ☑️ Extra Credit
+
+Now that you have IIS Installed, create a new playbook called
+*remove_iis.yml* to stop and remove IIS.
+
+*Hint:* First stop the `W3Svc` service using the `win_service` module,
+then delete the `Web-Server` service using the `win_feature` module.
+Optionally, use the `win_file` module to delete the index page.
+
+== End Result
+
+At this point in the workshop, you’ve experienced the core functionality
+of Automation Controller. But wait… there’s more! You’ve just begun to explore
+the possibilities of Automation Controller. The next few lessons will help you
+move beyond a basic playbook.
