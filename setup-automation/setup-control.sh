@@ -1,3 +1,4 @@
+dnf install python3-pip
 ############################ CONTROLLER CONFIG
 
 cat <<EOF | tee /tmp/controller-setup.yml
