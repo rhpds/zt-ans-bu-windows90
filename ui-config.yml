@@ -23,6 +23,9 @@ tabs:
   - name: Windows
     url: https://windows-ironrdp-${guid}.${domain}/
     external: false
+  - name: Gitea
+    url: https://gitea-${guid}.${domain}/
+    external: false
   #   modules:
   #     - module-01
   #     - module-02
