@@ -171,4 +171,51 @@ virtualmachines:
         service: iis
         targetPort: 80
         tls: true
+
+  - name: "vscode"
+    image: "devtools-ansible"
+    memory: "8G"
+    cores: 2
+    image_size: "20Gi"
+    disk_type: "scsi"
+    bootloader: "efi"
+    tags:
+      - key: "AnsibleGroup"
+        value: "isolated"
+    networks:
+      - default
+    services:
+      # - name: vscode-http
+      #   ports:
+      #     - port: 80
+      #       protocol: TCP
+      #       targetPort: 80
+      #       name: vscode
+      - name: vscode-8080
+        ports:
+          - port: 8080
+            protocol: TCP
+            targetPort: 8080
+            name: vscode
+    routes:
+      # - name: vscode-http
+      #   host: vscode
+      #   service: vscode-http
+      #   targetPort: 80
+      #   tls: true
+      #   tls_termination: Edge
+      - name: vscode-8080
+        host: vscode
+        service: vscode-8080
+        targetPort: 8080
+        tls: true
+        tls_termination: Edge
+    userdata: |-
+      #cloud-config
+      user: rhel
+      password: ansible123!
+      chpasswd: { expire: False }
+      runcmd:
+        - echo "PasswordAuthentication yes" > /etc/ssh/sshd_config.d/50-cloud-init.conf
+        - systemctl reload sshd
         tls_termination: Edge
