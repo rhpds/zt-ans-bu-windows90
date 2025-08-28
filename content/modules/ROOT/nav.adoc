@@ -1,15 +1,26 @@
-* xref:module-01.adoc[1. Automated Backups]
-** xref:module-01.adoc#backupLinux[Backing up Linux]
-** xref:module-01.adoc#backupWindows[Windows VSS]
-** xref:module-01.adoc#codeSnippets[Code Snippets]
+* xref:index.adoc[Workshop Introduction]
 
-* xref:module-02.adoc[2. Infrastructure Awareness]
-** xref:module-02.adoc#atscale[System Reports]
-** xref:module-02.adoc#compliance[Compliance Reporting]
-** xref:module-02.adoc#codeSnippets[Code Snippets]
+* xref:module-01.adoc[1. Controller Setup]
+** xref:module-01.adoc#_logging_into_controller[Logging into Controller]
+** xref:module-01.adoc#_creating_machine_credentials[Creating Machine Credentials]
+** xref:module-01.adoc#_create_scm_credentials[Create SCM Credentials]
+** xref:module-01.adoc#_creating_a_project[Creating a Project]
+** xref:module-01.adoc#_inventories[Inventories]
 
-* xref:module-03.adoc[3. Windows Reports]
-** xref:module-03.adoc#lastCheck[Check Schedule]
-** xref:module-03.adoc#codeSnippets[Code Snippets]
+* xref:module-02.adoc[2. Ad-Hoc Commands]
+** xref:module-02.adoc#_ad_hoc_commands[Understanding Ad-Hoc Commands]
 
+* xref:module-03.adoc[3. Playbooks]
+** xref:module-03.adoc#_creating_a_directory_structure_files_for_your_playbook[Creating Directory Structure]
+** xref:module-03.adoc#_define_your_play[Define Your Play]
+** xref:module-03.adoc#_adding_tasks_to_your_play[Adding Tasks]
+** xref:module-03.adoc#_saving_your_playbook[Saving Your Playbook]
 
+* xref:module-04.adoc[4. Job Templates]
+** xref:module-04.adoc#_syncing_your_project[Syncing Your Project]
+** xref:module-04.adoc#_creating_your_job_template[Creating Job Templates]
+** xref:module-04.adoc#_running_the_template[Running Templates]
+
+* xref:module-05.adoc[5. Advanced Features]
+
+* xref:module-06.adoc[6. Roles]
