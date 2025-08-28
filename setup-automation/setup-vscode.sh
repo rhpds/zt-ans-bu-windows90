@@ -1,4 +1,6 @@
+#!/bin/bash
+curl -k  -L https://${SATELLITE_URL}/pub/katello-server-ca.crt -o /etc/pki/ca-trust/source/anchors/${SATELLITE_URL}.ca.crt
+update-ca-trust
+rpm -Uhv https://${SATELLITE_URL}/pub/katello-ca-consumer-latest.noarch.rpm
 
-#. { iwr -useb https://raw.githubusercontent.com/nmartins0611/windows_getting_started_instruqt/main/winrm_setup.ps1 -OutFile .\winrm_setup.ps1 } 
-
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/nmartins0611/windows_getting_started_instruqt/main/winrm_setup.ps1 -OutFile .\winrm_setup.ps1; .\winrm_setup.ps1
+subscription-manager register --org=${SATELLITE_ORG} --activationkey=${SATELLITE_ACTIVATIONKEY}
