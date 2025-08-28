@@ -1,5 +1,9 @@
 * xref:module-01.adoc[1. Controller]
-** xref:module-01.adoc#backupLinux[Logging into Controller]
+** xref:module-01.adoc#logging-in[Logging into Controller]
+** xref:module-01.adoc#creating-machine-credentials[Creating machine credentials]
+** xref:module-01.adoc#creating-scm-credentials[Creating SCM credentials]
+** xref:module-01.adoc#creating-a-project[Creating a project]
+** xref:module-01.adoc#inventories[Inventories]
 
 * xref:module-02.adoc[2. Ad-Hoc Commands]
 
@@ -8,5 +12,4 @@
 * xref:module-04.adoc[4. Projects]
 
 * xref:module-05.adoc[5. Advanced Playbooks]
-
 * xref:module-06.adoc[6. Roles]
