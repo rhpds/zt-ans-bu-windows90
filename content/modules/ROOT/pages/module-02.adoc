@@ -26,7 +26,7 @@ can run a single task against our hosts.
 
 Let’s start with something really basic - pinging a host. The `win_ping`
 module makes sure our windows hosts are responsive. This is not a
-traditional *ping*, but actually verifying both connectivity and
+traditional _ping_, but actually verifying both connectivity and
 authentication to the host.
 
 Fill out this form as follows:
@@ -71,7 +71,7 @@ image::../assets/2-adhoc-run-win_ping-details.png[Win_Ping details]
 The results returned will be different depending on which module is
 used, as they all handle and deal with different data sets depending on
 the task. No matter which module is used, you will always see a color
-coded STATUS of either SUCCESS, FAILURE, CHANGED, or SKIPPING.
+coded STATUS of either SUCCESS, FAILURE, CHANGed, or SKIPPING.
 
 ---
 

@@ -199,8 +199,8 @@ EOF
 
 cat <<EOF | tee /tmp/controller.cfg
 host: localhost
-username: admin
-password: ansible123!
+username: student
+password: learn_ansible
 verify_ssl = false
 EOF
 
