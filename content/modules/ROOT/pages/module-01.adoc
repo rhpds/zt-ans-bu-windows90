@@ -14,7 +14,7 @@ workshop today.
 
 ---
 
-[[logging-in]]
+[#logging-in]
 == ☑️ Logging into Controller
 
 Your Automation Controller instance can be found in the tab called `controller`
@@ -32,7 +32,7 @@ logging in, you should now see the Dashboard.
 
 ---
 
-[[creating-machine-credentials]]
+[#creating-machine-credentials]
 == ☑️ Creating machine credentials
 
 Credentials are utilized by Controller for authentication when launching jobs
@@ -84,7 +84,7 @@ Select SAVE image:../assets/at_save.png[Save]
 
 ---
 
-[[creating-scm-credentials]]
+[#creating-scm-credentials]
 == ☑️ Creating SCM credentials
 
 Our first credential was to access our Windows machines over WinRM. We need another
@@ -126,7 +126,7 @@ image::../assets/1-controller-add-scm-credential.png[Add SCM Credential]
 
 ---
 
-[[creating-a-project]]
+[#creating-a-project]
 == ☑️ Creating a project
 
 A *Project* is a logical collection of Ansible content, represented in Controller. You can manage projects by placing your ansible content into a source code management (SCM) system supported by Controller, including Git and Subversion.
@@ -222,7 +222,7 @@ image::../assets/1-controller-project-success.png[Successful Sync]
 
 ---
 
-[[inventories]]
+[#inventories]
 == ☑️ Inventories
 
 An inventory is a collection of hosts against which jobs may be
