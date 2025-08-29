@@ -8,8 +8,27 @@
 * xref:module-02.adoc[2. Ad-Hoc Commands]
 
 * xref:module-03.adoc[3. Playbooks]
+** xref:module-03.adoc#creating-a-directory[Creating a directory structure & files]
+** xref:module-03.adoc#define-your-play[Define your play]
+** xref:module-03.adoc#adding-tasks[Adding tasks to your play]
+** xref:module-03.adoc#saving-your-playbook[Saving your playbook]
 
 * xref:module-04.adoc[4. Projects]
+** xref:module-04.adoc#syncing-your-project[Syncing your project]
+** xref:module-04.adoc#creating-your-job-template[Creating your job template]
+** xref:module-04.adoc#running-the-template[Running the template]
+** xref:module-04.adoc#extra-credit[Extra Credit]
 
 * xref:module-05.adoc[5. Advanced Playbooks]
+** xref:module-05.adoc#creating-the-playbook[Creating the playbook]
+** xref:module-05.adoc#creating-iis-site[Creating iis_advanced & site.yml]
+** xref:module-05.adoc#open-firewall[Opening firewall and deploying files]
+** xref:module-05.adoc#defining-using-handlers[Defining and using handlers]
+** xref:module-05.adoc#commit-and-review[Commit and reveiw]
+** xref:module-05.adoc#creating-job-template[Creating your job template]
+** xref:module-05.adoc#running-new-playbook[Running your new playbook]
+
 * xref:module-06.adoc[6. Roles]
+** xref:module-06.adoc#directory-structure[Creating your directory structure]
+** xref:module-06.adoc#create-role[Breaking up site.yml to create the role]
+** xref:module-06.adoc#running-playbook[Running your new playbook]

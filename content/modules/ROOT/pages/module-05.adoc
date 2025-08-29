@@ -13,14 +13,17 @@ Ansible exists to make tasks simple and repeatable. We also know that not all sy
 For a full understanding of variables, loops, and handlers; check out
 our Ansible documentation on these subjects.
 
-* link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html[*Ansible Variables*]
-* link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html[*Ansible Loops*]
-* link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html#handlers[*Ansible Handlers*]
+https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html[*Ansible Variables*]
 
+https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html[*Ansible Loops*]
+
+https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html#handlers[*Ansible Handlers*]
+
+[#creating-the-playbook]
 == ☑️ Creating the Playbook
 
 To begin, we are going to create a new playbook, but it should look very
-familiar to the one you created in exercise 3.
+familiar to the one you created in exercise 3
 
 === Step 1
 
@@ -32,9 +35,10 @@ you previously made `iis_basic`.
 
 image::../assets/5-vscode-existing-folders.png[Student Playbooks]
 
+[#creating-iis-site]
 == ☑️ Creating *iis_advanced* & `site.yml`
 
-Hover over the *WORKSHOP_PROJECT* section and click the *New Folder* button.
+Hover over the *WORKSHOP_PROJECT* section and click the *New Folder* button
 
 Type `iis_advanced` and hit enter. Now, click that folder so it is
 selected.
@@ -51,7 +55,7 @@ image::../assets/5-vscode-create-folders.png[Empty site.yml]
 === Step 2
 
 Add a play definition and some variables to your playbook. These include
-additional packages your playbook will install on your web servers, plus
+addtional packages your playbook will install on your web servers, plus
 some web server specific configurations.
 
 [source,yaml]
@@ -98,19 +102,20 @@ Add a new task called *install IIS*. After writing the playbook, click
       with_items: "{{ iis_sites }}"
       notify: restart iis service
 ----
-
 image::../assets/5-vscode-iis-yaml.png[site.yml part 1]
 
-.What is happening here!?
-****
-- `vars:` You’ve told Ansible the next thing it sees will be a variable name
-- `iis_sites` You are defining a list-type variable called iis_sites. What follows is a list of each site with it’s related variables
-- `win_file:` This module is used to create, modify, delete files, directories, and symlinks.
-- `{{ item }}` You are telling Ansible that this will expand into a list item. Each item has several variables like `name`, `port`, and `path`.
-- `with_items: "{{ iis_sites }}` This is your loop which is instructing Ansible to perform this task on every `item` in `iis_sites`
-- `notify: restart iis service` This statement is a `handler`, so we’ll come back to it in Section 3.
-****
+[quote]
+____
+*What is happening here!?*
+* `vars:` You’ve told Ansible the next thing it sees will be a variable name
+* `iis_sites` You are defining a list-type variable called iis_sites. What follows is a list of each site with it’s related variables
+* `win_file:` This module is used to create, modify, delete files, directories, and symlinks.
+* `{{ item }}` You are telling Ansible that this will expand into a list item. Each item has several variables like `name`, `port`, and `path`.
+* `with_items: "{{ iis_sites }}` This is your loop which is instructing Ansible to perform this task on every `item` in `iis_sites`
+* `notify: restart iis service` This statement is a `handler`, so we’ll come back to it in Section 3.
+____
 
+[#open-firewall]
 == ☑️ Opening Firewall and Deploying Files
 
 After that, you will define a task to start the IIS service.
@@ -121,9 +126,9 @@ Create a `templates` directory in your project directory and create a
 template as follows:
 
 Ensure your *iis_advanced folder* is highlighted and then hover over
-the *WORKSHOP_PROJECT* section and click the *New Folder* button.
+the *WORKSHOP_PROJECT* section and click the *New Folder* button
 
-Type `templates` and hit enter. Then right-click the *templates* folder and click the *New File* button.
+Type `templates` and hit enter. The right-click the *templates* folder and click the *New File* button.
 
 Type `index.html.j2` and hit enter.
 
@@ -141,7 +146,6 @@ for creating your template. Enter the following details:
 </body>
 </html>
 ----
-
 image::../assets/5-vscode-template.png[index.html template]
 
 === Step 2
@@ -169,16 +173,18 @@ not escape the forward slash.
         dest: '{{ item.path }}\index.html'
       with_items: "{{ iis_sites }}"
 ----
+[quote]
+____
+*Note*
 
-[NOTE]
-.So… what did I just write?
-====
-- `win_firewall_rule:` This module is used to create, modify, and update firewall rules. Note in the case of AWS there are also security group rules which may impact communication. We’ve opened these for the ports in this example.
-- `win_template:` This module specifies that a jinja2 template is being used and deployed.
-- `with_items:` used in Ansible to transform data inside a template expression, i.e. filters.
-- `debug:` Again, like in the `iis_basic` playbook, this task displays the URLs to access the sites we are creating for this exercise
-====
+*So… what did I just write?*
+* `win_firewall_rule:` This module is used to create, modify, and update firewall rules. Note in the case of AWS there are also security group rules which may impact communication. We’ve opened these for the ports in this example.
+* `win_template:` This module specifies that a jinja2 template is being used and deployed.
+* `with_items:` used in Ansible to transform data inside a template expression, i.e. filters.
+* `debug:` Again, like in the `iis_basic` playbook, this task displays the URLs to access the sites we are creating for this exercise
+____
 
+[#defining-using-handlers]
 == ☑️ Defining and Using Handlers
 
 There are any number of reasons we often need to restart a
@@ -204,12 +210,14 @@ Define a handler.
         start_mode: auto
 ----
 
-.You can’t have a former if you don’t mention the latter
-****
-- `handler:` This is telling the *play* that the `tasks:` are over, and now we are defining `handlers:`. Everything below that looks the same as any other task, i.e. you give it a name, a module, and the options for that module. This is the definition of a handler.
-- `notify: restart iis service` …and here is your latter. Finally! The `notify` statement is the invocation of a handler by name. Quite the reveal, we know. You already noticed that you’ve added a `notify` statement to the `win_iis_website` task, now you know why.
-****
+[quote]
+____
+*You can’t have a former if you don’t mention the latter*
+* `handler:` This is telling the *play* that the `tasks:` are over, and now we are defining `handlers:`. Everything below that looks the same as any other task, i.e. you give it a name, a module, and the options for that module. This is the definition of a handler.
+* `notify: restart iis service` …and here is your latter. Finally! The `notify` statement is the invocation of a handler by name. Quite the reveal, we know. You already noticed that you’ve added a `notify` statement to the `win_iis_website` task, now you know why.
+____
 
+[#commit-and-review]
 == ☑️ Commit and Review
 
 Your new, improved playbook is done! But remember we still need to
@@ -217,8 +225,7 @@ commit the changes to source code control.
 
 Click `File` → `Save All` to save the files you’ve written!
 
-Now open up the Terminal in vscode, and make sure you are in your `workshop_project` folder before commiting to your repo.
-
+Now open up the Terminal in vscode, and make sure you are in your `workshop_project` folder before commiting to your repo
 ....
 git add *
 git commit -m "adding iis_advanced"
@@ -293,6 +300,7 @@ intended. If not, now is the time for us to fix it up. The playbook below should
         start_mode: auto
 ----
 
+[#creating-job-template]
 == ☑️ Create your Job Template
 
 === Step 1
@@ -300,13 +308,14 @@ intended. If not, now is the time for us to fix it up. The playbook below should
 Before we can create our Job Template, you must first go resync your
 Project again. So do that now.
 
-[NOTE]
-====
+[quote]
+____
+*Note*
 You must do this anytime you create a new *base* playbook file that
 you will be selecting via a Job Template. The new file must be synced
 to Controller before it will become available in the Job Template playbook
 dropdown.
-====
+____
 
 === Step 2
 
@@ -314,20 +323,49 @@ To test this playbook, we need to create a new Job Template to run this
 playbook. So go to *Template* and click *Add* and select `Job Template`
 to create a second job template.
 
-Complete the form using the following values:
+Complete the form using the following values
 
 [cols="1,2,1",options="header"]
 |===
-| Key | Value | Note
-| Name | IIS Advanced |
-| Description | Template for iis_advanced |
-| Job Type | Run |
-| Inventory | Workshop Inventory |
-| Execution Environment | windows workshop execution environment |
-| Project | Ansible Workshop Project |
-| Playbook | `iis_advanced/site.yml` |
-| Credentials | Workshop Credential |
-| OPTIONS | [x] Enable Fact Storage |
+| Key
+| Value
+| Note
+
+| Name
+| IIS Advanced
+|
+
+| Description
+| Template for iis_advanced
+|
+
+| Job Type
+| Run
+|
+
+| Inventory
+| Workshop Inventory
+|
+
+| Execution Environment
+| windows workshop execution environment
+|
+
+| Project
+| Ansible Workshop Project
+|
+
+| Playbook
+| `iis_advanced/site.yml`
+|
+
+| Credentials
+| Workshop Credential
+|
+
+| OPTIONS
+| [x] Enable Fact Storage
+|
 |===
 
 === Step 3
@@ -336,47 +374,69 @@ Click SAVE image:../assets/at_save.png[Save] and on the following page, select t
 
 === Step 4
 
-Create a new survey with following values:
+Create a new survey with following values
 
 [cols="1,2,1",options="header"]
 |===
-| Key | Value | Note
-| Question | Please enter a test message for your new website |
-| Description | Website test message prompt |
-| Answer Variable Name | `iis_test_message` |
-| Answer Type | Text |
-| Minimum/Maximum Length | Keep the defaults |
-| Default Answer | Be creative, keep it clean, we’re all professionals here |
+| Key
+| Value
+| Note
+
+| Question
+| Please enter a test message for your new website
+|
+
+| Description
+| Website test message prompt
+|
+
+| Answer Variable Name
+| `iis_test_message`
+|
+
+| Answer Type
+| Text
+|
+
+| Minimum/Maximum Length
+| Keep the defaults
+|
+
+| Default Answer
+| Be creative, keep it clean, we’re all professionals here
+|
 |===
 
 image::../assets/5-survey.png[Survey Form]
 
 === Step 5
 
-Select SAVE image:../assets/at_save.png[Add] and remember to flip the *On* switch image:../assets/controller_on.png[On switch].
+Select SAVE image:../assets/at_save.png[Add] and remember to flip the *On* switch image:../assets/controller_on.png[On switch]
 
+[#running-new-playbook]
 == ☑️ Running your new playbook
 
 Now let’s run it and see how it works.
 
 === Step 1
 
-Select TEMPLATES.
+Select TEMPLATES
 
-[NOTE]
-====
+[quote]
+____
+*Note*
 Alternatively, if you haven’t navigated away from the job templates
-creation page, you can scroll down to see all existing job templates.
-====
+creation page, you can scroll down to see all existing job templates
+____
 
 === Step 2
 
-Click the rocketship icon image:../assets/at_launch_icon.png[Launch] for the
+Click the rocketship icon image:../assets/at_launch_icon.png[Add] for the
 *IIS Advanced* Job Template.
 
 === Step 3
 
-When prompted, enter your desired test message.
+When prompted, enter your desired test message
 
 After it launches, you should be redirected and can watch the output of
 the job in real time.

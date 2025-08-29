@@ -78,8 +78,8 @@ virtualmachines:
       - default
     userdata: |-
       #cloud-config
-      user: rhel
-      password: ansible123!
+      user: student
+      password: learn_ansible
       chpasswd: { expire: False }
       runcmd:
         - sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/" /etc/ssh/sshd_config
@@ -212,8 +212,8 @@ virtualmachines:
         tls_termination: Edge
     userdata: |-
       #cloud-config
-      user: rhel
-      password: ansible123!
+      user: student
+      password: learn_ansible
       chpasswd: { expire: False }
       runcmd:
         - echo "PasswordAuthentication yes" > /etc/ssh/sshd_config.d/50-cloud-init.conf

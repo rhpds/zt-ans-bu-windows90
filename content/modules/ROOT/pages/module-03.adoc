@@ -12,30 +12,29 @@ All of our playbooks will be stored in a single git *repository*. Multiple users
 
 Starting at this task we are going to use Visual Studio Code as our editor. In addition, we will use Gitea for source code control. This will allow us to minimize development work on the linux command line. Other editors or source code solutions can be used, but this will show the general workflow.
 
+[#creating-a-directory]
 == ☑️ Creating a Directory Structure & Files for your Playbook
 
-There is a link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html[best practice] on the preferred directory structures for playbooks. We strongly encourage you to read and understand these practices as you develop your Ansible skills. That said, our playbook today is very basic and a complex directory structure is not necessary.
+There is a https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html[best practice] on the preferred directory structures for playbooks. We strongly encourage you to read and understand these practices as you develop your Ansible skills. That said, our playbook today is very basic and a complex directory structure is not necessary.
 
 Instead, we are going to create a very simple directory structure for our playbook, and add just a couple of files.
 
-=== Step 1
+*Step 1:*
 
-Navigate to the `vscode` tab.
+Navigate to the `vscode` tab
 
 For this lab, we have already created a repository for you, and we just need to clone it. Open a new terminal in vscode.
 
 image::../assets/3-new-term.png[VS Code Terminal]
 
-Now clone the repo.
+Now clone the repo
 ....
 git clone http://gitea:3000/student/workshop_project.git
 ....
 
 Navigate to the `workshop_project` directory, we are going to create our playbooks here.
 
-=== Step 2
-
-Create a directory called *iis_basic* and a file called `install_iis.yml`.
+*Step 2:* Create a directory called *iis_basic* and a file called `install_iis.yml`
 
 Hover over the *WORKSHOP_PROJECT* section and click the *New Folder* button. Create a folder called `iis_basic`. Then click that folder so it is selected. Right click the new folder you’ve created and create a file
 called `install_iis.yml`.
@@ -44,10 +43,11 @@ You should now have an editor open in the right pane that can be used for creati
 
 image::../assets/3-vscode-create-folders.png[Empty install_iis.yml]
 
+[#define-your-play]
 == ☑️ Define your play
 
 Now that you are editing `install_iis.yml`, let’s begin by defining the
-play and then understanding what each line accomplishes.
+play and then understanding what each line accomplishes
 
 [source,yaml]
 ----
@@ -60,9 +60,10 @@ play and then understanding what each line accomplishes.
 * `name: Install the iis web service` This describes our play
 * `hosts: windows` Defines the host group in your inventory on which this play will run against
 
+[#adding-tasks]
 == ☑️ Adding tasks to your play
 
-Now that we’ve defined your play, let’s add some tasks to get some things done. Align (vertically) the *t* in `task` with the *h* in `hosts`.
+Now that we’ve defined your play, let’s add some tasks to get some things done. Align (vertically) the *t* in `task` with the *h* in`hosts`.
 
 Yes, it does actually matter. In fact, you should make sure all of your playbook statements are aligned in the way shown here. You also must use spaces for indentation. Tabs are not valid YAML syntax. If you want to see the entire playbook for reference, skip to the bottom of this exercise.
 
@@ -88,7 +89,6 @@ Yes, it does actually matter. In fact, you should make sure all of your playbook
       ansible.builtin.debug:
         msg: http://{{ ansible_host }}
 ----
-
 * `tasks:` This denotes that one or more tasks are about to be defined
 * `- name:` Each task requires a name which will print to standard output when you run your playbook. Therefore, give your tasks a name that is short, sweet, and to the point
 
@@ -100,7 +100,7 @@ Yes, it does actually matter. In fact, you should make sure all of your playbook
         state: present
 ----
 
-* These three lines are calling the Ansible module *`win_feature`* to install the IIS Web Server. link:https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_feature_module.html[Click here] to see all options for the `win_feature` module.
+* These three lines are calling the Ansible module *`win_feature`* to install the IIS Web Server. https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_feature_module.html[Click here] to see all options for the `win_feature` module.
 
 [source,yaml]
 ----
@@ -110,7 +110,7 @@ Yes, it does actually matter. In fact, you should make sure all of your playbook
         state: started
 ----
 
-* The next few lines are using the ansible module *win_service* to start the IIS service. The `win_service` module is the preferred way of controlling services on remote hosts. link:https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_service_module.html[Click here] to learn more about the *`win_service`* module.
+* The next few lines are using the ansible module *win_service* to start the IIS service. The `win_service` module is the preferred way of controlling services on remote hosts. https://docs.ansible.com/ansible/latest/collections/ansible/windows/win_service_module.html[Click here] to learn more about the *`win_service`* module.
 
 [source,yaml]
 ----
@@ -119,7 +119,6 @@ Yes, it does actually matter. In fact, you should make sure all of your playbook
         content: "{{ iis_test_message }}"
         dest: C:\Inetpub\wwwroot\index.html
 ----
-
 * In this task, we use the win_copy module to create a file with specific contents in it. We are getting a little more complex here as we are using a variable to source the contents. We won’t go into the variables just yet, since they will be showcased in a later lesson.
 
 [source,yaml]
@@ -128,9 +127,9 @@ Yes, it does actually matter. In fact, you should make sure all of your playbook
       ansible.builtin.debug:
         msg: http://{{ ansible_host }}
 ----
-
 * This task uses the `debug` module to post a message at the end of playbook execution. This particular message prints out `http://` + the variable name that contains the IP address of the host we're running the playbook on (our Windows IIS server)
 
+[#saving-your-playbook]
 == ☑️ Saving your playbook
 
 Now that you’ve completed writing your playbook, it would be a shame not to keep it. Click `File > Save` from the menu.
@@ -138,14 +137,12 @@ Now that you’ve completed writing your playbook, it would be a shame not to ke
 And that should do it. You should now have a fully written playbook called `install_iis.yml`.
 
 But wait!!! We haven’t committed our changes from our *local* copy to *git*. We need to setup our identity for git! so enter the following in terminal:
-
 ....
 git config --global user.email "student@ansible.com"
 git config --global user.name "Student"
 ....
 
 Now we have our default identity, we can push our newly created playbook into our git repository.
-
 ....
 git add *
 git commit -m "adding install_iis.yml"
@@ -163,12 +160,14 @@ Password: learn_ansible
 
 Once the push is complete, you are ready to automate!
 
-[NOTE]
-====
+[quote]
+____
+*Note*
+
 Ansible (well, YAML really) can be a bit particular about formatting
 especially around indentation/spacing. When you get back to the
-office, read up on this link:https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html[YAML Syntax] a bit more and it will save you some headaches later. In the meantime, your completed playbook should look like this. Take note of the spacing and alignment.
-====
+office, read up on this https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html[YAML Syntax] a bit more and it will save you some headaches later. In the meantime, your completed playbook should look like this. Take note of the spacing and alignment.
+____
 
 [source,yaml]
 ----

@@ -8,8 +8,6 @@ to perform tasks on remote nodes without having to write a playbook.
 They are very useful when you simply need to do one or two things
 quickly, to many remote nodes.
 
----
-
 === Step 1
 
 To start, we will need to go to our Inventory. So click *Inventories*
@@ -29,31 +27,55 @@ module makes sure our windows hosts are responsive. This is not a
 traditional _ping_, but actually verifying both connectivity and
 authentication to the host.
 
-Fill out this form as follows:
+Fill out this form as follows
 
 [cols="1,2,2",options="header"]
 |===
-| Key | Value | Note
-| Module | `win_ping` |
-| Arguments | | Intentionally blank
-| Limit | | This should display the host you selected in the previous step
+| Key
+| Value
+| Note
+
+| Module
+| `win_ping`
+|
+
+| Arguments
+|
+| Intentionally blank
+
+| Limit
+|
+| This should display the host you selected in the previous step
 |===
 
-Click the *Next* button.
+Click the *Next* button
 
 [cols="1,2,1",options="header"]
 |===
-| Key | Value | Note
-| Execution environment | windows workshop execution environment |
+| Key
+| Value
+| Note
+
+| Execution environment
+| windows workshop execution environment
+|
 |===
 
-Click the *Next* button.
+Click the *Next* button
 
 [cols="1,1,1",options="header"]
 |===
-| Key | Value | Note
-| Machine credential | Workshop Credential |
-| | |
+| Key
+| Value
+| Note
+
+| Machine credential
+| Workshop Credential
+|
+
+|
+|
+|
 |===
 
 Once you click *LAUNCH* you will be redirected to the Job log. Every
@@ -71,9 +93,7 @@ image::../assets/2-adhoc-run-win_ping-details.png[Win_Ping details]
 The results returned will be different depending on which module is
 used, as they all handle and deal with different data sets depending on
 the task. No matter which module is used, you will always see a color
-coded STATUS of either SUCCESS, FAILURE, CHANGed, or SKIPPING.
-
----
+coded STATUS of either SUCCESS, FAILURE, CHANGED, or SKIPPING.
 
 === Step 2
 
@@ -85,36 +105,58 @@ Lets go ahead and run the `setup` module to look at the output. Fill out the *EX
 
 [cols="1,1,2",options="header"]
 |===
-| Key | Value | Note
-| Module | `setup` |
-| Arguments | | Intentionally blank
-| Limit | | This should display the host you selected in the previous step
+| Key
+| Value
+| Note
+
+| Module
+| `setup`
+|
+
+| Arguments
+|
+| Intentionally blank
+
+| Limit
+|
+| This should display the host you selected in the previous step
 |===
 
-Click the *Next* button.
+Click the *Next* button
 
 [cols="1,2,1",options="header"]
 |===
-| Key | Value | Note
-| Execution environment | windows workshop execution environment |
+| Key
+| Value
+| Note
+
+| Execution environment
+| windows workshop execution environment
+|
 |===
 
-Click the *Next* button.
+Click the *Next* button
 
 [cols="1,1,1",options="header"]
 |===
-| Key | Value | Note
-| Machine credential | Workshop Credential |
-| | |
+| Key
+| Value
+| Note
+
+| Machine credential
+| Workshop Credential
+|
+
+|
+|
+|
 |===
 
 You should see output like this:
 
 image::../assets/2-adhoc-run-setup-output.png[Setup Log Details]
 
-(NOTE: If you click the three dots shown on line 21 in the above output, you will see all the facts returned by the `setup` module.)
-
----
+(*_Note:_* If you click the three dots shown on line 21 in the above output, you will see all the facts returned by the `setup` module.)
 
 === Step 3
 
@@ -122,34 +164,53 @@ Now, let’s reset the local admin account with the `win_user` module. Our argum
 
 [cols="1,2,2",options="header"]
 |===
-| Key | Value | Note
-| Module | `win_user` |
-| Arguments | `name=administrator password=P@ssw0rd.123` |
-| Limit | | This should display the host you selected in the previous step
+| Key
+| Value
+| Note
+
+| Module
+| `win_user`
+|
+
+| Arguments
+| `name=administrator password=P@ssw0rd.123`
+|
+
+| Limit
+|
+| This should display the host you selected in the previous step
 |===
 
-Click the *Next* button.
+Click the *Next* button
 
 [cols="1,2,1",options="header"]
 |===
-| Key | Value | Note
-| Execution environment | windows workshop execution environment |
+| Key
+| Value
+| Note
+
+| Execution environment
+| windows workshop execution environment
+|
 |===
 
-Click the *Next* button.
+Click the *Next* button
 
 [cols="1,1,1",options="header"]
 |===
-| Key | Value | Note
-| Machine credential | Workshop Credential |
+| Key
+| Value
+| Note
+
+| Machine credential
+| Workshop Credential
+|
 |===
 
 You will notice that the log text is now orange. This is to denote that a change was made on the system versus the green that shows that no changes were made earlier.
 
 image::../assets/2-adhoc-run-win_feature-output.png[Win_Feature Log Details]
 
----
-
 === End Result
 
-Ad-hoc commands may be useful to run once in a while. However, as automation continues to grow within an environment, they are used less and less often. In the IIS example above, this could have (should have) been written out in a playbook instead of executed through a laborious series of ad-hoc commands. This interaction with ad-hoc commands seems to mimic running individual commands from a CLI. Additional exercises will really make this clear.
+ad-hoc commands may be useful to run once in a while. However, as automation continues to grow within an environment, they are used less and less often. In the IIS example above, this could have (should have) been written out in a playbook instead of executed through a laborious series of ad-hoc commands. This interaction with ad-hoc commands seems to mimic running individual commands from a CLI. Additional exercises will really make this clear.
