@@ -5,13 +5,22 @@ antora:
   dir: www
   modules:
     - name: module-01
-      label: "Backup and Snapshots" ## Update for your lab/instructions
+      label: "Controller" ## Update for your lab/instructions
       solveButton: false
     - name: module-02
-      label: "Infrastructure Reporting"
+      label: "Ad-Hoc Commands"
       solveButton: false
     - name: module-03
-      label: "Windows Reporting"
+      label: "Playbooks"
+      solveButton: false
+    - name: module-04
+      label: "Projects"
+      solveButton: false
+    - name: module-05
+      label: "Advanced Playbooks"
+      solveButton: false
+    - name: module-06
+      label: "Roles"
       solveButton: false
 
 tabs:
