@@ -42,7 +42,7 @@ image::1-controller-credentials.png[Cred]
 
 === Step 2
 
-Click the image:../assets/images/add.png[Add] icon and add new credential
+Click the image::add.png[Add] icon and add new credential
 
 === Step 3
 
@@ -58,11 +58,11 @@ Complete the form using the following entries:
 | Password | Passw0rd!
 |===
 
-image::../assets/images/1-controller-add-machine-credential.png[Add Machine Credential]
+image::1-controller-add-machine-credential.png[Add Machine Credential]
 
 === Step 4
 
-Select SAVE image:../assets/images/at_save.png[Save]
+Select SAVE image::at_save.png[Save]
 
 == ☑️ Create SCM Credentials
 
@@ -81,9 +81,9 @@ with the following details:
 | Password | learn_ansible | Replace with your student password
 |===
 
-Select SAVE image:../assets/images/at_save.png[Save]
+Select SAVE image::at_save.png[Save]
 
-image::../assets/images/1-controller-add-scm-credential.png[Add SCM Credential]
+image::1-controller-add-scm-credential.png[Add SCM Credential]
 
 == ☑️ Creating a Project
 
@@ -102,8 +102,8 @@ Password: learn_ansible
 
 Then select your workshop project and copy the `https` url presented after clicking the "Copy" button.
 
-image::../assets/images/1-gitea-project.png[Proj]
-image::../assets/images/1-gitea-clone.png[Clone]
+image::1-gitea-project.png[Proj]
+image::1-gitea-clone.png[Clone]
 
 The repo url will be used in *Step 3*
 
@@ -111,9 +111,9 @@ The repo url will be used in *Step 3*
 
 Click *Projects* on the left hand panel.
 
-image::../assets/images/1-controller-project.png[Proj]
+image::1-controller-project.png[Proj]
 
-Click the image:..images/add.png[Add] icon and add new project
+Click the image::add.png[Add] icon and add new project
 
 === Step 3
 
@@ -141,11 +141,11 @@ OPTIONS
 * [x] Update Revision on Launch
 * [ ] Allow Branch Override
 
-image::../assets/images/1-controller-create-project.png[Defining a Project]
+image::1-controller-create-project.png[Defining a Project]
 
 === Step 4
 
-Select SAVE image:../assets/images/at_save.png[Save]
+Select SAVE image::at_save.png[Save]
 
 === Step 5
 
@@ -153,7 +153,7 @@ Scroll down and validate that the project has been successfully synchronized
 against the source control repository upon saving. You should see a green icon displaying "Successful"
 next to the project name in the list view. If the status does not show as "Successful", try pressing the "Sync Project" button again re-check the status.
 
-image::../assets/images/1-controller-project-success.png[Succesfull Sync]
+image::1-controller-project-success.png[Succesfull Sync]
 
 == ☑️ Inventories
 
@@ -167,14 +167,14 @@ A static Inventory has already been created for you today. Let's take a look at 
 === Step 1
 
 Click *Inventories* from the left hand panel. You will see the
-preconfigured Inventory listed. Click the Inventories' name *Workshop Inventory* or the Edit button. image:../assets/images/at_edit.png[Edit]
+preconfigured Inventory listed. Click the Inventories' name *Workshop Inventory* or the Edit button. image::at_edit.png[Edit]
 
 === Step 2
 
 You are now viewing the Inventory. From here, you can add Hosts,
 Groups, or even Variables specific to this Inventory.
 
-image::../assets/images/1-controller-edit-inventory.png[Edit Inventory]
+image::1-controller-edit-inventory.png[Edit Inventory]
 
 We will be viewing the hosts, so click the *HOSTS* button.
 
@@ -185,13 +185,13 @@ inventory. You will also see which groups a host is associated with.
 Hosts can be associated with multiple groups. These groups can later be used to narrow down the exact hosts we will later run our
 automation on.
 
-image::../assets/images/1-controller-hosts-view.png[Hosts View]
+image::1-controller-hosts-view.png[Hosts View]
 
 === Step 4
 
 If you click the *GROUPS* button and then select the *Windows* group, you can inspect variables set at the group level that will apply to all hosts in that group.
 
-image::../assets/images/1-controller-group-edit.png[Group Edit]
+image::1-controller-group-edit.png[Group Edit]
 
 Today, we have already defined a handful of variables to tell Controller how to connect to hosts in this group. You do not have to define these variables as
 a Group variable here, they could also be Host variables or reside
