@@ -57,13 +57,13 @@ ansible_python_interpreter: /usr/bin/python3
 controller_ee: windows workshop execution environment
 student_user: student
 student_password: learn_ansible
-controller_admin_user: admin
+controller_admin_user: student
 controller_admin_password: "ansible123!"
 host_key_checking: false
 custom_facts_dir: "/etc/ansible/facts.d"
 custom_facts_file: custom_facts.fact
-admin_username: admin
-admin_password: ansible123!
+admin_username: student
+admin_password: learn_ansible
 repo_user: rhel
 default_tag_name: "0.0.1"
 lab_organization: ACME
@@ -398,8 +398,8 @@ EOF
 
 cat <<EOF | tee /tmp/controller.cfg
 host: localhost
-username: admin
-password: ansible123!
+username: student
+password: learn_ansible
 verify_ssl = false
 EOF
 
