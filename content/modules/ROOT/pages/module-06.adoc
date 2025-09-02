@@ -235,7 +235,7 @@ ____
 
 === Step 3
 
-Click the rocketship icon image:../assets/images/at_launch_icon.png[Add] for the *IIS Advanced* Job Template.
+Click the rocketship icon image:at_launch_icon.png[Add] for the *IIS Advanced* Job Template.
 
 === Step 4
 

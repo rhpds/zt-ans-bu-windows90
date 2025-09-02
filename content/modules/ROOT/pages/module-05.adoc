@@ -370,7 +370,7 @@ Complete the form using the following values
 
 === Step 3
 
-Click SAVE image:../assets/images/at_save.png[Save] and on the following page, select the *Survey* tab.
+Click SAVE image:at_save.png[Save] and on the following page, select the *Survey* tab.
 
 === Step 4
 
@@ -411,7 +411,7 @@ image::5-survey.png[Survey Form]
 
 === Step 5
 
-Select SAVE image:../assets/images/at_save.png[Add] and remember to flip the *On* switch image:../assets/images/controller_on.png[On switch]
+Select SAVE image:at_save.png[Add] and remember to flip the *On* switch image:controller_on.png[On switch]
 
 [#running-new-playbook]
 == ☑️ Running your new playbook
@@ -431,7 +431,7 @@ ____
 
 === Step 2
 
-Click the rocketship icon image:../assets/images/at_launch_icon.png[Add] for the
+Click the rocketship icon image:at_launch_icon.png[Add] for the
 *IIS Advanced* Job Template.
 
 === Step 3

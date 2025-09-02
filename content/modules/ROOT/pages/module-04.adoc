@@ -21,7 +21,7 @@ Select *Templates*
 
 === Step 2
 
-Click the image:../assets/images/add.png[Add] icon, and select Job Template
+Click the image:add.png[Add] icon, and select Job Template
 
 === Step 3
 
@@ -78,7 +78,7 @@ image::4-create-job-template.png[Create Job Template]
 
 === Step 4
 
-Click SAVE image:../assets/images/at_save.png[Save]. On the resulting page, select the *Survey* tab and press the *Add* button
+Click SAVE image:at_save.png[Save]. On the resulting page, select the *Survey* tab and press the *Add* button
 image::4-create-survey.png[Create Survey]
 
 === Step 5
@@ -132,7 +132,7 @@ Select TEMPLATES
 
 === Step 2
 
-Click the rocketship icon image:../assets/images/at_launch_icon.png[Add] for the *IIS Basic Job Template*
+Click the rocketship icon image:at_launch_icon.png[Add] for the *IIS Basic Job Template*
 
 === Step 3
 
@@ -146,7 +146,7 @@ Select *NEXT* and preview the inputs.
 
 === Step 5
 
-Select LAUNCH image:../assets/images/4-survey-launch.png[SurveyL]
+Select LAUNCH image:4-survey-launch.png[SurveyL]
 
 === Step 6
 

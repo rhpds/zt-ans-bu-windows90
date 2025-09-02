@@ -42,7 +42,7 @@ image::1-controller-credentials.png[Cred]
 
 === Step 2
 
-Click the image::add.png[Add] icon and add new credential
+Click the image:add.png[Add] icon and add new credential
 
 === Step 3
 
