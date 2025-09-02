@@ -38,7 +38,7 @@ workshop, we are using *machine* and *source control* credentials.
 
 Select CREDENTIALS from the left hand panel under resources
 
-image::../assets/images/1-controller-credentials.png[Cred]
+image::1-controller-credentials.png[Cred]
 
 === Step 2
 
