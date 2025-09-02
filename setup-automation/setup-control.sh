@@ -55,7 +55,7 @@ controller_validate_certs: false
 ansible_python_interpreter: /usr/bin/python3
 controller_ee: windows workshop execution environment
 student_user: student
-student_password: "learn_ansible"
+student_password: learn_ansible
 controller_admin_user: admin
 controller_admin_password: "ansible123!"
 host_key_checking: false
@@ -390,7 +390,6 @@ cat <<EOF | tee /tmp/controller-setup.yml
          ansible_port: 5986
          ansible_winrm_server_cert_validation: ignore
        controller_config_file: "/tmp/controller.cfg"
-
      
        
 EOF
@@ -404,6 +403,7 @@ EOF
 
 
 ansible-galaxy collection install microsoft.ad
+ansible-galaxy collection install awx.awx --force
 pip3 install pywinrm
 
 ##### Executing:
