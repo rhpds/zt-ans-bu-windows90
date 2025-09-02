@@ -1,4 +1,6 @@
 = 1. Controller
+:toc:
+:toc-placement: auto
 
 There are a number of constructs in the Automation Controller UI that enable
 multi-tenancy, notifications, scheduling, etc. However, we are only
