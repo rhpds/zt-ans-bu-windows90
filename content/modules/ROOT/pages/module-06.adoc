@@ -16,7 +16,7 @@ Let’s begin with seeing how your iis-basic-playbook will break down into a rol
 
 In Visual Studio Code, navigate to explorer and your *WORKSHOP_PROJECT* section where you previously made `iis_advanced`.
 
-image::../assets/6-vscode-existing-folders.png[iis_advanced]
+image::../assets/images/6-vscode-existing-folders.png[iis_advanced]
 
 Select the *iis_advanced* folder.
 
@@ -42,7 +42,7 @@ Within each of these new folders (except templates), right-click and create *New
 
 The finished structure will look like this:
 
-image::../assets/6-create-role.png[Role Structure]
+image::../assets/images/6-create-role.png[Role Structure]
 
 == ☑️ Breaking up `site.yml` to create the role
 
@@ -70,7 +70,7 @@ Update site.yml to look like to only call your role. It should look like below:
         - iis_simple
 ----
 
-image::../assets/6-new-site.png[New site.yml]
+image::../assets/images/6-new-site.png[New site.yml]
 
 === Step 3
 
@@ -235,7 +235,7 @@ ____
 
 === Step 3
 
-Click the rocketship icon image:../assets/at_launch_icon.png[Add] for the *IIS Advanced* Job Template.
+Click the rocketship icon image:../assets/images/at_launch_icon.png[Add] for the *IIS Advanced* Job Template.
 
 === Step 4
 
@@ -243,7 +243,7 @@ When prompted, enter your desired test message
 
 If successful, your standard output should look similar to the figure below. Note that most of the tasks return OK because we’ve previously configured the servers and services are already running.
 
-image::../assets/6-job-output.png[Job output]
+image::../assets/images/6-job-output.png[Job output]
 
 When the job has successfully completed, you should see two URLs to your websites printed at the bottom of the job output. Verify they are still working.
 

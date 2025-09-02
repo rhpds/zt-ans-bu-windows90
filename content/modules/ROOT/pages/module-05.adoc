@@ -33,7 +33,7 @@ create a site.yml file.
 In the Explorer accordion you should have a *WORKSHOP_PROJECT* section where
 you previously made `iis_basic`.
 
-image::../assets/5-vscode-existing-folders.png[Student Playbooks]
+image::../assets/images/5-vscode-existing-folders.png[Student Playbooks]
 
 [#creating-iis-site]
 == ☑️ Creating *iis_advanced* & `site.yml`
@@ -50,7 +50,7 @@ Type `site.yml` and hit enter.
 You should now have an editor open in the right pane that can be used
 for creating your playbook.
 
-image::../assets/5-vscode-create-folders.png[Empty site.yml]
+image::../assets/images/5-vscode-create-folders.png[Empty site.yml]
 
 === Step 2
 
@@ -102,7 +102,7 @@ Add a new task called *install IIS*. After writing the playbook, click
       with_items: "{{ iis_sites }}"
       notify: restart iis service
 ----
-image::../assets/5-vscode-iis-yaml.png[site.yml part 1]
+image::../assets/images/5-vscode-iis-yaml.png[site.yml part 1]
 
 [quote]
 ____
@@ -146,7 +146,7 @@ for creating your template. Enter the following details:
 </body>
 </html>
 ----
-image::../assets/5-vscode-template.png[index.html template]
+image::../assets/images/5-vscode-template.png[index.html template]
 
 === Step 2
 
@@ -370,7 +370,7 @@ Complete the form using the following values
 
 === Step 3
 
-Click SAVE image:../assets/at_save.png[Save] and on the following page, select the *Survey* tab.
+Click SAVE image:../assets/images/at_save.png[Save] and on the following page, select the *Survey* tab.
 
 === Step 4
 
@@ -407,11 +407,11 @@ Create a new survey with following values
 |
 |===
 
-image::../assets/5-survey.png[Survey Form]
+image::../assets/images/5-survey.png[Survey Form]
 
 === Step 5
 
-Select SAVE image:../assets/at_save.png[Add] and remember to flip the *On* switch image:../assets/controller_on.png[On switch]
+Select SAVE image:../assets/images/at_save.png[Add] and remember to flip the *On* switch image:../assets/images/controller_on.png[On switch]
 
 [#running-new-playbook]
 == ☑️ Running your new playbook
@@ -431,7 +431,7 @@ ____
 
 === Step 2
 
-Click the rocketship icon image:../assets/at_launch_icon.png[Add] for the
+Click the rocketship icon image:../assets/images/at_launch_icon.png[Add] for the
 *IIS Advanced* Job Template.
 
 === Step 3

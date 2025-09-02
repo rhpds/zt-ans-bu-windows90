@@ -1,7 +1,5 @@
 = 1. Controller
 
-== Introduction
-
 There are a number of constructs in the Automation Controller UI that enable
 multi-tenancy, notifications, scheduling, etc. However, we are only
 going to focus on a few of the key constructs that are required for this
@@ -12,9 +10,6 @@ workshop today.
 * *Inventory*
 * *Job Template*
 
----
-
-[#logging-in]
 == ☑️ Logging into Controller
 
 Your Automation Controller instance can be found in the tab called `controller`
@@ -30,104 +25,67 @@ Password: learn_ansible
 Your Automation Controller subscription has already been applied for you, so after
 logging in, you should now see the Dashboard.
 
----
-
-[#creating-machine-credentials]
-== ☑️ Creating machine credentials
+== ☑️ Creating Machine Credentials
 
 Credentials are utilized by Controller for authentication when launching jobs
 against machines, synchronizing with inventory sources, and importing
 project content from a version control system.
 
-There are many https://docs.ansible.com/automation-controller/latest/html/userguide/credentials.html#credential-types[types of credentials] including machine, network, and various cloud providers. For this
+There are many link:https://docs.ansible.com/automation-controller/latest/html/userguide/credentials.html#credential-types[types of credentials] including machine, network, and various cloud providers. For this
 workshop, we are using *machine* and *source control* credentials.
 
 === Step 1
 
 Select CREDENTIALS from the left hand panel under resources
 
-image::../assets/1-controller-credentials.png[Cred]
+image::../assets/images/1-controller-credentials.png[Cred]
 
 === Step 2
 
-Click the image:../assets/add.png[Add] icon and add new credential
+Click the image:../assets/images/add.png[Add] icon and add new credential
 
 === Step 3
 
 Complete the form using the following entries:
 
-[cols="1,1"]
+[cols="1,1",options="header"]
 |===
 | Key | Value
-
-| Name
-| Windows Credential
-
-| Organization
-| Default
-
-| Type
-| Machine
-
-| Username
-| instruqt
-
-| Password
-| Passw0rd!
+| Name | Windows Credential
+| Organization | Default
+| Type | Machine
+| Username | instruqt
+| Password | Passw0rd!
 |===
 
-image::../assets/1-controller-add-machine-credential.png[Add Machine Credential]
+image::../assets/images/1-controller-add-machine-credential.png[Add Machine Credential]
 
 === Step 4
 
-Select SAVE image:../assets/at_save.png[Save]
+Select SAVE image:../assets/images/at_save.png[Save]
 
----
-
-[#creating-scm-credentials]
-== ☑️ Creating SCM credentials
+== ☑️ Create SCM Credentials
 
 Our first credential was to access our Windows machines over WinRM. We need another
 to access our source code repository where our automation projects will live. Repeat the process as above, but
 with the following details:
 
-[cols="1,1,1"]
+[cols="1,2,2",options="header"]
 |===
 | Key | Value |
-
-| Name
-| Git Credential
-|
-
-| Description
-| SCM credential for project sync
-|
-
-| Organization
-| Default
-|
-
-| Credential Type
-| Source Control
-|
-
-| Username
-| student
-| Replace # with your student number
-
-| Password
-| learn_ansible
-| Replace with your student password
+| Name | Git Credential |
+| Description | SCM credential for project sync |
+| Organization | Default |
+| Credential Type | Source Control |
+| Username | student | Replace # with your student number
+| Password | learn_ansible | Replace with your student password
 |===
 
-Select SAVE image:../assets/at_save.png[Save]
+Select SAVE image:../assets/images/at_save.png[Save]
 
-image::../assets/1-controller-add-scm-credential.png[Add SCM Credential]
+image::../assets/images/1-controller-add-scm-credential.png[Add SCM Credential]
 
----
-
-[#creating-a-project]
-== ☑️ Creating a project
+== ☑️ Creating a Project
 
 A *Project* is a logical collection of Ansible content, represented in Controller. You can manage projects by placing your ansible content into a source code management (SCM) system supported by Controller, including Git and Subversion.
 
@@ -144,8 +102,8 @@ Password: learn_ansible
 
 Then select your workshop project and copy the `https` url presented after clicking the "Copy" button.
 
-image::../assets/1-gitea-project.png[Proj]
-image::../assets/1-gitea-clone.png[Clone]
+image::../assets/images/1-gitea-project.png[Proj]
+image::../assets/images/1-gitea-clone.png[Clone]
 
 The repo url will be used in *Step 3*
 
@@ -153,49 +111,26 @@ The repo url will be used in *Step 3*
 
 Click *Projects* on the left hand panel.
 
-image::../assets/1-controller-project.png[Proj]
+image::../assets/images/1-controller-project.png[Proj]
 
-Click the image:../assets/add.png[Add] icon and add new project
+Click the image:..images/add.png[Add] icon and add new project
 
 === Step 3
 
-Complete the form using the following entries (*using your student number in SCM URL*)
+Complete the form using the following entries (*using your student
+number in SCM URL*)
 
-[cols="1,1,1"]
+[cols="1,2,2",options="header"]
 |===
 | Key | Value |
-
-| Name
-| Ansible Workshop Project
-|
-
-| Description
-| Windows Workshop Project
-|
-
-| Organization
-| Default
-|
-
-| Default Execution Environment
-| Windows Workshop Execution Environment
-|
-
-| SCM Type
-| Git
-|
-
-| SCM URL
-| http://gitea:3000/student/workshop_project.git
-| URL obtained from Step 1
-
-| SCM BRANCH
-|
-| Intentionally blank
-
-| SCM CREDENTIAL
-| Git Credential
-|
+| Name | Ansible Workshop Project |
+| Description | Windows Workshop Project |
+| Organization | Default |
+| Default Execution Environment | Windows Workshop Execution Environment |
+| SCM Type | Git |
+| SCM URL | http://gitea:3000/student/workshop_project.git | URL obtained from Step 1
+| SCM BRANCH | | Intentionally blank
+| SCM CREDENTIAL | Git Credential |
 |===
 
 OPTIONS
@@ -206,11 +141,11 @@ OPTIONS
 * [x] Update Revision on Launch
 * [ ] Allow Branch Override
 
-image::../assets/1-controller-create-project.png[Defining a Project]
+image::../assets/images/1-controller-create-project.png[Defining a Project]
 
 === Step 4
 
-Select SAVE image:../assets/at_save.png[Save]
+Select SAVE image:../assets/images/at_save.png[Save]
 
 === Step 5
 
@@ -218,11 +153,8 @@ Scroll down and validate that the project has been successfully synchronized
 against the source control repository upon saving. You should see a green icon displaying "Successful"
 next to the project name in the list view. If the status does not show as "Successful", try pressing the "Sync Project" button again re-check the status.
 
-image::../assets/1-controller-project-success.png[Successful Sync]
+image::../assets/images/1-controller-project-success.png[Succesfull Sync]
 
----
-
-[#inventories]
 == ☑️ Inventories
 
 An inventory is a collection of hosts against which jobs may be
@@ -235,14 +167,14 @@ A static Inventory has already been created for you today. Let's take a look at 
 === Step 1
 
 Click *Inventories* from the left hand panel. You will see the
-preconfigured Inventory listed. Click the Inventories' name *Workshop Inventory* or the Edit button. image:../assets/at_edit.png[Edit]
+preconfigured Inventory listed. Click the Inventories' name *Workshop Inventory* or the Edit button. image:../assets/images/at_edit.png[Edit]
 
 === Step 2
 
 You are now viewing the Inventory. From here, you can add Hosts,
 Groups, or even Variables specific to this Inventory.
 
-image::../assets/1-controller-edit-inventory.png[Edit Inventory]
+image::../assets/images/1-controller-edit-inventory.png[Edit Inventory]
 
 We will be viewing the hosts, so click the *HOSTS* button.
 
@@ -253,13 +185,13 @@ inventory. You will also see which groups a host is associated with.
 Hosts can be associated with multiple groups. These groups can later be used to narrow down the exact hosts we will later run our
 automation on.
 
-image::../assets/1-controller-hosts-view.png[Hosts View]
+image::../assets/images/1-controller-hosts-view.png[Hosts View]
 
 === Step 4
 
 If you click the *GROUPS* button and then select the *Windows* group, you can inspect variables set at the group level that will apply to all hosts in that group.
 
-image::../assets/1-controller-group-edit.png[Group Edit]
+image::../assets/images/1-controller-group-edit.png[Group Edit]
 
 Today, we have already defined a handful of variables to tell Controller how to connect to hosts in this group. You do not have to define these variables as
 a Group variable here, they could also be Host variables or reside
@@ -268,19 +200,25 @@ directly in your Template or Playbook. However, because these variables will be 
 By default, Ansible will attempt to use SSH to connect to any Host, so
 for Windows we need to tell it utilize a different connection method, in
 this case,
-https://docs.ansible.com/ansible/latest/user_guide/windows_winrm.html[WinRM].
+link:https://docs.ansible.com/ansible/latest/user_guide/windows_winrm.html[WinRM].
 
-*`ansible_connection: winrm`*
+....
+ansible_connection: winrm
+....
 
 We also instruct Ansible to connect to the WinRM SSL port 5986 (the
 non-SSL port runs on 5985 but is unencrypted).
 
-*`ansible_port: 5986`*
+....
+ansible_port: 5986
+....
 
 We also tell Ansible to ignore the WinRM cert, since our lab doesn’t
 have a proper certificate store setup.
 
-*`ansible_winrm_server_cert_validation: ignore`*
+....
+ansible_winrm_server_cert_validation: ignore
+....
 
 If you click the *HOSTS* button, you can view the hosts belonging to the windows group.
-You can find more information about these and other settings in our https://docs.ansible.com/ansible/latest/user_guide/windows.html[Windows Guides]. The authentication settings are particularly important and you will need to review them and decide which method is best for your needs.
+You can find more information about these and other settings in our link:https://docs.ansible.com/ansible/latest/user_guide/windows.html[Windows Guides]. The authentication settings are particularly important and you will need to review them and decide which method is best for your needs.
