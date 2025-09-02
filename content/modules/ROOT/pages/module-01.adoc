@@ -62,7 +62,7 @@ image::1-controller-add-machine-credential.png[Add Machine Credential]
 
 === Step 4
 
-Select SAVE image::at_save.png[Save]
+Select SAVE image:at_save.png[Save]
 
 == ☑️ Create SCM Credentials
 
@@ -81,7 +81,7 @@ with the following details:
 | Password | learn_ansible | Replace with your student password
 |===
 
-Select SAVE image::at_save.png[Save]
+Select SAVE image:at_save.png[Save]
 
 image::1-controller-add-scm-credential.png[Add SCM Credential]
 
@@ -113,7 +113,7 @@ Click *Projects* on the left hand panel.
 
 image::1-controller-project.png[Proj]
 
-Click the image::add.png[Add] icon and add new project
+Click the image:add.png[Add] icon and add new project
 
 === Step 3
 
@@ -145,7 +145,7 @@ image::1-controller-create-project.png[Defining a Project]
 
 === Step 4
 
-Select SAVE image::at_save.png[Save]
+Select SAVE image:at_save.png[Save]
 
 === Step 5
 
@@ -167,7 +167,7 @@ A static Inventory has already been created for you today. Let's take a look at 
 === Step 1
 
 Click *Inventories* from the left hand panel. You will see the
-preconfigured Inventory listed. Click the Inventories' name *Workshop Inventory* or the Edit button. image::at_edit.png[Edit]
+preconfigured Inventory listed. Click the Inventories' name *Workshop Inventory* or the Edit button. image:at_edit.png[Edit]
 
 === Step 2
 
