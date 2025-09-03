@@ -9,6 +9,7 @@ asciidoc:
     lab_name: "Ansible Automation With Windows - 90min workshop"
     release-version: master
     page-pagination: true
+    page-toclevels: 1
     my_var: "foo"
     guid: my-guid
     ssh_user: devops
