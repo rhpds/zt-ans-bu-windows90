@@ -31,7 +31,7 @@ Credentials are utilized by Controller for authentication when launching jobs
 against machines, synchronizing with inventory sources, and importing
 project content from a version control system.
 
-There are many link:https://docs.ansible.com/automation-controller/latest/html/userguide/credentials.html#credential-types[types of credentials] including machine, network, and various cloud providers. For this
+There are many link:https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.5/html/using_automation_execution/controller-credentials#ref-controller-credential-types[types of credentials] including machine, network, and various cloud providers. For this
 workshop, we are using *machine* and *source control* credentials.
 
 === Step 1
