@@ -26,7 +26,7 @@ antora:
 tabs:
   - name: aap
     url: https://control-${guid}.${domain}/
-  - name: VS Ccode
+  - name: VS Code
     url: https://vscode-${guid}.${domain}
     external: false
   - name: Windows
