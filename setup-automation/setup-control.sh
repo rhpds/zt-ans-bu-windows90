@@ -210,7 +210,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
       delay: 5
 
     - name: Create an OAuth2 token for automation
-      awx.awx.token:
+      ansible.controller.token:
         description: 'Token for lab setup automation'
         scope: "write"
         state: present
@@ -221,7 +221,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
 
     # Now use the created token for all subsequent tasks
     - name: Add Organization
-      awx.awx.organization:
+      ansible.controller.organization:
         name: "{{ lab_organization }}"
         description: "ACME Corp Organization"
         state: present
@@ -229,7 +229,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
         <<: *controller_auth_params
 
     - name: Add Instruqt Windows EE
-      awx.awx.execution_environment:
+      ansible.controller.execution_environment:
         name: "{{ controller_ee }}"
         image: "quay.io/nmartins/windows_ee"
         pull: missing # Pulls if not present on the system
@@ -239,7 +239,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
         <<: *controller_auth_params
         
     - name: Create student admin user
-      awx.awx.user:
+      ansible.controller.user:
         username: "{{ student_user }}"
         password: "{{ student_password }}"
         email: "student@acme.example.com"
@@ -249,7 +249,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
         <<: *controller_auth_params
 
     - name: Create Workshop Inventory
-      awx.awx.inventory:
+      ansible.controller.inventory:
         name: "Workshop Inventory"
         organization: "{{ lab_organization }}"
         state: present
@@ -257,7 +257,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
         <<: *controller_auth_params
 
     - name: Create Host for Windows Server
-      awx.awx.host:
+      ansible.controller.host:
         name: "windows"
         inventory: "Workshop Inventory"
         state: present
@@ -265,7 +265,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
         <<: *controller_auth_params
 
     - name: Create Group for Windows Servers
-      awx.awx.group:
+      ansible.controller.group:
         name: "Windows Servers"
         inventory: "Workshop Inventory"
         state: present
@@ -277,7 +277,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
         <<: *controller_auth_params
         
     - name: Associate windows host with the Windows Servers group
-      awx.awx.host:
+      ansible.controller.host:
         name: "windows"
         inventory: "Workshop Inventory"
         groups:
@@ -289,7 +289,7 @@ EOF
 
 # Install necessary collections and packages
 ansible-galaxy collection install microsoft.ad
-ansible-galaxy collection install awx.awx --force
+ansible-galaxy collection install ansible.controller
 pip3 install pywinrm
 
 # Execute the setup
