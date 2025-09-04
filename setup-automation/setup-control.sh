@@ -292,6 +292,7 @@ EOF
 ansible-galaxy collection install community.general
 ansible-galaxy collection install microsoft.ad
 ansible-galaxy collection install ansible.controller
+pip3 install docker
 pip3 install pywinrm
 
 # Execute the setup
