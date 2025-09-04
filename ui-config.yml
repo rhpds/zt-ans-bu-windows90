@@ -5,7 +5,7 @@ antora:
   dir: www
   modules:
     - name: module-01
-      label: "Controller" ## Update for your lab/instructions
+      label: "Controller"
       solveButton: false
     - name: module-02
       label: "Ad-Hoc Commands"
@@ -24,7 +24,7 @@ antora:
       solveButton: false
 
 tabs:
-  - name: aap
+  - name: Controller
     url: https://control-${guid}.${domain}/
   - name: VS Code
     url: https://vscode-${guid}.${domain}
