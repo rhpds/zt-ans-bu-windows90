@@ -21,7 +21,7 @@ cat <<EOF | tee /tmp/inventory.ini
 controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
 
 [ciservers]
-gitea ansible_user=root
+gitea ansible_user=root ansible_connection=docker
 jenkins ansible_user=root
 
 [windowssrv]
@@ -535,3 +535,7 @@ pip3.9 install yamllint
 # sudo dnf install -y ansible-lint
 # sudo dnf install -y nc
 # pip3.9 install yamllint
+
+
+
+
