@@ -21,7 +21,8 @@ cat <<EOF | tee /tmp/inventory.ini
 controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
 
 [ciservers]
-gitea ansible_user=root ansible_connection=docker
+# gitea ansible_user=root ansible_connection=docker
+gitea ansible_user=root
 jenkins ansible_user=root
 
 [windowssrv]
@@ -292,7 +293,6 @@ EOF
 ansible-galaxy collection install community.general
 ansible-galaxy collection install microsoft.ad
 ansible-galaxy collection install ansible.controller
-pip3 install docker
 pip3 install pywinrm
 
 # Execute the setup
@@ -304,7 +304,7 @@ sudo dnf clean all
 sudo dnf install -y ansible-navigator ansible-lint nc
 pip3.9 install yamllint
 
-ANSIBLE_COLLECTIONS_PATH=/tmp/ansible-automation-platform-containerized-setup-bundle-2.5-9-x86_64/collections/:/root/.ansible/collections/ansible_collections/ ansible-playbook -i /tmp/inventory /tmp/setup.yml
+# ANSIBLE_COLLECTIONS_PATH=/tmp/ansible-automation-platform-containerized-setup-bundle-2.5-9-x86_64/collections/:/root/.ansible/collections/ansible_collections/ ansible-playbook -i /tmp/inventory /tmp/setup.yml
 
 ###########################################
 
