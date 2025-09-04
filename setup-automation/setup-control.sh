@@ -1,16 +1,20 @@
+#!/bin/bash
+
+# Initial system and user setup
 dnf install -y python3-pip
 
 cp -a /root/.ssh/* /home/rhel/.ssh/.
 chown -R rhel:rhel /home/rhel/.ssh
 
-mkdir /home/rhel/ansible
-chown -R /home/rhel/ansible
+mkdir -p /home/rhel/ansible
+chown -R rhel:rhel /home/rhel/ansible
 chmod 777 /home/rhel/ansible
 
-
+# Git global configuration
 git config --global user.email "student@redhat.com"
 git config --global user.name "student"
 
+# Create inventory file
 cat <<EOF | tee /tmp/inventory.ini
 [ctrlnodes]
 controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
@@ -28,25 +32,23 @@ ansible_become_method=su
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-
 EOF
 
+# Create lab setup script
 cat <<EOF | tee /tmp/lab-setup.sh
-#/bin/bash
-yum install git nano -y
-mkdir /tmp/cache
+#!/bin/bash
+dnf install git nano -y
+mkdir -p /tmp/cache
 git clone https://github.com/nmartins0611/windows_getting_started_instruqt.git /tmp/cache
 
-# Configure gitea and repo for builds
-#ansible-playbook /tmp/gitea-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini
-
 # Configure Repo for builds
-ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini
-# Configure Controller
-ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini
+ansible-playbook /tmp/git-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
 
+# Configure Controller
+ansible-playbook /tmp/controller-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
 EOF
 
+# Create variables file
 cat <<EOF | tee /tmp/track-vars.yml
 ---
 # config vars
@@ -66,11 +68,10 @@ admin_password: ansible123!
 repo_user: rhel
 default_tag_name: "0.0.1"
 lab_organization: ACME
-
 EOF
 
+# Create Gitea setup playbook (unchanged from original)
 cat <<EOF | tee /tmp/git-setup.yml
-
 # Gitea config
 - name: Configure Gitea host
   hosts: gitea
@@ -161,23 +162,6 @@ cat <<EOF | tee /tmp/git-setup.yml
         scope: global
         value: "{{ ansible_user }}@local"
 
-    - name: Grab the rsa
-      ansible.builtin.set_fact:
-        controller_ssh: "{{ lookup('file', '/home/rhel/.ssh/id_rsa.pub') }}"
-
-    - name: Create cache folder for working files
-      ansible.builtin.file:
-        path: "/tmp/cache"
-        state: directory
-        mode: '0755'
-
-    # - name: Ensure files are in local repo
-    #   ansible.builtin.copy:
-    #    src: "{{ item }}"
-    #    dest: "/tmp/workshop_project/"
-    #   with_fileglob:
-    #    - "/tmp/cache/*"
-
     - name: Create generic ReadME
       ansible.builtin.file:
        path: /tmp/workshop_project/Readme
@@ -197,226 +181,124 @@ cat <<EOF | tee /tmp/git-setup.yml
         - "git push -u origin main --force"
 EOF
 
-############################ CONTROLLER CONFIG
+############################ REVISED CONTROLLER CONFIG ############################
 
 cat <<EOF | tee /tmp/controller-setup.yml
 ## Controller setup
 - name: Controller config for Windows Getting Started
   hosts: controller.acme.example.com
-  gather_facts: true
-    
+  gather_facts: false
+  
+  vars:
+    # Define common controller connection parameters here for reuse
+    controller_auth_params:
+      controller_host: "{{ controller_hostname }}"
+      validate_certs: "{{ controller_validate_certs }}"
+
   tasks:
-   # Create auth login token
-    - name: get auth token and restart automation-controller if it fails
-      block:
-        - name: Refresh facts
-          setup:
-
-        - name: Create oauth token
-          awx.awx.token:
-            description: 'Instruqt lab'
-            scope: "write"
-            state: present
-            controller_host: controller
-            controller_username: "{{ controller_admin_user }}"
-            controller_password: "{{ controller_admin_password }}"
-            validate_certs: false
-          register: _auth_token
-          until: _auth_token is not failed
-          delay: 3
-          retries: 5
-      rescue:
-        - name: In rescue block for auth token
-          debug:
-            msg: "failed to get auth token. Restarting automation controller service"
-
-        - name: restart the controller service
-          ansible.builtin.service:
-            name: automation-controller
-            state: restarted
-
-        - name: Ensure tower/controller is online and working
-          uri:
-            url: https://localhost/api/v2/ping/
-            method: GET
-            user: "{{ admin_username }}"
-            password: "{{ admin_password }}"
-            validate_certs: false
-            force_basic_auth: true
-          register: controller_online
-          until: controller_online is success
-          delay: 3
-          retries: 5
-
-        - name: Retry getting auth token
-          awx.awx.token:
-            description: 'Instruqt lab'
-            scope: "write"
-            state: present
-            controller_host: controller
-            controller_username: "{{ controller_admin_user }}"
-            controller_password: "{{ controller_admin_password }}"
-            validate_certs: false
-          register: _auth_token
-          until: _auth_token is not failed
-          delay: 3
-          retries: 5
-      always:
-        - name: Create fact.d dir
-          ansible.builtin.file:
-            path: "{{ custom_facts_dir }}"
-            state: directory
-            recurse: yes
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
-            mode: 0755
-          become: true
-
-        - name: Create _auth_token custom fact
-          ansible.builtin.copy:
-            content: "{{ _auth_token.ansible_facts }}"
-            dest: "{{ custom_facts_dir }}/{{ custom_facts_file }}"
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
-            mode: 0644
-          become: true
-      check_mode: false
-      when: ansible_local.custom_facts.controller_token is undefined
-      tags:
-        - auth-token
-
-    - name: refresh facts
-      setup:
-        filter:
-          - ansible_local
-      tags:
-        - always
-
-    - name: create auth token fact
-      ansible.builtin.set_fact:
-        auth_token: "{{ ansible_local.custom_facts.controller_token }}"
-        cacheable: true
-      check_mode: false
-      when: auth_token is undefined
-      tags:
-        - always
- 
-    - name: Ensure tower/controller is online and working
-      uri:
-        url: https://localhost/api/v2/ping/
+    - name: Ensure controller is online and responsive
+      ansible.builtin.uri:
+        url: "https://{{ controller_hostname }}/api/v2/ping/"
         method: GET
-        user: "{{ admin_username }}"
-        password: "{{ admin_password }}"
-        validate_certs: false
+        user: "{{ controller_admin_user }}"
+        password: "{{ controller_admin_password }}"
+        validate_certs: "{{ controller_validate_certs }}"
         force_basic_auth: true
       register: controller_online
-      until: controller_online is success
-      delay: 3
-      retries: 5
-      tags:
-        - controller-config
+      until: controller_online.status == 200
+      retries: 10
+      delay: 5
 
-# Controller objects
+    - name: Create an OAuth2 token for automation
+      awx.awx.token:
+        description: 'Token for lab setup automation'
+        scope: "write"
+        state: present
+        controller_username: "{{ controller_admin_user }}"
+        controller_password: "{{ controller_admin_password }}"
+        <<: *controller_auth_params # Merge in common connection params
+      register: oauth_token
+
+    # Now use the created token for all subsequent tasks
     - name: Add Organization
       awx.awx.organization:
         name: "{{ lab_organization }}"
         description: "ACME Corp Organization"
         state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        validate_certs: false
-      tags:
-        - controller-config
-        - controller-org
-  
+        controller_oauthtoken: "{{ oauth_token.token }}"
+        <<: *controller_auth_params
+
     - name: Add Instruqt Windows EE
       awx.awx.execution_environment:
         name: "{{ controller_ee }}"
         image: "quay.io/nmartins/windows_ee"
-        pull: missing
+        pull: missing # Pulls if not present on the system
+        organization: "{{ lab_organization }}"
         state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: "{{ controller_validate_certs }}"
-      tags:
-        - controller-config
-        - controller-ees
-
+        controller_oauthtoken: "{{ oauth_token.token }}"
+        <<: *controller_auth_params
+        
     - name: Create student admin user
       awx.awx.user:
-        superuser: true
         username: "{{ student_user }}"
         password: "{{ student_password }}"
-        email: student@acme.example.com
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: "{{ controller_validate_certs }}"
-      tags:
-        - controller-config
-        - controller-users
+        email: "student@acme.example.com"
+        is_superuser: true
+        state: present
+        controller_oauthtoken: "{{ oauth_token.token }}"
+        <<: *controller_auth_params
 
-    - name: Create Inventory
+    - name: Create Workshop Inventory
       awx.awx.inventory:
-       name: "Workshop Inventory"
-       description: "Our Server environment"
-       organization: "Default"
-       state: present
-       controller_config_file: "/tmp/controller.cfg"
+        name: "Workshop Inventory"
+        organization: "{{ lab_organization }}"
+        state: present
+        controller_oauthtoken: "{{ oauth_token.token }}"
+        <<: *controller_auth_params
 
-    - name: Create Host for Workshop
+    - name: Create Host for Windows Server
       awx.awx.host:
-       name: windows
-       description: "Windows Group"
-       inventory: "Workshop Inventory"
-       state: present
-       controller_config_file: "/tmp/controller.cfg"
+        name: "windows"
+        inventory: "Workshop Inventory"
+        state: present
+        controller_oauthtoken: "{{ oauth_token.token }}"
+        <<: *controller_auth_params
 
-    - name: Create Host for Workshop
-      awx.awx.host:
-       name: student-ansible
-       description: "Ansible node"
-       inventory: "Workshop Inventory"
-       state: present
-       controller_config_file: "/tmp/controller.cfg"
-
-    - name: Create Group for inventory
+    - name: Create Group for Windows Servers
       awx.awx.group:
-       name: Windows
-       description: Windows Server Group
-       inventory: "Workshop Inventory"
-       hosts:
-        - windows
-       variables:
-         ansible_connection: winrm
-         ansible_port: 5986
-         ansible_winrm_server_cert_validation: ignore
-       controller_config_file: "/tmp/controller.cfg"
-     
-       
+        name: "Windows Servers"
+        inventory: "Workshop Inventory"
+        state: present
+        variables: |
+          ansible_connection: winrm
+          ansible_port: 5986
+          ansible_winrm_server_cert_validation: ignore
+        controller_oauthtoken: "{{ oauth_token.token }}"
+        <<: *controller_auth_params
+        
+    - name: Associate windows host with the Windows Servers group
+      awx.awx.host:
+        name: "windows"
+        inventory: "Workshop Inventory"
+        groups:
+          - "Windows Servers"
+        state: present
+        controller_oauthtoken: "{{ oauth_token.token }}"
+        <<: *controller_auth_params
 EOF
 
-cat <<EOF | tee /tmp/controller.cfg
-host: localhost
-username: admin
-password: ansible123!
-verify_ssl = false
-EOF
-
-
+# Install necessary collections and packages
 ansible-galaxy collection install microsoft.ad
 ansible-galaxy collection install awx.awx --force
 pip3 install pywinrm
 
-##### Executing:
-
+# Execute the setup
 chmod +x /tmp/lab-setup.sh
-
-#sh /tmp/lab-setup.sh
 sh /tmp/lab-setup.sh
 
+# Install additional tools
 sudo dnf clean all
-sudo dnf install -y ansible-navigator
-sudo dnf install -y ansible-lint
-sudo dnf install -y nc
+sudo dnf install -y ansible-navigator ansible-lint nc
 pip3.9 install yamllint
 ###########################################
 
