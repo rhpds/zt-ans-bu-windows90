@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Initial system and user setup
-# dnf install -y python3-pip
+dnf install -y python3-pip
 dnf install -y python3-pip python3-libsemanage
 
 cp -a /root/.ssh/* /home/rhel/.ssh/.
@@ -302,6 +302,9 @@ sh /tmp/lab-setup.sh
 sudo dnf clean all
 sudo dnf install -y ansible-navigator ansible-lint nc
 pip3.9 install yamllint
+
+ANSIBLE_COLLECTIONS_PATH=/tmp/ansible-automation-platform-containerized-setup-bundle-2.5-9-x86_64/collections/:/root/.ansible/collections/ansible_collections/ ansible-playbook -i /tmp/inventory /tmp/setup.yml
+
 ###########################################
 
 
