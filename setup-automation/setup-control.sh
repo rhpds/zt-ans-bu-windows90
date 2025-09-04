@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Initial system and user setup
-dnf install -y python3-pip
+# dnf install -y python3-pip
+dnf install -y python3-pip python3-libsemanage
 
 cp -a /root/.ssh/* /home/rhel/.ssh/.
 chown -R rhel:rhel /home/rhel/.ssh
@@ -288,6 +289,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
 EOF
 
 # Install necessary collections and packages
+ansible-galaxy collection install community.general
 ansible-galaxy collection install microsoft.ad
 ansible-galaxy collection install ansible.controller
 pip3 install pywinrm
