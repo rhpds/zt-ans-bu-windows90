@@ -21,7 +21,6 @@ cat <<EOF | tee /tmp/inventory.ini
 controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
 
 [ciservers]
-# gitea ansible_user=root ansible_connection=docker
 gitea ansible_user=root
 jenkins ansible_user=root
 
@@ -72,9 +71,9 @@ default_tag_name: "0.0.1"
 lab_organization: ACME
 EOF
 
-# Create Gitea setup playbook (unchanged from original)
+# Create Gitea setup playbook (updated for showroom environment)
 cat <<EOF | tee /tmp/git-setup.yml
-# Gitea config
+# Gitea config for showroom environment
 - name: Configure Gitea host
   hosts: gitea
   gather_facts: false
@@ -83,22 +82,15 @@ cat <<EOF | tee /tmp/git-setup.yml
     - gitea-config
 
   tasks:
-    - name: Install python3 Gitea
-      ansible.builtin.raw: /sbin/apk add python3
-
-    - name: Install Gitea packages
-      community.general.apk:
-        name: subversion, tar
-        state: present
-
-    - name: Create repo users
-      ansible.builtin.command: "{{ item }}"
-      become_user: git
-      register: __output
-      failed_when: __output.rc not in [ 0, 1 ]
-      changed_when: '"user already exists" not in __output.stdout'
-      loop:
-        - "/usr/local/bin/gitea admin user create --admin --username {{ student_user }} --password {{ student_password }} --must-change-password=false --email {{ student_user }}@localhost"
+    - name: Wait for Gitea to be ready
+      ansible.builtin.uri:
+        url: http://localhost:3000/api/v1/version
+        method: GET
+        status_code: 200
+      register: gitea_ready
+      until: gitea_ready.status == 200
+      retries: 30
+      delay: 2
 
     - name: Create repo for project 
       ansible.builtin.uri:
@@ -132,7 +124,7 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.command:
         cmd: /usr/bin/git init
         chdir: "/tmp/workshop_project"
-        creates: "/workshop_project/.git" 
+        creates: "/tmp/workshop_project/.git" 
 
     - name: Configure git to store credentials
       community.general.git_config:
@@ -150,7 +142,7 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.copy:
         dest: /tmp/git-creds
         mode: 0644
-        content: "http://{{ student_user }}:{{ student_password }}@{{ 'gitea:3000' | urlencode }}"
+        content: "http://{{ student_user }}:{{ student_password }}@gitea:3000"
 
     - name: Configure git username
       community.general.git_config:
