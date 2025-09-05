@@ -156,10 +156,13 @@ cat <<EOF | tee /tmp/git-setup.yml
         scope: global
         value: "{{ ansible_user }}@local"
 
-    - name: Create generic ReadME
-      ansible.builtin.file:
-       path: /tmp/workshop_project/Readme
-       state: touch
+    - name: Copy workshop content to repository
+      ansible.builtin.copy:
+        src: "/tmp/cache/"
+        dest: "/tmp/workshop_project/"
+        mode: preserve
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
 
     - name: Add remote origin to repo
       ansible.builtin.command:

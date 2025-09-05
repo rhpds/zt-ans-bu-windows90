@@ -39,16 +39,6 @@ containers:
     commands: 
         - gitea admin user create --admin --username gitea --password gitea --email dummy@dummy.com --must-change-password=false
         - gitea admin user create --username student --password learn_ansible --email student@localhost --must-change-password=false
-        - >
-          curl -X POST -H "accept: application/json" -H "Content-Type: application/json"
-          -u 'student:learn_ansible' 
-          -d '{"name": "workshop_project", "auto_init": false, "private": false}'
-          http://localhost:3000/api/v1/user/repos
-        - >
-          curl -X POST -H "accept: application/json" -H "Content-Type: application/json"
-          -u 'student:learn_ansible'
-          -d '{"clone_addr": "https://github.com/ansible-tmm/windows_getting_started_90.git", "repo_name": "workshop_project", "owner": "student", "private": false}'
-          http://localhost:3000/api/v1/repos/migrate
     memory: 2Gi
     services:
       - name: gitea
