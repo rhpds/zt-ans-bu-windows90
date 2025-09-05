@@ -21,7 +21,6 @@ cat <<EOF | tee /tmp/inventory.ini
 controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
 
 [ciservers]
-gitea ansible_user=root
 jenkins ansible_user=root
 
 [windowssrv]
@@ -73,18 +72,18 @@ EOF
 
 # Create Gitea setup playbook (updated for showroom environment)
 cat <<EOF | tee /tmp/git-setup.yml
-# Gitea config for showroom environment
-- name: Configure Gitea host
-  hosts: gitea
+# Gitea config for showroom environment - run from control VM
+- name: Configure Gitea repository from control VM
+  hosts: localhost
   gather_facts: false
-  become: true
+  connection: local
   tags:
     - gitea-config
 
   tasks:
     - name: Wait for Gitea to be ready
       ansible.builtin.uri:
-        url: http://localhost:3000/api/v1/version
+        url: http://gitea:3000/api/v1/version
         method: GET
         status_code: 200
       register: gitea_ready
