@@ -3,8 +3,15 @@
 echo "=== Windows Workshop Setup - Converting from Instruqt Pattern ==="
 
 # Copy root's SSH keys into the rhel user's home so Ansible/Git can authenticate
-cp -a /root/.ssh/* /home/rhel/.ssh/.
-chown -R rhel:rhel /home/rhel/.ssh
+if [ -d "/root/.ssh" ] && [ "$(ls -A /root/.ssh)" ]; then
+    cp -a /root/.ssh/* /home/rhel/.ssh/.
+    chown -R rhel:rhel /home/rhel/.ssh
+    echo "✅ SSH keys copied successfully"
+else
+    echo "⚠️  No SSH keys found in /root/.ssh, generating new ones..."
+    su - rhel -c 'ssh-keygen -f /home/rhel/.ssh/id_rsa -q -N ""'
+    chown -R rhel:rhel /home/rhel/.ssh
+fi
 
 # Create a writable workspace for the rhel user used by exercises
 mkdir -p /home/rhel/ansible
@@ -20,14 +27,8 @@ cat <<EOF | tee /tmp/inventory.ini
 [ctrlnodes]
 localhost ansible_connection=local
 
-[ciservers]
-gitea ansible_user=root
-
 [windowssrv]
 windows ansible_host=windows ansible_user=instruqt ansible_password=Passw0rd! ansible_connection=winrm ansible_port=5986 ansible_winrm_server_cert_validation=ignore
-
-[ciservers:vars]
-ansible_become_method=su
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
@@ -56,27 +57,29 @@ default_tag_name: "0.0.1"
 lab_organization: ACME
 EOF
 
-# Write the Git/Gitea setup playbook (converted from original Instruqt)
+# Write the Git/Gitea setup playbook (using localhost instead of gitea host)
 cat <<EOF | tee /tmp/git-setup.yml
 ---
-# Gitea config - converted from original Instruqt
-- name: Configure Gitea host
-  hosts: gitea
+# Gitea config - using localhost and direct API calls
+- name: Configure Git and Gitea repository
+  hosts: localhost
   gather_facts: false
-  become: true
+  connection: local
   tags:
     - gitea-config
 
   tasks:
-    - name: Install python3 Gitea
-      ansible.builtin.raw: /sbin/apk add python3
+    - name: Wait for Gitea to be ready
+      ansible.builtin.uri:
+        url: http://gitea:3000/api/v1/version
+        method: GET
+        status_code: 200
+      register: gitea_ready
+      until: gitea_ready.status == 200
+      delay: 5
+      retries: 12
 
-    - name: Install Gitea packages
-      community.general.apk:
-        name: subversion, tar
-        state: present
-
-    - name: Create repo for project 
+    - name: Create repo for project via API
       ansible.builtin.uri:
         url: http://gitea:3000/api/v1/user/repos
         method: POST
@@ -126,23 +129,19 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.copy:
         dest: /tmp/git-creds
         mode: 0644
-        content: "http://{{ student_user }}:{{ student_password }}@{{ 'gitea:3000' | urlencode }}"
+        content: "http://{{ student_user }}:{{ student_password }}@gitea:3000"
 
     - name: Configure git username
       community.general.git_config:
         name: user.name
         scope: global
-        value: "{{ ansible_user }}"
+        value: "{{ student_user }}"
 
     - name: Configure git email address
       community.general.git_config:
         name: user.email
         scope: global
-        value: "{{ ansible_user }}@local"
-
-    - name: Grab the rsa
-      ansible.builtin.set_fact:
-        controller_ssh: "{{ lookup('file', '/home/rhel/.ssh/id_rsa.pub') }}"
+        value: "{{ student_user }}@local"
 
     - name: Create cache folder for working files
       ansible.builtin.file:
