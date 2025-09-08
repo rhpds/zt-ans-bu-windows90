@@ -7,20 +7,20 @@ dnf install -y python3-pip python3-libsemanage
 cp -a /root/.ssh/* /home/rhel/.ssh/.
 chown -R rhel:rhel /home/rhel/.ssh
 
-mkdir -p /home/rhel/ansible
-chown -R rhel:rhel /home/rhel/ansible
+mkdir /home/rhel/ansible
+chown -R /home/rhel/ansible
 chmod 777 /home/rhel/ansible
 
-# Git global configuration
+
 git config --global user.email "student@redhat.com"
 git config --global user.name "student"
 
-# Create inventory file
 cat <<EOF | tee /tmp/inventory.ini
 [ctrlnodes]
 controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
 
 [ciservers]
+gitea ansible_user=root
 jenkins ansible_user=root
 
 [windowssrv]
@@ -32,23 +32,25 @@ ansible_become_method=su
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
 EOF
 
-# Create lab setup script
 cat <<EOF | tee /tmp/lab-setup.sh
-#!/bin/bash
-dnf install git nano -y
-mkdir -p /tmp/cache
+#/bin/bash
+yum install git nano -y
+mkdir /tmp/cache
 git clone https://github.com/nmartins0611/windows_getting_started_instruqt.git /tmp/cache
 
-# Configure Repo for builds
-ansible-playbook /tmp/git-setup.yml -i localhost, -e @/tmp/track-vars.yml
+# Configure gitea and repo for builds
+#ansible-playbook /tmp/gitea-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini
 
+# Configure Repo for builds
+ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini
 # Configure Controller
-ansible-playbook /tmp/controller-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
+ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini
+
 EOF
 
-# Create variables file
 cat <<EOF | tee /tmp/track-vars.yml
 ---
 # config vars
@@ -68,28 +70,36 @@ admin_password: ansible123!
 repo_user: rhel
 default_tag_name: "0.0.1"
 lab_organization: ACME
+
 EOF
 
-# Create Gitea setup playbook (updated for showroom environment)
 cat <<EOF | tee /tmp/git-setup.yml
-# Gitea config for showroom environment - run from control VM
-- name: Configure Gitea repository from control VM
-  hosts: localhost
+
+# Gitea config
+- name: Configure Gitea host
+  hosts: gitea
   gather_facts: false
-  connection: local
+  become: true
   tags:
     - gitea-config
 
   tasks:
-    - name: Wait for Gitea to be ready
-      ansible.builtin.uri:
-        url: http://gitea:3000/api/v1/version
-        method: GET
-        status_code: 200
-      register: gitea_ready
-      until: gitea_ready.status == 200
-      retries: 30
-      delay: 2
+    - name: Install python3 Gitea
+      ansible.builtin.raw: /sbin/apk add python3
+
+    - name: Install Gitea packages
+      community.general.apk:
+        name: subversion, tar
+        state: present
+
+    - name: Create repo users
+      ansible.builtin.command: "{{ item }}"
+      become_user: git
+      register: __output
+      failed_when: __output.rc not in [ 0, 1 ]
+      changed_when: '"user already exists" not in __output.stdout'
+      loop:
+        - "/usr/local/bin/gitea admin user create --admin --username {{ student_user }} --password {{ student_password }} --must-change-password=false --email {{ student_user }}@localhost"
 
     - name: Create repo for project 
       ansible.builtin.uri:
@@ -123,7 +133,7 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.command:
         cmd: /usr/bin/git init
         chdir: "/tmp/workshop_project"
-        creates: "/tmp/workshop_project/.git" 
+        creates: "/workshop_project/.git" 
 
     - name: Configure git to store credentials
       community.general.git_config:
@@ -141,7 +151,7 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.copy:
         dest: /tmp/git-creds
         mode: 0644
-        content: "http://{{ student_user }}:{{ student_password }}@gitea:3000"
+        content: "http://{{ student_user }}:{{ student_password }}@{{ 'gitea:3000' | urlencode }}"
 
     - name: Configure git username
       community.general.git_config:
@@ -155,13 +165,27 @@ cat <<EOF | tee /tmp/git-setup.yml
         scope: global
         value: "{{ ansible_user }}@local"
 
-    - name: Copy workshop content to repository
-      ansible.builtin.copy:
-        src: "/tmp/cache/"
-        dest: "/tmp/workshop_project/"
-        mode: preserve
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
+    - name: Grab the rsa
+      ansible.builtin.set_fact:
+        controller_ssh: "{{ lookup('file', '/home/rhel/.ssh/id_rsa.pub') }}"
+
+    - name: Create cache folder for working files
+      ansible.builtin.file:
+        path: "/tmp/cache"
+        state: directory
+        mode: '0755'
+
+    # - name: Ensure files are in local repo
+    #   ansible.builtin.copy:
+    #    src: "{{ item }}"
+    #    dest: "/tmp/workshop_project/"
+    #   with_fileglob:
+    #    - "/tmp/cache/*"
+
+    - name: Create generic ReadME
+      ansible.builtin.file:
+       path: /tmp/workshop_project/Readme
+       state: touch
 
     - name: Add remote origin to repo
       ansible.builtin.command:
