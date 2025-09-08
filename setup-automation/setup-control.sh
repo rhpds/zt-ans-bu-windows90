@@ -4,23 +4,23 @@
 dnf install -y python3-pip
 dnf install -y python3-pip python3-libsemanage
 
-sudo cp -a /root/.ssh/* /home/rhel/.ssh/.
+sudo cp -a /root/.ssh/ /home/rhel/.ssh/.
 sudo chown -R rhel:rhel /home/rhel/.ssh
 
-mkdir /home/rhel/ansible
-chown -R /home/rhel/ansible
+mkdir -p /home/rhel/ansible
+chown -R rhel:rhel /home/rhel/ansible
 chmod 777 /home/rhel/ansible
 
-
+# Git global configuration
 git config --global user.email "student@redhat.com"
 git config --global user.name "student"
 
+# Create inventory file
 cat <<EOF | tee /tmp/inventory.ini
 [ctrlnodes]
 controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
 
 [ciservers]
-gitea ansible_user=root
 jenkins ansible_user=root
 
 [windowssrv]
@@ -32,25 +32,23 @@ ansible_become_method=su
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-
 EOF
 
+# Create lab setup script
 cat <<EOF | tee /tmp/lab-setup.sh
-#/bin/bash
-yum install git nano -y
-mkdir /tmp/cache
+#!/bin/bash
+dnf install git nano -y
+mkdir -p /tmp/cache
 git clone https://github.com/nmartins0611/windows_getting_started_instruqt.git /tmp/cache
 
-# Configure gitea and repo for builds
-#ansible-playbook /tmp/gitea-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini
-
 # Configure Repo for builds
-ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini
-# Configure Controller
-ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini
+ansible-playbook /tmp/git-setup.yml -i localhost, -e @/tmp/track-vars.yml
 
+# Configure Controller
+ansible-playbook /tmp/controller-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
 EOF
 
+# Create variables file
 cat <<EOF | tee /tmp/track-vars.yml
 ---
 # config vars
@@ -70,48 +68,32 @@ admin_password: ansible123!
 repo_user: rhel
 default_tag_name: "0.0.1"
 lab_organization: ACME
-
-# Gitea access (OpenShift Route or Service URL) and admin credentials
-# Update these to match your OpenShift deployment
-gitea_base_url: "http://gitea:3000"
-gitea_admin_user: "admin"
-gitea_admin_password: "admin123!"
-
 EOF
 
+# Create Gitea setup playbook (updated for showroom environment)
 cat <<EOF | tee /tmp/git-setup.yml
-
-# Gitea config via REST (suitable for OpenShift-deployed Gitea)
-- name: Configure Gitea (REST)
-  hosts: controller.acme.example.com
+# Gitea config for showroom environment - run from control VM
+- name: Configure Gitea repository from control VM
+  hosts: localhost
   gather_facts: false
+  connection: local
   tags:
     - gitea-config
 
-  vars:
-    admin_auth: &admin_auth
-      force_basic_auth: true
-      url_username: "{{ gitea_admin_user }}"
-      url_password: "{{ gitea_admin_password }}"
-
   tasks:
-    - name: Ensure student user exists (admin API)
+    - name: Wait for Gitea to be ready
       ansible.builtin.uri:
-        url: "{{ gitea_base_url }}/api/v1/admin/users"
-        method: POST
-        body_format: json
-        body:
-          username: "{{ student_user }}"
-          password: "{{ student_password }}"
-          email: "{{ student_user }}@localhost"
-          must_change_password: false
-          send_notify: false
-        status_code: [201, 409]
-        <<: *admin_auth
+        url: http://gitea:3000/api/v1/version
+        method: GET
+        status_code: 200
+      register: gitea_ready
+      until: gitea_ready.status == 200
+      retries: 30
+      delay: 2
 
-    - name: Create repo for project as student
+    - name: Create repo for project 
       ansible.builtin.uri:
-        url: "{{ gitea_base_url }}/api/v1/user/repos"
+        url: http://gitea:3000/api/v1/user/repos
         method: POST
         body_format: json
         body:
@@ -119,8 +101,8 @@ cat <<EOF | tee /tmp/git-setup.yml
           auto_init: false
           private: false
         force_basic_auth: true
-        url_username: "{{ student_user }}"
         url_password: "{{ student_password }}"
+        url_username: "{{ student_user }}"
         status_code: [201, 409]
 
     - name: Create repo dir
@@ -141,7 +123,7 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.command:
         cmd: /usr/bin/git init
         chdir: "/tmp/workshop_project"
-        creates: "/workshop_project/.git"
+        creates: "/tmp/workshop_project/.git" 
 
     - name: Configure git to store credentials
       community.general.git_config:
@@ -159,7 +141,7 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.copy:
         dest: /tmp/git-creds
         mode: 0644
-        content: "{{ gitea_base_url | regex_replace('://', '://' ~ student_user ~ ':' ~ student_password ~ '@') }}"
+        content: "http://{{ student_user }}:{{ student_password }}@gitea:3000"
 
     - name: Configure git username
       community.general.git_config:
@@ -173,29 +155,22 @@ cat <<EOF | tee /tmp/git-setup.yml
         scope: global
         value: "{{ ansible_user }}@local"
 
-    - name: Grab the rsa
-      ansible.builtin.set_fact:
-        controller_ssh: "{{ lookup('file', '/home/rhel/.ssh/id_rsa.pub') }}"
+    - name: Copy workshop content to repository
+      ansible.builtin.copy:
+        src: "/tmp/cache/"
+        dest: "/tmp/workshop_project/"
+        mode: preserve
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
 
-    - name: Create cache folder for working files
-      ansible.builtin.file:
-        path: "/tmp/cache"
-        state: directory
-        mode: '0755'
-
-    - name: Create generic ReadME
-      ansible.builtin.file:
-        path: /tmp/workshop_project/Readme
-        state: touch
-
-    - name: Add remote origin and push initial content
+    - name: Add remote origin to repo
       ansible.builtin.command:
         cmd: "{{ item }}"
-        chdir: "/tmp/workshop_project"
+        chdir: "/tmp/workshop_project"   
       register: __output
       changed_when: __output.rc == 0
       loop:
-        - "git remote add origin {{ gitea_base_url }}/{{ student_user }}/workshop_project.git"
+        - "git remote add origin http://gitea:3000/{{ student_user }}/workshop_project.git"
         - "git checkout -b main"
         - "git add ."
         - "git commit -m'Initial commit'"
