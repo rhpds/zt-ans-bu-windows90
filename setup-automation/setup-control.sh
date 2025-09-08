@@ -4,18 +4,9 @@
 dnf install -y python3-pip
 dnf install -y python3-pip python3-libsemanage
 
-# Create .ssh directory for rhel user if it doesn't exist
-mkdir -p /home/rhel/.ssh
-chown -R rhel:rhel /home/rhel/.ssh
-chmod 700 /home/rhel/.ssh
-
-# Copy SSH keys if they exist
-if [ -d /root/.ssh ] && [ "$(ls -A /root/.ssh)" ]; then
-    cp -a /root/.ssh/* /home/rhel/.ssh/.
-    chown -R rhel:rhel /home/rhel/.ssh
-    chmod 600 /home/rhel/.ssh/*
-    chmod 644 /home/rhel/.ssh/*.pub 2>/dev/null || true
-fi
+# Copy SSH keys from root to rhel user with proper permissions
+sudo cp -a /root/.ssh/* /home/rhel/.ssh/.
+sudo chown -R rhel:rhel /home/rhel/.ssh
 
 mkdir -p /home/rhel/ansible
 chown -R rhel:rhel /home/rhel/ansible
@@ -25,14 +16,6 @@ chmod 777 /home/rhel/ansible
 git config --global user.email "student@redhat.com"
 git config --global user.name "student"
 
-# Test connectivity to Gitea container
-echo "Testing connectivity to Gitea container..."
-if curl -s --connect-timeout 10 http://gitea:3000 > /dev/null; then
-    echo "✓ Gitea container is reachable"
-else
-    echo "✗ Warning: Cannot reach Gitea container at http://gitea:3000"
-    echo "This may be normal if Gitea is still starting up"
-fi
 
 # Create inventory file
 cat <<EOF | tee /tmp/inventory.ini
@@ -40,6 +23,7 @@ cat <<EOF | tee /tmp/inventory.ini
 controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
 
 [ciservers]
+gitea ansible_user=root
 jenkins ansible_user=root
 
 [windowssrv]
@@ -61,7 +45,7 @@ mkdir -p /tmp/cache
 git clone https://github.com/nmartins0611/windows_getting_started_instruqt.git /tmp/cache
 
 # Configure Repo for builds
-ansible-playbook /tmp/git-setup.yml -i localhost, -e @/tmp/track-vars.yml
+ansible-playbook /tmp/git-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
 
 # Configure Controller
 ansible-playbook /tmp/controller-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
@@ -91,9 +75,9 @@ EOF
 
 # Create Gitea setup playbook (updated for showroom environment)
 cat <<EOF | tee /tmp/git-setup.yml
-# Gitea config for showroom environment - run from control VM
-- name: Configure Gitea repository from control VM
-  hosts: localhost
+# Gitea config for showroom environment
+- name: Configure Gitea repository
+  hosts: gitea
   gather_facts: false
   connection: local
   tags:
@@ -166,13 +150,13 @@ cat <<EOF | tee /tmp/git-setup.yml
       community.general.git_config:
         name: user.name
         scope: global
-        value: "{{ ansible_user }}"
+        value: "rhel"
 
     - name: Configure git email address
       community.general.git_config:
         name: user.email
         scope: global
-        value: "{{ ansible_user }}@local"
+        value: "rhel@local"
 
     - name: Copy workshop content to repository
       ansible.builtin.copy:
