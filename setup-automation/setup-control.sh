@@ -319,13 +319,22 @@ cat <<EOF | tee /tmp/controller-setup.yml
 
     - name: Create student admin user
       ansible.controller.user:
-        is_superuser: true
         username: "{{ student_user }}"
         password: "{{ student_password }}"
         email: student@acme.example.com
+        is_superuser: true
+        state: present
         controller_oauthtoken: "{{ auth_token }}"
         controller_host: "{{ controller_hostname }}"
         validate_certs: "{{ controller_validate_certs }}"
+      register: student_user_result
+      tags:
+        - controller-config
+        - controller-users
+
+    - name: Debug student user creation
+      ansible.builtin.debug:
+        var: student_user_result
       tags:
         - controller-config
         - controller-users
@@ -409,8 +418,17 @@ echo "=== Final Verification ==="
 echo "Checking Gitea repository..."
 curl -s -u 'student:learn_ansible' http://gitea:3000/api/v1/repos/student/workshop_project | grep -q "workshop_project" && echo "✅ Gitea repository exists" || echo "❌ Gitea repository missing"
 
-echo "Checking AAP student user..."
-curl -s -k https://localhost/api/v2/ping/ -u student:learn_ansible > /dev/null && echo "✅ AAP student user works" || echo "❌ AAP student user not working"
+echo "Checking AAP student user authentication..."
+AAP_STUDENT_AUTH=$(curl -s -k https://localhost/api/v2/ping/ -u student:learn_ansible)
+if [[ "$AAP_STUDENT_AUTH" == *"pong"* ]]; then
+    echo "✅ AAP student user authentication works"
+else
+    echo "❌ AAP student user authentication failed"
+    echo "Response: $AAP_STUDENT_AUTH"
+fi
+
+echo "Checking AAP users list..."
+curl -s -k https://localhost/api/v2/users/ -u admin:ansible123! | grep -q "student" && echo "✅ Student user exists in AAP" || echo "❌ Student user not found in AAP"
 
 echo ""
 echo "=== Setup Complete ==="
