@@ -248,9 +248,55 @@ ansible-doc ansible.controller.token > /dev/null 2>&1 && echo "Module found" || 
 # Install Python packages
 pip3 install pywinrm
 
+# Fix Gitea repository issues first
+echo "=== Fixing Gitea Repository ==="
+echo "Waiting for Gitea to be ready..."
+sleep 10
+
+echo "Checking if student user exists in Gitea..."
+STUDENT_EXISTS=$(curl -s -u 'gitea:gitea' http://gitea:3000/api/v1/users/student)
+if [[ "$STUDENT_EXISTS" == *"student"* ]]; then
+    echo "✅ Student user already exists in Gitea"
+else
+    echo "❌ Student user does not exist, creating..."
+    curl -X POST -H "accept: application/json" -H "Content-Type: application/json" \
+      -u 'gitea:gitea' \
+      -d '{"username": "student", "password": "learn_ansible", "email": "student@acme.example.com", "must_change_password": false}' \
+      http://gitea:3000/api/v1/admin/users
+    echo "Student user creation attempted"
+fi
+
+echo "Checking if repository exists in Gitea..."
+REPO_EXISTS=$(curl -s -u 'gitea:gitea' http://gitea:3000/api/v1/repos/student/workshop_project)
+if [[ "$REPO_EXISTS" == *"workshop_project"* ]]; then
+    echo "✅ Repository already exists in Gitea"
+else
+    echo "❌ Repository does not exist, creating..."
+    curl -X POST -H "accept: application/json" -H "Content-Type: application/json" \
+      -u 'gitea:gitea' \
+      -d '{"name": "workshop_project", "description": "Windows Getting Started Workshop", "private": false}' \
+      http://gitea:3000/api/v1/user/repos
+    echo "Repository creation attempted"
+fi
+
 # Execute the controller setup
+echo "=== Running AAP Controller Setup ==="
 echo "Running controller setup playbook..."
 ansible-playbook /tmp/controller-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml -v
+
+# Final verification
+echo "=== Final Verification ==="
+echo "Checking Gitea repository..."
+curl -s -u 'gitea:gitea' http://gitea:3000/api/v1/repos/student/workshop_project | grep -q "workshop_project" && echo "✅ Gitea repository exists" || echo "❌ Gitea repository missing"
+
+echo "Checking AAP student user..."
+curl -s -k https://localhost/api/v2/ping/ -u student:learn_ansible > /dev/null && echo "✅ AAP student user works" || echo "❌ AAP student user not working"
+
+echo ""
+echo "=== Setup Complete ==="
+echo "✅ Gitea: http://gitea:3000 (student:learn_ansible)"
+echo "✅ AAP: https://localhost (student:learn_ansible)"
+echo "✅ Repository: workshop_project should be visible in Gitea"
 
 # Install additional tools
 sudo dnf clean all
