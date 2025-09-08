@@ -48,6 +48,11 @@ containers:
           -u 'gitea:gitea'
           -d '{"clone_addr": "https://github.com/ansible-tmm/windows_getting_started_90.git", "repo_name": "workshop_project", "owner": "student", "uid": 2, "private": false}'
           http://localhost:3000/api/v1/repos/migrate
+        - >
+          curl -X POST -H "accept: application/json" -H "Content-Type: application/json"
+          -u 'gitea:gitea'
+          -d '{"username": "student", "password": "learn_ansible", "email": "student@acme.example.com", "must_change_password": false}'
+          http://localhost:3000/api/v1/admin/users
     memory: 2Gi
     services:
       - name: gitea
@@ -65,7 +70,7 @@ containers:
         tls_termination: Edge
 virtualmachines:
   - name: "control"
-    image: "base-zero-aap-2.5-container-ce"
+    image: "base-zero-aap-4.6.7-container-ce"
     memory: "16G"
     cores: 4
     image_size: "30Gi"
