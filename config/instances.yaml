@@ -28,7 +28,8 @@ containers:
       - name: gitea-data
         mountPath: /data/
       - name: gitea-etc
-        mountPath: /etc/giteashou
+        mountPath: /etc/gitea/
+    volumes:
       - name: gitea-data
         emptyDir: {}
       - name: gitea-etc
