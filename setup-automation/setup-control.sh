@@ -322,7 +322,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
         username: "{{ student_user }}"
         password: "{{ student_password }}"
         email: student@acme.example.com
-        is_superuser: true
+        superuser: true
         state: present
         controller_oauthtoken: "{{ auth_token }}"
         controller_host: "{{ controller_hostname }}"
@@ -411,14 +411,8 @@ echo "=== Running Git/Gitea Setup ==="
 ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
 echo "=== Running AAP Controller Setup ==="
-echo "Waiting for AAP controller to be fully ready..."
-sleep 30
-
 echo "Testing AAP controller connectivity..."
-# Try different API endpoints to see which one works
 curl -k https://localhost/api/v2/ -u admin:ansible123! > /dev/null 2>&1 && echo "AAP API v2 accessible" || echo "AAP API v2 not accessible"
-curl -k https://localhost/api/ -u admin:ansible123! > /dev/null 2>&1 && echo "AAP API accessible" || echo "AAP API not accessible"
-curl -k https://localhost/ -u admin:ansible123! > /dev/null 2>&1 && echo "AAP web interface accessible" || echo "AAP web interface not accessible"
 
 ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
