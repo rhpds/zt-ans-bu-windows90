@@ -242,8 +242,8 @@ cat <<EOF | tee /tmp/controller-setup.yml
             path: "{{ custom_facts_dir }}"
             state: directory
             recurse: yes
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
+            owner: "rhel"
+            group: "rhel"
             mode: 0755
           become: true
 
@@ -251,8 +251,8 @@ cat <<EOF | tee /tmp/controller-setup.yml
           ansible.builtin.copy:
             content: "{{ _auth_token.ansible_facts }}"
             dest: "{{ custom_facts_dir }}/{{ custom_facts_file }}"
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
+            owner: "rhel"
+            group: "rhel"
             mode: 0644
           become: true
       check_mode: false
@@ -411,7 +411,44 @@ echo "=== Running Git/Gitea Setup ==="
 ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
 echo "=== Running AAP Controller Setup ==="
+echo "Waiting for AAP controller to be fully ready..."
+sleep 30
+
+echo "Testing AAP controller connectivity..."
+curl -k https://localhost/api/v2/ping/ -u admin:ansible123! || echo "AAP not ready yet"
+
 ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
+
+# If the playbook failed, try a simple direct approach
+echo "=== Fallback: Direct Student User Creation ==="
+echo "Attempting to create student user directly via API..."
+
+# Get admin token first
+ADMIN_TOKEN=$(curl -s -k -X POST https://localhost/api/v2/tokens/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "ansible123!"}' | \
+  python3 -c "import sys, json; print(json.load(sys.stdin)['token'])" 2>/dev/null)
+
+if [ ! -z "$ADMIN_TOKEN" ]; then
+    echo "Got admin token, creating student user..."
+    
+    # Create student user
+    curl -s -k -X POST https://localhost/api/v2/users/ \
+      -H "Authorization: Bearer $ADMIN_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "username": "student",
+        "password": "learn_ansible",
+        "email": "student@acme.example.com",
+        "is_superuser": true,
+        "first_name": "Student",
+        "last_name": "User"
+      }' > /dev/null
+    
+    echo "Student user creation attempted via API"
+else
+    echo "Could not get admin token for fallback method"
+fi
 
 # Final verification
 echo "=== Final Verification ==="
