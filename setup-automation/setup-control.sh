@@ -143,26 +143,18 @@ cat <<EOF | tee /tmp/git-setup.yml
         scope: global
         value: "{{ student_user }}@local"
 
-    - name: Create cache folder for working files
-      ansible.builtin.file:
-        path: "/tmp/cache"
-        state: directory
-        mode: '0755'
-
-    - name: Clone workshop content from GitHub
-      ansible.builtin.git:
-        repo: https://github.com/ansible-tmm/windows_getting_started_90.git
-        dest: /tmp/cache
-        clone: yes
-        update: yes
-
-    - name: Copy workshop content to local repo
+    - name: Create generic README file
       ansible.builtin.copy:
-        src: "{{ item }}"
-        dest: "/tmp/workshop_project/"
-        remote_src: yes
-      with_fileglob:
-        - "/tmp/cache/*"
+        dest: /tmp/workshop_project/README.md
+        content: |
+          # Windows Getting Started Workshop
+          
+          This repository will be used during the Windows Getting Started Workshop.
+          
+          ## Getting Started
+          
+          Follow the lab instructions to begin working with Ansible and Windows automation.
+        mode: '0644'
 
     - name: Add remote origin to repo
       ansible.builtin.command:
