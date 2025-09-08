@@ -38,21 +38,26 @@ containers:
         emptyDir: {}
     commands: 
         - gitea admin user create --admin --username gitea --password gitea --email dummy@dummy.com --must-change-password=false
+        - sleep 5
         - >
           curl -X POST -H "accept: application/json" -H "Content-Type: application/json"
           -u 'gitea:gitea'
           -d '{"username": "student", "password": "learn_ansible", "email": "student@acme.example.com", "must_change_password": false}'
           http://localhost:3000/api/v1/admin/users
-        - >
-          curl -X POST -H "accept: application/json" -H "Content-Type: application/json"
-          -u 'gitea:gitea' 
-          -d '{"username": "student", "full_name": "student", "description": "student"}'
-          http://localhost:3000/api/v1/orgs
+        - sleep 5
         - >
           curl -X POST -H "accept: application/json" -H "Content-Type: application/json"
           -u 'gitea:gitea'
-          -d '{"clone_addr": "https://github.com/ansible-tmm/windows_getting_started_90.git", "repo_name": "workshop_project", "owner": "student", "uid": 2, "private": false}'
+          -d '{"clone_addr": "https://github.com/ansible-tmm/windows_getting_started_90.git", "repo_name": "workshop_project", "owner": "student", "private": false}'
           http://localhost:3000/api/v1/repos/migrate
+        - sleep 5
+        - >
+          curl -X GET -H "accept: application/json" -u 'gitea:gitea' http://localhost:3000/api/v1/repos/student/workshop_project
+        - >
+          curl -X POST -H "accept: application/json" -H "Content-Type: application/json"
+          -u 'gitea:gitea'
+          -d '{"name": "workshop_project", "description": "Windows Getting Started Workshop", "private": false}'
+          http://localhost:3000/api/v1/user/repos
     memory: 2Gi
     services:
       - name: gitea

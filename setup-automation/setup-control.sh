@@ -59,6 +59,62 @@ cat <<EOF | tee /tmp/controller-setup.yml
     - ansible.controller
     
   tasks:
+    - name: Check Ansible version compatibility
+      ansible.builtin.debug:
+        msg: "Ansible version {{ ansible_version.full }} detected. AAP 2.5 supports Ansible 2.9-2.15"
+      when: ansible_version.major == 2 and ansible_version.minor > 15
+
+    - name: Check if controller service is running
+      ansible.builtin.systemd:
+        name: automation-controller
+        state: started
+      become: true
+
+    - name: Wait for controller service to be ready
+      ansible.builtin.wait_for:
+        port: 443
+        host: localhost
+        delay: 10
+        timeout: 300
+
+    - name: Debug - Check controller status
+      ansible.builtin.uri:
+        url: "https://localhost/api/v2/ping/"
+        method: GET
+        user: "{{ controller_admin_user }}"
+        password: "{{ controller_admin_password }}"
+        validate_certs: "{{ controller_validate_certs }}"
+        force_basic_auth: true
+        status_code: [200, 404, 503]
+      register: controller_debug
+      ignore_errors: true
+
+    - name: Display controller debug info
+      ansible.builtin.debug:
+        msg: "Controller response: Status {{ controller_debug.status }}, Body: {{ controller_debug.content | default('No content') }}"
+
+    - name: Try alternative controller URLs
+      ansible.builtin.uri:
+        url: "{{ item }}"
+        method: GET
+        user: "{{ controller_admin_user }}"
+        password: "{{ controller_admin_password }}"
+        validate_certs: "{{ controller_validate_certs }}"
+        force_basic_auth: true
+        status_code: [200, 404, 503]
+      register: alt_urls
+      ignore_errors: true
+      loop:
+        - "https://localhost/api/v2/"
+        - "https://localhost/"
+        - "http://localhost/api/v2/ping/"
+        - "http://localhost/"
+
+    - name: Display alternative URL results
+      ansible.builtin.debug:
+        msg: "URL {{ item.item }}: Status {{ item.status }}"
+      loop: "{{ alt_urls.results }}"
+
     - name: Ensure controller is online and responsive
       ansible.builtin.uri:
         url: "https://localhost/api/v2/ping/"
@@ -69,8 +125,8 @@ cat <<EOF | tee /tmp/controller-setup.yml
         force_basic_auth: true
       register: controller_online
       until: controller_online.status == 200
-      retries: 10
-      delay: 5
+      retries: 20
+      delay: 10
 
     - name: Create an OAuth2 token for automation
       ansible.controller.token:
@@ -170,13 +226,31 @@ cat <<EOF | tee /tmp/controller-setup.yml
 EOF
 
 # Install necessary collections and packages
-ansible-galaxy collection install community.general
-ansible-galaxy collection install microsoft.ad
-ansible-galaxy collection install ansible.controller
+echo "Installing Ansible collections..."
+ansible-galaxy collection install community.general --force
+ansible-galaxy collection install microsoft.ad --force
+
+# Try to install ansible.controller with specific version first, then fallback to latest
+echo "Installing ansible.controller collection..."
+if ! ansible-galaxy collection install ansible.controller:2.5.0 --force; then
+    echo "Failed to install ansible.controller:2.5.0, trying latest version..."
+    ansible-galaxy collection install ansible.controller --force
+fi
+
+# Verify collection installation
+echo "Verifying collection installation..."
+ansible-galaxy collection list | grep ansible.controller
+
+# Test if the module is available
+echo "Testing ansible.controller.token module availability..."
+ansible-doc ansible.controller.token > /dev/null 2>&1 && echo "Module found" || echo "Module not found"
+
+# Install Python packages
 pip3 install pywinrm
 
 # Execute the controller setup
-ansible-playbook /tmp/controller-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
+echo "Running controller setup playbook..."
+ansible-playbook /tmp/controller-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml -v
 
 # Install additional tools
 sudo dnf clean all
