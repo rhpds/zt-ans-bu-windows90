@@ -278,7 +278,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
  
     - name: Ensure tower/controller is online and working
       uri:
-        url: https://localhost/api/v2/ping/
+        url: https://localhost/api/v2/
         method: GET
         user: "{{ admin_username }}"
         password: "{{ admin_password }}"
@@ -415,7 +415,10 @@ echo "Waiting for AAP controller to be fully ready..."
 sleep 30
 
 echo "Testing AAP controller connectivity..."
-curl -k https://localhost/api/v2/ping/ -u admin:ansible123! || echo "AAP not ready yet"
+# Try different API endpoints to see which one works
+curl -k https://localhost/api/v2/ -u admin:ansible123! > /dev/null 2>&1 && echo "AAP API v2 accessible" || echo "AAP API v2 not accessible"
+curl -k https://localhost/api/ -u admin:ansible123! > /dev/null 2>&1 && echo "AAP API accessible" || echo "AAP API not accessible"
+curl -k https://localhost/ -u admin:ansible123! > /dev/null 2>&1 && echo "AAP web interface accessible" || echo "AAP web interface not accessible"
 
 ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
@@ -423,11 +426,21 @@ ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inven
 echo "=== Fallback: Direct Student User Creation ==="
 echo "Attempting to create student user directly via API..."
 
-# Get admin token first
+# Get admin token first - try different endpoints
+ADMIN_TOKEN=""
+# Try /api/v2/tokens/ first
 ADMIN_TOKEN=$(curl -s -k -X POST https://localhost/api/v2/tokens/ \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "ansible123!"}' | \
   python3 -c "import sys, json; print(json.load(sys.stdin)['token'])" 2>/dev/null)
+
+# If that fails, try /api/tokens/
+if [ -z "$ADMIN_TOKEN" ]; then
+    ADMIN_TOKEN=$(curl -s -k -X POST https://localhost/api/tokens/ \
+      -H "Content-Type: application/json" \
+      -d '{"username": "admin", "password": "ansible123!"}' | \
+      python3 -c "import sys, json; print(json.load(sys.stdin)['token'])" 2>/dev/null)
+fi
 
 if [ ! -z "$ADMIN_TOKEN" ]; then
     echo "Got admin token, creating student user..."
@@ -456,8 +469,9 @@ echo "Checking Gitea repository..."
 curl -s -u 'student:learn_ansible' http://gitea:3000/api/v1/repos/student/workshop_project | grep -q "workshop_project" && echo "✅ Gitea repository exists" || echo "❌ Gitea repository missing"
 
 echo "Checking AAP student user authentication..."
-AAP_STUDENT_AUTH=$(curl -s -k https://localhost/api/v2/ping/ -u student:learn_ansible)
-if [[ "$AAP_STUDENT_AUTH" == *"pong"* ]]; then
+# Try different endpoints for authentication test
+AAP_STUDENT_AUTH=$(curl -s -k https://localhost/api/v2/ -u student:learn_ansible)
+if [[ "$AAP_STUDENT_AUTH" == *"users"* ]] || [[ "$AAP_STUDENT_AUTH" == *"organizations"* ]]; then
     echo "✅ AAP student user authentication works"
 else
     echo "❌ AAP student user authentication failed"
