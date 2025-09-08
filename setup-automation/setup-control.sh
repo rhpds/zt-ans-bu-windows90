@@ -4,7 +4,6 @@
 dnf install -y python3-pip
 dnf install -y python3-pip python3-libsemanage
 
-# Copy SSH keys from root to rhel user with proper permissions
 sudo cp -a /root/.ssh/* /home/rhel/.ssh/.
 sudo chown -R rhel:rhel /home/rhel/.ssh
 
@@ -16,14 +15,12 @@ chmod 777 /home/rhel/ansible
 git config --global user.email "student@redhat.com"
 git config --global user.name "student"
 
-
 # Create inventory file
 cat <<EOF | tee /tmp/inventory.ini
 [ctrlnodes]
 controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
 
 [ciservers]
-gitea ansible_user=root
 jenkins ansible_user=root
 
 [windowssrv]
@@ -45,7 +42,7 @@ mkdir -p /tmp/cache
 git clone https://github.com/nmartins0611/windows_getting_started_instruqt.git /tmp/cache
 
 # Configure Repo for builds
-ansible-playbook /tmp/git-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
+ansible-playbook /tmp/git-setup.yml -i localhost, -e @/tmp/track-vars.yml
 
 # Configure Controller
 ansible-playbook /tmp/controller-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
@@ -75,9 +72,9 @@ EOF
 
 # Create Gitea setup playbook (updated for showroom environment)
 cat <<EOF | tee /tmp/git-setup.yml
-# Gitea config for showroom environment
-- name: Configure Gitea repository
-  hosts: gitea
+# Gitea config for showroom environment - run from control VM
+- name: Configure Gitea repository from control VM
+  hosts: localhost
   gather_facts: false
   connection: local
   tags:
@@ -150,13 +147,13 @@ cat <<EOF | tee /tmp/git-setup.yml
       community.general.git_config:
         name: user.name
         scope: global
-        value: "rhel"
+        value: "{{ ansible_user }}"
 
     - name: Configure git email address
       community.general.git_config:
         name: user.email
         scope: global
-        value: "rhel@local"
+        value: "{{ ansible_user }}@local"
 
     - name: Copy workshop content to repository
       ansible.builtin.copy:
@@ -538,4 +535,3 @@ sudo dnf install -y ansible-navigator
 sudo dnf install -y ansible-lint
 sudo dnf install -y nc
 pip3.9 install yamllint
-
