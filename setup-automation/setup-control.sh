@@ -7,14 +7,20 @@ dnf install -y python3-pip python3-libsemanage
 sudo cp -a /root/.ssh/. /home/rhel/.ssh/
 sudo chown -R rhel:rhel /home/rhel/.ssh
 
+# Create a writable workspace for the rhel user used by exercises
 mkdir /home/rhel/ansible
 chown -R /home/rhel/ansible
 chmod 777 /home/rhel/ansible
 
 
+# Set a generic Git identity used in the lab environment
 git config --global user.email "student@redhat.com"
 git config --global user.name "student"
 
+# Create a minimal Ansible inventory for this lab
+# - controller.acme.example.com is addressed locally as "controller" using user rhel
+# - gitea and jenkins are managed as ciservers with become via su
+# - a windows host uses winrm with a lab password
 cat <<EOF | tee /tmp/inventory.ini
 [ctrlnodes]
 controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
@@ -35,6 +41,8 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
 EOF
 
+# Generate a helper script that installs small tools, clones a cache repo, and
+# runs the Git/Gitea setup and Controller setup playbooks using the inventory/vars made above
 cat <<EOF | tee /tmp/lab-setup.sh
 #/bin/bash
 yum install git nano -y
@@ -51,6 +59,9 @@ ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inven
 
 EOF
 
+# Define lab configuration variables consumed by the playbooks
+# - controller connection, user credentials, and common options
+# - repo_user used in some tasks
 cat <<EOF | tee /tmp/track-vars.yml
 ---
 # config vars
@@ -73,6 +84,13 @@ lab_organization: ACME
 
 EOF
 
+# Write the Git/Gitea setup playbook.
+# This playbook:
+# - Ensures Python and basic packages on the Gitea container host (Alpine)
+# - Creates a student user in Gitea
+# - Creates a demo repository, configures Git client settings and credentials
+# - Reads controller's public key from /home/rhel/.ssh/id_rsa.pub into a fact
+# - Initializes a local repo and pushes to Gitea as origin
 cat <<EOF | tee /tmp/git-setup.yml
 
 # Gitea config
