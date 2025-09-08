@@ -42,7 +42,7 @@ mkdir -p /tmp/cache
 git clone https://github.com/nmartins0611/windows_getting_started_instruqt.git /tmp/cache
 
 # Configure Repo for builds
-ansible-playbook /tmp/git-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
+ansible-playbook /tmp/git-setup.yml -i localhost, -e @/tmp/track-vars.yml
 
 # Configure Controller
 ansible-playbook /tmp/controller-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
