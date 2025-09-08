@@ -4,8 +4,8 @@
 dnf install -y python3-pip
 dnf install -y python3-pip python3-libsemanage
 
-cp -a /root/.ssh/* /home/rhel/.ssh/.
-chown -R rhel:rhel /home/rhel/.ssh
+sudo cp -a /root/.ssh/* /home/rhel/.ssh/.
+sudo chown -R rhel:rhel /home/rhel/.ssh
 
 mkdir /home/rhel/ansible
 chown -R /home/rhel/ansible
