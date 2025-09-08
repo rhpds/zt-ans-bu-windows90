@@ -71,39 +71,47 @@ repo_user: rhel
 default_tag_name: "0.0.1"
 lab_organization: ACME
 
+# Gitea access (OpenShift Route or Service URL) and admin credentials
+# Update these to match your OpenShift deployment
+gitea_base_url: "http://gitea:3000"
+gitea_admin_user: "admin"
+gitea_admin_password: "admin123!"
+
 EOF
 
 cat <<EOF | tee /tmp/git-setup.yml
 
-# Gitea config
-- name: Configure Gitea host
-  hosts: gitea
+# Gitea config via REST (suitable for OpenShift-deployed Gitea)
+- name: Configure Gitea (REST)
+  hosts: controller.acme.example.com
   gather_facts: false
-  become: true
   tags:
     - gitea-config
 
+  vars:
+    admin_auth: &admin_auth
+      force_basic_auth: true
+      url_username: "{{ gitea_admin_user }}"
+      url_password: "{{ gitea_admin_password }}"
+
   tasks:
-    - name: Install python3 Gitea
-      ansible.builtin.raw: /sbin/apk add python3
-
-    - name: Install Gitea packages
-      community.general.apk:
-        name: subversion, tar
-        state: present
-
-    - name: Create repo users
-      ansible.builtin.command: "{{ item }}"
-      become_user: git
-      register: __output
-      failed_when: __output.rc not in [ 0, 1 ]
-      changed_when: '"user already exists" not in __output.stdout'
-      loop:
-        - "/usr/local/bin/gitea admin user create --admin --username {{ student_user }} --password {{ student_password }} --must-change-password=false --email {{ student_user }}@localhost"
-
-    - name: Create repo for project 
+    - name: Ensure student user exists (admin API)
       ansible.builtin.uri:
-        url: http://gitea:3000/api/v1/user/repos
+        url: "{{ gitea_base_url }}/api/v1/admin/users"
+        method: POST
+        body_format: json
+        body:
+          username: "{{ student_user }}"
+          password: "{{ student_password }}"
+          email: "{{ student_user }}@localhost"
+          must_change_password: false
+          send_notify: false
+        status_code: [201, 409]
+        <<: *admin_auth
+
+    - name: Create repo for project as student
+      ansible.builtin.uri:
+        url: "{{ gitea_base_url }}/api/v1/user/repos"
         method: POST
         body_format: json
         body:
@@ -111,8 +119,8 @@ cat <<EOF | tee /tmp/git-setup.yml
           auto_init: false
           private: false
         force_basic_auth: true
-        url_password: "{{ student_password }}"
         url_username: "{{ student_user }}"
+        url_password: "{{ student_password }}"
         status_code: [201, 409]
 
     - name: Create repo dir
@@ -133,7 +141,7 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.command:
         cmd: /usr/bin/git init
         chdir: "/tmp/workshop_project"
-        creates: "/workshop_project/.git" 
+        creates: "/workshop_project/.git"
 
     - name: Configure git to store credentials
       community.general.git_config:
@@ -151,7 +159,7 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.copy:
         dest: /tmp/git-creds
         mode: 0644
-        content: "http://{{ student_user }}:{{ student_password }}@{{ 'gitea:3000' | urlencode }}"
+        content: "{{ gitea_base_url | regex_replace('://', '://' ~ student_user ~ ':' ~ student_password ~ '@') }}"
 
     - name: Configure git username
       community.general.git_config:
@@ -175,26 +183,19 @@ cat <<EOF | tee /tmp/git-setup.yml
         state: directory
         mode: '0755'
 
-    # - name: Ensure files are in local repo
-    #   ansible.builtin.copy:
-    #    src: "{{ item }}"
-    #    dest: "/tmp/workshop_project/"
-    #   with_fileglob:
-    #    - "/tmp/cache/*"
-
     - name: Create generic ReadME
       ansible.builtin.file:
-       path: /tmp/workshop_project/Readme
-       state: touch
+        path: /tmp/workshop_project/Readme
+        state: touch
 
-    - name: Add remote origin to repo
+    - name: Add remote origin and push initial content
       ansible.builtin.command:
         cmd: "{{ item }}"
-        chdir: "/tmp/workshop_project"   
+        chdir: "/tmp/workshop_project"
       register: __output
       changed_when: __output.rc == 0
       loop:
-        - "git remote add origin http://gitea:3000/{{ student_user }}/workshop_project.git"
+        - "git remote add origin {{ gitea_base_url }}/{{ student_user }}/workshop_project.git"
         - "git checkout -b main"
         - "git add ."
         - "git commit -m'Initial commit'"
