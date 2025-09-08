@@ -170,10 +170,10 @@ cat <<EOF | tee /tmp/git-setup.yml
         - "git push -u origin main --force"
 EOF
 
-# Write the Controller setup playbook (converted from original Instruqt)
+# Write the Controller setup playbook (using roadshow approach)
 cat <<EOF | tee /tmp/controller-setup.yml
 ---
-## Controller setup - converted from original Instruqt
+## Controller setup - using roadshow approach
 - name: Controller config for Windows Getting Started
   hosts: localhost
   gather_facts: true
@@ -181,163 +181,52 @@ cat <<EOF | tee /tmp/controller-setup.yml
     - ansible.controller
     
   tasks:
-   # Create auth login token
-    - name: get auth token and restart automation-controller if it fails
-      block:
-        - name: Refresh facts
-          setup:
-
-        - name: Create oauth token
-          ansible.controller.token:
-            description: 'Windows Workshop lab'
-            scope: "write"
-            state: present
-            controller_host: localhost
-            controller_username: "{{ controller_admin_user }}"
-            controller_password: "{{ controller_admin_password }}"
-            validate_certs: false
-          register: _auth_token
-          until: _auth_token is not failed
-          delay: 3
-          retries: 5
-      rescue:
-        - name: In rescue block for auth token
-          debug:
-            msg: "failed to get auth token. Restarting automation controller service"
-
-        - name: restart the controller service
-          ansible.builtin.service:
-            name: automation-controller
-            state: restarted
-
-        - name: Ensure tower/controller is online and working
-          uri:
-            url: https://localhost/api/v2/ping/
-            method: GET
-            user: "{{ admin_username }}"
-            password: "{{ admin_password }}"
-            validate_certs: false
-            force_basic_auth: true
-          register: controller_online
-          until: controller_online is success
-          delay: 3
-          retries: 5
-
-        - name: Retry getting auth token
-          ansible.controller.token:
-            description: 'Windows Workshop lab'
-            scope: "write"
-            state: present
-            controller_host: localhost
-            controller_username: "{{ controller_admin_user }}"
-            controller_password: "{{ controller_admin_password }}"
-            validate_certs: false
-          register: _auth_token
-          until: _auth_token is not failed
-          delay: 3
-          retries: 5
-      always:
-        - name: Create fact.d dir
-          ansible.builtin.file:
-            path: "{{ custom_facts_dir }}"
-            state: directory
-            recurse: yes
-            owner: "rhel"
-            group: "rhel"
-            mode: 0755
-          become: true
-
-        - name: Create _auth_token custom fact
-          ansible.builtin.copy:
-            content: "{{ _auth_token.ansible_facts }}"
-            dest: "{{ custom_facts_dir }}/{{ custom_facts_file }}"
-            owner: "rhel"
-            group: "rhel"
-            mode: 0644
-          become: true
-      check_mode: false
-      when: ansible_local.custom_facts.controller_token is undefined
-      tags:
-        - auth-token
-
-    - name: refresh facts
-      setup:
-        filter:
-          - ansible_local
-      tags:
-        - always
-
-    - name: create auth token fact
-      ansible.builtin.set_fact:
-        auth_token: "{{ ansible_local.custom_facts.controller_token }}"
-        cacheable: true
-      check_mode: false
-      when: auth_token is undefined
-      tags:
-        - always
- 
-    - name: Ensure tower/controller is online and working
+    - name: Ensure controller is accessible
       uri:
-        url: https://localhost/api/v2/
+        url: https://localhost/
         method: GET
-        user: "{{ admin_username }}"
-        password: "{{ admin_password }}"
         validate_certs: false
-        force_basic_auth: true
-      register: controller_online
-      until: controller_online is success
-      delay: 3
-      retries: 5
-      tags:
-        - controller-config
-
-# Controller objects
+      register: controller_check
+      until: controller_check.status == 200
+      delay: 5
+      retries: 12
     - name: Add Organization
       ansible.controller.organization:
         name: "{{ lab_organization }}"
         description: "ACME Corp Organization"
         state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
+        controller_host: "https://localhost"
+        controller_username: "{{ controller_admin_user }}"
+        controller_password: "{{ controller_admin_password }}"
         validate_certs: false
-      tags:
-        - controller-config
-        - controller-org
-  
+
     - name: Add Windows EE
       ansible.controller.execution_environment:
         name: "{{ controller_ee }}"
         image: "quay.io/ansible/ansible-runner:latest"
         pull: missing
         state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: "{{ controller_validate_certs }}"
-      tags:
-        - controller-config
-        - controller-ees
+        controller_host: "https://localhost"
+        controller_username: "{{ controller_admin_user }}"
+        controller_password: "{{ controller_admin_password }}"
+        validate_certs: false
 
     - name: Create student admin user
       ansible.controller.user:
         username: "{{ student_user }}"
         password: "{{ student_password }}"
         email: student@acme.example.com
-        superuser: true
+        is_superuser: true
         state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: "{{ controller_validate_certs }}"
+        controller_host: "https://localhost"
+        controller_username: "{{ controller_admin_user }}"
+        controller_password: "{{ controller_admin_password }}"
+        validate_certs: false
       register: student_user_result
-      tags:
-        - controller-config
-        - controller-users
 
     - name: Debug student user creation
       ansible.builtin.debug:
         var: student_user_result
-      tags:
-        - controller-config
-        - controller-users
 
     - name: Create Inventory
       ansible.controller.inventory:
@@ -345,9 +234,10 @@ cat <<EOF | tee /tmp/controller-setup.yml
        description: "Our Server environment"
        organization: "{{ lab_organization }}"
        state: present
-       controller_oauthtoken: "{{ auth_token }}"
-       controller_host: "{{ controller_hostname }}"
-       validate_certs: "{{ controller_validate_certs }}"
+       controller_host: "https://localhost"
+       controller_username: "{{ controller_admin_user }}"
+       controller_password: "{{ controller_admin_password }}"
+       validate_certs: false
 
     - name: Create Host for Workshop
       ansible.controller.host:
@@ -355,9 +245,10 @@ cat <<EOF | tee /tmp/controller-setup.yml
        description: "Windows Group"
        inventory: "Workshop Inventory"
        state: present
-       controller_oauthtoken: "{{ auth_token }}"
-       controller_host: "{{ controller_hostname }}"
-       validate_certs: "{{ controller_validate_certs }}"
+       controller_host: "https://localhost"
+       controller_username: "{{ controller_admin_user }}"
+       controller_password: "{{ controller_admin_password }}"
+       validate_certs: false
 
     - name: Create Host for Workshop
       ansible.controller.host:
@@ -365,9 +256,10 @@ cat <<EOF | tee /tmp/controller-setup.yml
        description: "Ansible node"
        inventory: "Workshop Inventory"
        state: present
-       controller_oauthtoken: "{{ auth_token }}"
-       controller_host: "{{ controller_hostname }}"
-       validate_certs: "{{ controller_validate_certs }}"
+       controller_host: "https://localhost"
+       controller_username: "{{ controller_admin_user }}"
+       controller_password: "{{ controller_admin_password }}"
+       validate_certs: false
 
     - name: Create Group for inventory
       ansible.controller.group:
@@ -380,9 +272,10 @@ cat <<EOF | tee /tmp/controller-setup.yml
          ansible_connection: winrm
          ansible_port: 5986
          ansible_winrm_server_cert_validation: ignore
-       controller_oauthtoken: "{{ auth_token }}"
-       controller_host: "{{ controller_hostname }}"
-       validate_certs: "{{ controller_validate_certs }}"
+       controller_host: "https://localhost"
+       controller_username: "{{ controller_admin_user }}"
+       controller_password: "{{ controller_admin_password }}"
+       validate_certs: false
 
     - name: Create Project
       ansible.controller.project:
@@ -392,9 +285,10 @@ cat <<EOF | tee /tmp/controller-setup.yml
         scm_type: git
         scm_url: "http://gitea:3000/student/workshop_project.git"
         state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: "{{ controller_validate_certs }}"
+        controller_host: "https://localhost"
+        controller_username: "{{ controller_admin_user }}"
+        controller_password: "{{ controller_admin_password }}"
+        validate_certs: false
 EOF
 
 # Install necessary collections and packages
@@ -411,50 +305,55 @@ echo "=== Running Git/Gitea Setup ==="
 ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
 echo "=== Running AAP Controller Setup ==="
-echo "Testing AAP controller connectivity..."
-curl -k https://localhost/api/v2/ -u admin:ansible123! > /dev/null 2>&1 && echo "AAP API v2 accessible" || echo "AAP API v2 not accessible"
+echo "Finding correct AAP API endpoints..."
+
+# Try different possible API endpoints
+echo "Testing various API endpoints:"
+curl -k https://localhost/api/v2/ -u admin:ansible123! > /dev/null 2>&1 && echo "✅ /api/v2/ works" || echo "❌ /api/v2/ fails"
+curl -k https://localhost/api/ -u admin:ansible123! > /dev/null 2>&1 && echo "✅ /api/ works" || echo "❌ /api/ fails"
+curl -k https://localhost/api/v1/ -u admin:ansible123! > /dev/null 2>&1 && echo "✅ /api/v1/ works" || echo "❌ /api/v1/ fails"
+curl -k https://localhost/ansible/ -u admin:ansible123! > /dev/null 2>&1 && echo "✅ /ansible/ works" || echo "❌ /ansible/ fails"
+curl -k https://localhost/awx/ -u admin:ansible123! > /dev/null 2>&1 && echo "✅ /awx/ works" || echo "❌ /awx/ fails"
+
+# Check what the web interface shows
+echo "Checking web interface response:"
+curl -k https://localhost/ -u admin:ansible123! 2>/dev/null | head -20
 
 ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
 # If the playbook failed, try a simple direct approach
-echo "=== Fallback: Direct Student User Creation ==="
-echo "Attempting to create student user directly via API..."
+echo "=== Fallback: Manual Student User Creation ==="
+echo "Since API endpoints are not working, let's try manual user creation..."
 
-# Get admin token first - try different endpoints
-ADMIN_TOKEN=""
-# Try /api/v2/tokens/ first
-ADMIN_TOKEN=$(curl -s -k -X POST https://localhost/api/v2/tokens/ \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "ansible123!"}' | \
-  python3 -c "import sys, json; print(json.load(sys.stdin)['token'])" 2>/dev/null)
+# Try to create user via Django management command
+echo "Attempting to create student user via Django management command..."
+cd /var/lib/awx/venv/awx/lib/python*/site-packages/awx 2>/dev/null || cd /opt/awx/venv/awx/lib/python*/site-packages/awx 2>/dev/null || echo "Could not find AWX directory"
 
-# If that fails, try /api/tokens/
-if [ -z "$ADMIN_TOKEN" ]; then
-    ADMIN_TOKEN=$(curl -s -k -X POST https://localhost/api/tokens/ \
-      -H "Content-Type: application/json" \
-      -d '{"username": "admin", "password": "ansible123!"}' | \
-      python3 -c "import sys, json; print(json.load(sys.stdin)['token'])" 2>/dev/null)
-fi
-
-if [ ! -z "$ADMIN_TOKEN" ]; then
-    echo "Got admin token, creating student user..."
-    
-    # Create student user
-    curl -s -k -X POST https://localhost/api/v2/users/ \
-      -H "Authorization: Bearer $ADMIN_TOKEN" \
-      -H "Content-Type: application/json" \
-      -d '{
-        "username": "student",
-        "password": "learn_ansible",
-        "email": "student@acme.example.com",
-        "is_superuser": true,
-        "first_name": "Student",
-        "last_name": "User"
-      }' > /dev/null
-    
-    echo "Student user creation attempted via API"
+if [ -d "management" ]; then
+    echo "Found AWX management directory, attempting user creation..."
+    python3 manage.py shell -c "
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+try:
+    user = User.objects.create_user(
+        username='student',
+        password='learn_ansible',
+        email='student@acme.example.com',
+        is_superuser=True,
+        is_staff=True
+    )
+    print('Student user created successfully')
+except Exception as e:
+    print(f'Error creating user: {e}')
+" 2>/dev/null || echo "Django management command failed"
 else
-    echo "Could not get admin token for fallback method"
+    echo "AWX management directory not found, trying alternative approach..."
+    
+    # Try to find and use the AWX CLI
+    which awx 2>/dev/null && echo "Found awx CLI" || echo "awx CLI not found"
+    
+    # Try to create user via awx CLI
+    awx users create --username student --password learn_ansible --email student@acme.example.com --is_superuser true 2>/dev/null && echo "Student user created via awx CLI" || echo "awx CLI user creation failed"
 fi
 
 # Final verification
