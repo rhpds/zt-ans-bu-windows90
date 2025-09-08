@@ -4,8 +4,18 @@
 dnf install -y python3-pip
 dnf install -y python3-pip python3-libsemanage
 
-cp -a /root/.ssh/* /home/rhel/.ssh/.
+# Create .ssh directory for rhel user if it doesn't exist
+mkdir -p /home/rhel/.ssh
 chown -R rhel:rhel /home/rhel/.ssh
+chmod 700 /home/rhel/.ssh
+
+# Copy SSH keys if they exist
+if [ -d /root/.ssh ] && [ "$(ls -A /root/.ssh)" ]; then
+    cp -a /root/.ssh/* /home/rhel/.ssh/.
+    chown -R rhel:rhel /home/rhel/.ssh
+    chmod 600 /home/rhel/.ssh/*
+    chmod 644 /home/rhel/.ssh/*.pub 2>/dev/null || true
+fi
 
 mkdir -p /home/rhel/ansible
 chown -R rhel:rhel /home/rhel/ansible
@@ -14,6 +24,15 @@ chmod 777 /home/rhel/ansible
 # Git global configuration
 git config --global user.email "student@redhat.com"
 git config --global user.name "student"
+
+# Test connectivity to Gitea container
+echo "Testing connectivity to Gitea container..."
+if curl -s --connect-timeout 10 http://gitea:3000 > /dev/null; then
+    echo "✓ Gitea container is reachable"
+else
+    echo "✗ Warning: Cannot reach Gitea container at http://gitea:3000"
+    echo "This may be normal if Gitea is still starting up"
+fi
 
 # Create inventory file
 cat <<EOF | tee /tmp/inventory.ini
