@@ -168,7 +168,6 @@ cat <<EOF | tee /tmp/controller-setup.yml
   connection: local
   collections:
     - ansible.controller
-    - ansible.platform
 
   tasks:
     - name: Add Windows EE
@@ -242,22 +241,24 @@ cat <<EOF | tee /tmp/controller-setup.yml
         controller_password: ansible123!
         validate_certs: false
 
-    - name: Create student user (after all other resources)
-      ansible.platform.user:
-        controller_host: "https://localhost"
-        controller_username: "admin"
-        controller_password: "ansible123!"
-        validate_certs: false
-        username: "{{ student_user }}"
-        password: "{{ student_password }}"
-        email: student@acme.example.com
-        is_superuser: true
-        state: present
-      register: student_user_result
+    # - name: Create student user (after all other resources)
+    #   ansible.platform.user:
+    #     controller_host: "https://localhost"
+    #     controller_username: "admin"
+    #     controller_password: "ansible123!"
+    #     validate_certs: false
+    #     username: "{{ student_user }}"
+    #     password: "{{ student_password }}"
+    #     email: student@acme.example.com
+    #     is_superuser: true
+    #     state: present
+    #   register: student_user_result
+    #   ignore_errors: true
 
-    - name: Debug student user creation
-      ansible.builtin.debug:
-        var: student_user_result
+    # - name: Debug student user creation
+    #   ansible.builtin.debug:
+    #     var: student_user_result
+    #   when: student_user_result is defined
 EOF
 
 # Install necessary collections and packages
@@ -272,11 +273,13 @@ ansible-galaxy collection install microsoft.ad || ansible-galaxy collection inst
 echo "Installing ansible.controller (try specific version first)..."
 ansible-galaxy collection install ansible.controller:2.5.0 || ansible-galaxy collection install ansible.controller || ansible-galaxy collection install ansible.controller --force
 
-echo "Installing ansible.platform..."
-ansible-galaxy collection install ansible.platform || ansible-galaxy collection install ansible.platform --force
+echo "Skipping ansible.platform collection installation"
+echo "Reason: Requires Ansible 2.16+ (current: 2.14.17) and Red Hat credentials"
+echo "Will use direct API approach for user creation instead"
 
 # Install Python packages
-python3 -m pip install pywinrm
+echo "Installing pywinrm..."
+python3 -m pip install pywinrm || pip3 install pywinrm || echo "Failed to install pywinrm - continuing anyway"
 
 # Execute the setup playbooks
 echo "=== Running Git/Gitea Setup ==="
@@ -297,8 +300,38 @@ echo "✅ Hosts: windows, student-ansible"
 echo "✅ Group: Windows Servers"
 echo "✅ Project: Windows Workshop"
 echo ""
-echo "Note: Student user creation is commented out for now"
-echo "You can log into AAP at https://localhost with admin:ansible123!"
+echo "=== Attempting Student User Creation via Direct API ==="
+echo "Since ansible.platform collection is not available, trying direct API approach..."
+
+# Try direct API call for user creation
+echo "Attempting to create student user via direct API call..."
+STUDENT_USER_CREATE=$(curl -s -k -X POST https://localhost/api/v2/users/ \
+  -u admin:ansible123! \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "student",
+    "password": "learn_ansible",
+    "email": "student@acme.example.com",
+    "is_superuser": true
+  }' \
+  -w "HTTPSTATUS:%{http_code}")
+
+HTTP_STATUS=$(echo $STUDENT_USER_CREATE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+RESPONSE_BODY=$(echo $STUDENT_USER_CREATE | sed -e 's/HTTPSTATUS:.*//g')
+
+if [ "$HTTP_STATUS" -eq 201 ]; then
+    echo "✅ Student user created successfully via API"
+elif [ "$HTTP_STATUS" -eq 400 ]; then
+    echo "ℹ️  Student user already exists"
+else
+    echo "❌ Student user creation failed (HTTP $HTTP_STATUS)"
+    echo "Response: $RESPONSE_BODY"
+fi
+
+echo ""
+echo "You can log into AAP at https://localhost with:"
+echo "  Admin: admin:ansible123!"
+echo "  Student: student:learn_ansible (if creation succeeded)"
 
 # # If the playbook failed, try a simple direct approach
 # echo "=== Fallback: Manual Student User Creation ==="
