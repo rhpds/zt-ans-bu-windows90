@@ -179,6 +179,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
   gather_facts: true
   collections:
     - ansible.controller
+    - ansible.platform
     
   tasks:
     - name: Ensure controller is accessible
@@ -191,7 +192,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
       delay: 5
       retries: 12
     - name: Add Organization
-      ansible.controller.organization:
+      ansible.platform.organization:
         name: "{{ lab_organization }}"
         description: "ACME Corp Organization"
         state: present
@@ -212,7 +213,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
         validate_certs: false
 
     - name: Create student admin user
-      ansible.controller.user:
+      ansible.platform.user:
         username: "{{ student_user }}"
         password: "{{ student_password }}"
         email: student@acme.example.com
@@ -294,6 +295,7 @@ EOF
 # Install necessary collections and packages
 echo "Installing Ansible collections..."
 ansible-galaxy collection install ansible.controller --force
+ansible-galaxy collection install ansible.platform --force
 ansible-galaxy collection install community.general --force
 ansible-galaxy collection install microsoft.ad --force
 
