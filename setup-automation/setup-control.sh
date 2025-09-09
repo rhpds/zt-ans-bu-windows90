@@ -16,7 +16,7 @@ cat <<EOF | tee /tmp/inventory.ini
 localhost ansible_connection=local
 
 [windowssrv]
-windows ansible_host=windows ansible_user=instruqt ansible_password=Passw0rd! ansible_connection=winrm ansible_port=5986 ansible_winrm_server_cert_validation=ignore
+windows ansible_host=windows ansible_user=student ansible_password=learn_ansible ansible_connection=winrm ansible_port=5986 ansible_winrm_server_cert_validation=ignore
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
