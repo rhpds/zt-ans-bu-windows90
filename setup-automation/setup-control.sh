@@ -242,7 +242,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
         validate_certs: false
 
     - name: Create student user (after all other resources)
-      ansible.controller.controller_user:
+      ansible.controller.user:
         controller_host: "https://localhost"
         controller_username: "admin"
         controller_password: "ansible123!"
