@@ -179,25 +179,22 @@ cat <<EOF | tee /tmp/controller-setup.yml
         controller_password: ansible123!
         validate_certs: false
 
-    # - name: Create student user via direct API call
-    #   uri:
-    #     url: "https://localhost/api/v2/users/"
-    #     method: POST
-    #     user: admin
-    #     password: ansible123!
-    #     validate_certs: false
-    #     body_format: json
-    #     body:
-    #       username: "{{ student_user }}"
-    #       password: "{{ student_password }}"
-    #       email: student@acme.example.com
-    #       is_superuser: true
-    #     status_code: [201, 400]  # 201 = created, 400 = already exists
-    #   register: student_user_result
+    - name: Create student user
+      ansible.controller.user:
+        controller_host: "https://localhost"
+        controller_username: "admin"
+        controller_password: "ansible123!"
+        validate_certs: false
+        username: "{{ student_user }}"
+        password: "{{ student_password }}"
+        email: student@acme.example.com
+        is_superuser: true
+        state: present
+      register: student_user_result
 
-    # - name: Debug student user creation
-    #   ansible.builtin.debug:
-    #     var: student_user_result
+    - name: Debug student user creation
+      ansible.builtin.debug:
+        var: student_user_result
 
     - name: Create Inventory
       ansible.controller.inventory:
@@ -284,17 +281,6 @@ ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/ ansible
 echo "=== Running AAP Controller Setup ==="
 # echo "Finding correct AAP API endpoints..."
 
-# # Try different possible API endpoints
-# echo "Testing various API endpoints:"
-# curl -k https://localhost/api/v2/ -u admin:ansible123! > /dev/null 2>&1 && echo "✅ /api/v2/ works" || echo "❌ /api/v2/ fails"
-# curl -k https://localhost/api/ -u admin:ansible123! > /dev/null 2>&1 && echo "✅ /api/ works" || echo "❌ /api/ fails"
-# curl -k https://localhost/api/v1/ -u admin:ansible123! > /dev/null 2>&1 && echo "✅ /api/v1/ works" || echo "❌ /api/v1/ fails"
-# curl -k https://localhost/ansible/ -u admin:ansible123! > /dev/null 2>&1 && echo "✅ /ansible/ works" || echo "❌ /ansible/ fails"
-# curl -k https://localhost/awx/ -u admin:ansible123! > /dev/null 2>&1 && echo "✅ /awx/ works" || echo "❌ /awx/ fails"
-
-# # Check what the web interface shows
-# echo "Checking web interface response:"
-# curl -k https://localhost/ -u admin:ansible123! 2>/dev/null | head -20
 
 ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/ ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
@@ -316,34 +302,34 @@ echo "You can log into AAP at https://localhost with admin:ansible123!"
 
 # # Try to create user via Django management command
 # echo "Attempting to create student user via Django management command..."
-cd /var/lib/awx/venv/awx/lib/python*/site-packages/awx 2>/dev/null || cd /opt/awx/venv/awx/lib/python*/site-packages/awx 2>/dev/null || echo "Could not find AWX directory"
+# cd /var/lib/awx/venv/awx/lib/python*/site-packages/awx 2>/dev/null || cd /opt/awx/venv/awx/lib/python*/site-packages/awx 2>/dev/null || echo "Could not find AWX directory"
 
-if [ -d "management" ]; then
-    echo "Found AWX management directory, attempting user creation..."
-    python3 manage.py shell -c "
-from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password
-try:
-    user = User.objects.create_user(
-        username='student',
-        password='learn_ansible',
-        email='student@acme.example.com',
-        is_superuser=True,
-        is_staff=True
-    )
-    print('Student user created successfully')
-except Exception as e:
-    print(f'Error creating user: {e}')
-" 2>/dev/null || echo "Django management command failed"
-else
-    echo "AWX management directory not found, trying alternative approach..."
+# if [ -d "management" ]; then
+#     echo "Found AWX management directory, attempting user creation..."
+#     python3 manage.py shell -c "
+# from django.contrib.auth.models import User
+# from django.contrib.auth.hashers import make_password
+# try:
+#     user = User.objects.create_user(
+#         username='student',
+#         password='learn_ansible',
+#         email='student@acme.example.com',
+#         is_superuser=True,
+#         is_staff=True
+#     )
+#     print('Student user created successfully')
+# except Exception as e:
+#     print(f'Error creating user: {e}')
+# " 2>/dev/null || echo "Django management command failed"
+# else
+#     echo "AWX management directory not found, trying alternative approach..."
     
-    # Try to find and use the AWX CLI
-    which awx 2>/dev/null && echo "Found awx CLI" || echo "awx CLI not found"
+#     # Try to find and use the AWX CLI
+#     which awx 2>/dev/null && echo "Found awx CLI" || echo "awx CLI not found"
     
-    # Try to create user via awx CLI
-    awx users create --username student --password learn_ansible --email student@acme.example.com --is_superuser true 2>/dev/null && echo "Student user created via awx CLI" || echo "awx CLI user creation failed"
-fi
+#     # Try to create user via awx CLI
+#     awx users create --username student --password learn_ansible --email student@acme.example.com --is_superuser true 2>/dev/null && echo "Student user created via awx CLI" || echo "awx CLI user creation failed"
+# fi
 
 # Final verification
 # echo "=== Final Verification ==="
