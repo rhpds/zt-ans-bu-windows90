@@ -1,7 +1,5 @@
 #!/bin/bash
-
 echo "=== Windows Workshop Setup ==="
-
 
 # Create a writable workspace for the rhel user used by exercises
 mkdir -p /home/rhel/ansible
@@ -12,7 +10,7 @@ chmod 755 /home/rhel/ansible
 git config --global user.email "student@redhat.com"
 git config --global user.name "student"
 
-# Create a minimal Ansible inventory for this lab
+# Create Ansible inventory
 cat <<EOF | tee /tmp/inventory.ini
 [ctrlnodes]
 localhost ansible_connection=local
@@ -25,7 +23,7 @@ ansible_python_interpreter=/usr/bin/python3
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 EOF
 
-# Define lab configuration variables consumed by the playbooks
+# Create lab variables
 cat <<EOF | tee /tmp/track-vars.yml
 ---
 # config vars
@@ -160,7 +158,7 @@ cat <<EOF | tee /tmp/git-setup.yml
         - "git push -u origin main --force"
 EOF
 
-# Write the Controller setup playbook (using direct auth like the working ServiceNow lab)
+# Controller setup playbook
 cat <<EOF | tee /tmp/controller-setup.yml
 ---
 - name: Configure Windows Workshop Controller 
@@ -262,16 +260,12 @@ cat <<EOF | tee /tmp/controller-setup.yml
 EOF
 
 # Install necessary collections
-echo "Installing Ansible collections..."
 ansible-galaxy collection install community.general
 ansible-galaxy collection install microsoft.ad
 ansible-galaxy collection install ansible.controller
 
 # Install pip3 and pywinrm for Windows connectivity
-echo "Installing pip3..."
 dnf install -y python3-pip
-
-echo "Installing pywinrm for Windows WinRM connectivity..."
 pip3 install pywinrm
 
 # Set collections path for playbook execution
@@ -283,15 +277,3 @@ ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.in
 
 echo "=== Running AAP Controller Setup ==="
 ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
-
-echo ""
-echo "=== AAP Controller Setup Complete ==="
-echo "✅ AAP Controller configured with admin user"
-echo "✅ Execution Environment: Windows EE"
-echo "✅ Inventory: Workshop Inventory"
-echo "✅ Hosts: windows, student-ansible"
-echo "✅ Group: Windows Servers"
-echo "✅ Project: Windows Workshop"
-echo ""
-echo ""
-echo "You can log into AAP at https://localhost with admin:ansible123!"
