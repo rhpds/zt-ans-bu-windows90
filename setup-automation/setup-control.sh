@@ -178,7 +178,6 @@ cat <<EOF | tee /tmp/controller-setup.yml
   connection: local
   collections:
     - ansible.controller
-    - ansible.platform
 
   tasks:
     - name: Add Windows EE
@@ -190,17 +189,20 @@ cat <<EOF | tee /tmp/controller-setup.yml
         controller_password: ansible123!
         validate_certs: false
 
-    - name: Create student admin user
-      ansible.platform.user:
-        username: "{{ student_user }}"
-        password: "{{ student_password }}"
-        email: student@acme.example.com
-        is_superuser: true
-        state: present
-        controller_host: "https://localhost"
-        controller_username: admin
-        controller_password: ansible123!
+    - name: Create student user via direct API call
+      uri:
+        url: "https://localhost/api/v2/users/"
+        method: POST
+        user: admin
+        password: ansible123!
         validate_certs: false
+        body_format: json
+        body:
+          username: "{{ student_user }}"
+          password: "{{ student_password }}"
+          email: student@acme.example.com
+          is_superuser: true
+        status_code: [201, 400]  # 201 = created, 400 = already exists
       register: student_user_result
 
     - name: Debug student user creation
@@ -273,7 +275,6 @@ EOF
 # Install necessary collections and packages
 echo "Installing Ansible collections..."
 ansible-galaxy collection install ansible.controller --force
-ansible-galaxy collection install ansible.platform --force
 ansible-galaxy collection install community.general --force
 ansible-galaxy collection install microsoft.ad --force
 
