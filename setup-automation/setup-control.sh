@@ -274,16 +274,22 @@ EOF
 
 # Install necessary collections and packages
 echo "Installing Ansible collections..."
-ansible-galaxy collection install ansible.controller --force
-ansible-galaxy collection install community.general --force
-ansible-galaxy collection install microsoft.ad --force
+# Install in dependency order - try without force first, then with force
+echo "Installing community.general first (dependency)..."
+ansible-galaxy collection install community.general || ansible-galaxy collection install community.general --force
+
+echo "Installing microsoft.ad..."
+ansible-galaxy collection install microsoft.ad || ansible-galaxy collection install microsoft.ad --force
+
+echo "Installing ansible.controller (try specific version first)..."
+ansible-galaxy collection install ansible.controller:2.5.0 || ansible-galaxy collection install ansible.controller || ansible-galaxy collection install ansible.controller --force
 
 # Install Python packages
-pip3 install pywinrm
+python3 -m pip install pywinrm
 
 # Execute the setup playbooks
 echo "=== Running Git/Gitea Setup ==="
-ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
+ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/ ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
 echo "=== Running AAP Controller Setup ==="
 echo "Finding correct AAP API endpoints..."
@@ -300,7 +306,7 @@ curl -k https://localhost/awx/ -u admin:ansible123! > /dev/null 2>&1 && echo "âœ
 echo "Checking web interface response:"
 curl -k https://localhost/ -u admin:ansible123! 2>/dev/null | head -20
 
-ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
+ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/ ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
 # If the playbook failed, try a simple direct approach
 echo "=== Fallback: Manual Student User Creation ==="
