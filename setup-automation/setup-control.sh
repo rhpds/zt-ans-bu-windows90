@@ -173,7 +173,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
     - name: Add Windows EE
       ansible.controller.execution_environment:
         name: "Windows EE"
-        image: "quay.io/ansible/ansible-runner:latest"
+        image: "quay.io/nmartins/windows_ee"
         controller_host: "https://localhost"
         controller_username: admin
         controller_password: ansible123!
@@ -261,35 +261,28 @@ cat <<EOF | tee /tmp/controller-setup.yml
     #   when: student_user_result is defined
 EOF
 
-# Install necessary collections and packages
+# Install necessary collections
 echo "Installing Ansible collections..."
-# Install in dependency order - try without force first, then with force
-echo "Installing community.general first (dependency)..."
-ansible-galaxy collection install community.general || ansible-galaxy collection install community.general --force
+ansible-galaxy collection install community.general
+ansible-galaxy collection install microsoft.ad
+ansible-galaxy collection install ansible.controller
 
-echo "Installing microsoft.ad..."
-ansible-galaxy collection install microsoft.ad || ansible-galaxy collection install microsoft.ad --force
+# Install pip3 and pywinrm for Windows connectivity
+echo "Installing pip3..."
+dnf install -y python3-pip
 
-echo "Installing ansible.controller (try specific version first)..."
-ansible-galaxy collection install ansible.controller:2.5.0 || ansible-galaxy collection install ansible.controller || ansible-galaxy collection install ansible.controller --force
+echo "Installing pywinrm for Windows WinRM connectivity..."
+pip3 install pywinrm
 
-echo "Skipping ansible.platform collection installation"
-echo "Reason: Requires Ansible 2.16+ (current: 2.14.17) and Red Hat credentials"
-echo "Will use direct API approach for user creation instead"
-
-# Install Python packages
-echo "Installing pywinrm..."
-python3 -m pip install pywinrm || pip3 install pywinrm || echo "Failed to install pywinrm - continuing anyway"
+# Set collections path for playbook execution
+export ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/
 
 # Execute the setup playbooks
 echo "=== Running Git/Gitea Setup ==="
-ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/ ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
+ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
 echo "=== Running AAP Controller Setup ==="
-# echo "Finding correct AAP API endpoints..."
-
-
-ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/ ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
+ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
 echo ""
 echo "=== AAP Controller Setup Complete ==="
@@ -300,94 +293,5 @@ echo "✅ Hosts: windows, student-ansible"
 echo "✅ Group: Windows Servers"
 echo "✅ Project: Windows Workshop"
 echo ""
-echo "=== Attempting Student User Creation via Direct API ==="
-echo "Since ansible.platform collection is not available, trying direct API approach..."
-
-# Try direct API call for user creation
-echo "Attempting to create student user via direct API call..."
-STUDENT_USER_CREATE=$(curl -s -k -X POST https://localhost/api/v2/users/ \
-  -u admin:ansible123! \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "student",
-    "password": "learn_ansible",
-    "email": "student@acme.example.com",
-    "is_superuser": true
-  }' \
-  -w "HTTPSTATUS:%{http_code}")
-
-HTTP_STATUS=$(echo $STUDENT_USER_CREATE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
-RESPONSE_BODY=$(echo $STUDENT_USER_CREATE | sed -e 's/HTTPSTATUS:.*//g')
-
-if [ "$HTTP_STATUS" -eq 201 ]; then
-    echo "✅ Student user created successfully via API"
-elif [ "$HTTP_STATUS" -eq 400 ]; then
-    echo "ℹ️  Student user already exists"
-else
-    echo "❌ Student user creation failed (HTTP $HTTP_STATUS)"
-    echo "Response: $RESPONSE_BODY"
-fi
-
 echo ""
-echo "You can log into AAP at https://localhost with:"
-echo "  Admin: admin:ansible123!"
-echo "  Student: student:learn_ansible (if creation succeeded)"
-
-# # If the playbook failed, try a simple direct approach
-# echo "=== Fallback: Manual Student User Creation ==="
-# echo "Since API endpoints are not working, let's try manual user creation..."
-
-# # Try to create user via Django management command
-# echo "Attempting to create student user via Django management command..."
-# cd /var/lib/awx/venv/awx/lib/python*/site-packages/awx 2>/dev/null || cd /opt/awx/venv/awx/lib/python*/site-packages/awx 2>/dev/null || echo "Could not find AWX directory"
-
-# if [ -d "management" ]; then
-#     echo "Found AWX management directory, attempting user creation..."
-#     python3 manage.py shell -c "
-# from django.contrib.auth.models import User
-# from django.contrib.auth.hashers import make_password
-# try:
-#     user = User.objects.create_user(
-#         username='student',
-#         password='learn_ansible',
-#         email='student@acme.example.com',
-#         is_superuser=True,
-#         is_staff=True
-#     )
-#     print('Student user created successfully')
-# except Exception as e:
-#     print(f'Error creating user: {e}')
-# " 2>/dev/null || echo "Django management command failed"
-# else
-#     echo "AWX management directory not found, trying alternative approach..."
-    
-#     # Try to find and use the AWX CLI
-#     which awx 2>/dev/null && echo "Found awx CLI" || echo "awx CLI not found"
-    
-#     # Try to create user via awx CLI
-#     awx users create --username student --password learn_ansible --email student@acme.example.com --is_superuser true 2>/dev/null && echo "Student user created via awx CLI" || echo "awx CLI user creation failed"
-# fi
-
-# Final verification
-# echo "=== Final Verification ==="
-# echo "Checking Gitea repository..."
-# curl -s -u 'student:learn_ansible' http://gitea:3000/api/v1/repos/student/workshop_project | grep -q "workshop_project" && echo "✅ Gitea repository exists" || echo "❌ Gitea repository missing"
-
-# echo "Checking AAP student user authentication..."
-# # Try different endpoints for authentication test
-# AAP_STUDENT_AUTH=$(curl -s -k https://localhost/api/v2/ -u student:learn_ansible)
-# if [[ "$AAP_STUDENT_AUTH" == *"users"* ]] || [[ "$AAP_STUDENT_AUTH" == *"organizations"* ]]; then
-#     echo "✅ AAP student user authentication works"
-# else
-#     echo "❌ AAP student user authentication failed"
-#     echo "Response: $AAP_STUDENT_AUTH"
-# fi
-
-# echo "Checking AAP users list..."
-# curl -s -k https://localhost/api/v2/users/ -u admin:ansible123! | grep -q "student" && echo "✅ Student user exists in AAP" || echo "❌ Student user not found in AAP"
-
-# echo ""
-# echo "=== Setup Complete ==="
-# echo "✅ Gitea: http://gitea:3000 (student:learn_ansible)"
-# echo "✅ AAP: https://localhost (student:learn_ansible)"
-# echo "✅ Repository: workshop_project should be visible in Gitea with content"
+echo "You can log into AAP at https://localhost with admin:ansible123!"
