@@ -241,22 +241,22 @@ cat <<EOF | tee /tmp/controller-setup.yml
         controller_password: ansible123!
         validate_certs: false
 
-    - name: Create student user (after all other resources)
-      ansible.controller.user:
-        controller_host: "https://localhost"
-        controller_username: "admin"
-        controller_password: "ansible123!"
-        validate_certs: false
-        username: "{{ student_user }}"
-        password: "{{ student_password }}"
-        email: student@acme.example.com
-        is_superuser: true
-        state: present
-      register: student_user_result
+    # - name: Create student user (after all other resources)
+    #   ansible.controller.user:
+    #     controller_host: "https://localhost"
+    #     controller_username: "admin"
+    #     controller_password: "ansible123!"
+    #     validate_certs: false
+    #     username: "{{ student_user }}"
+    #     password: "{{ student_password }}"
+    #     email: student@acme.example.com
+    #     is_superuser: true
+    #     state: present
+    #   register: student_user_result
 
-    - name: Debug student user creation
-      ansible.builtin.debug:
-        var: student_user_result
+    # - name: Debug student user creation
+    #   ansible.builtin.debug:
+    #     var: student_user_result
 EOF
 
 # Install necessary collections and packages
