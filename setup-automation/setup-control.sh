@@ -170,146 +170,24 @@ cat <<EOF | tee /tmp/git-setup.yml
         - "git push -u origin main --force"
 EOF
 
-# Write the Controller setup playbook (using roadshow approach)
+# Write the Controller setup playbook (using direct auth like the working ServiceNow lab)
 cat <<EOF | tee /tmp/controller-setup.yml
 ---
-## Controller setup - using roadshow approach
-- name: Controller config for Windows Getting Started
+- name: Configure Windows Workshop Controller 
   hosts: localhost
-  gather_facts: true
+  connection: local
   collections:
     - ansible.controller
-    
+
   tasks:
-   # Create auth login token
-    - name: get auth token and restart automation-controller if it fails
-      block:
-        - name: Refresh facts
-          setup:
-
-        - name: Create oauth token
-          ansible.controller.token:
-            description: 'Windows Workshop lab'
-            scope: "write"
-            state: present
-            controller_host: localhost
-            controller_username: "{{ controller_admin_user }}"
-            controller_password: "{{ controller_admin_password }}"
-            validate_certs: false
-          register: _auth_token
-          until: _auth_token is not failed
-          delay: 3
-          retries: 5
-      rescue:
-        - name: In rescue block for auth token
-          debug:
-            msg: "failed to get auth token. Restarting automation controller service"
-
-        - name: restart the controller service
-          ansible.builtin.service:
-            name: automation-controller
-            state: restarted
-
-        - name: Ensure controller is accessible
-          uri:
-            url: https://localhost/
-            method: GET
-            validate_certs: false
-          register: controller_online
-          until: controller_online.status == 200
-          delay: 5
-          retries: 12
-
-        - name: Retry getting auth token
-          ansible.controller.token:
-            description: 'Windows Workshop lab'
-            scope: "write"
-            state: present
-            controller_host: localhost
-            controller_username: "{{ controller_admin_user }}"
-            controller_password: "{{ controller_admin_password }}"
-            validate_certs: false
-          register: _auth_token
-          until: _auth_token is not failed
-          delay: 3
-          retries: 5
-      always:
-        - name: Create fact.d dir
-          ansible.builtin.file:
-            path: "{{ custom_facts_dir }}"
-            state: directory
-            recurse: yes
-            owner: "rhel"
-            group: "rhel"
-            mode: 0755
-          become: true
-
-        - name: Create _auth_token custom fact
-          ansible.builtin.copy:
-            content: "{{ _auth_token.ansible_facts }}"
-            dest: "{{ custom_facts_dir }}/{{ custom_facts_file }}"
-            owner: "rhel"
-            group: "rhel"
-            mode: 0644
-          become: true
-      check_mode: false
-      when: ansible_local.custom_facts.controller_token is undefined
-      tags:
-        - auth-token
-
-    - name: refresh facts
-      setup:
-        filter:
-          - ansible_local
-      tags:
-        - always
-
-    - name: create auth token fact
-      ansible.builtin.set_fact:
-        auth_token: "{{ ansible_local.custom_facts.controller_token }}"
-        cacheable: true
-      check_mode: false
-      when: auth_token is undefined
-      tags:
-        - always
- 
-    - name: Ensure controller is accessible
-      uri:
-        url: https://localhost/
-        method: GET
-        validate_certs: false
-      register: controller_check
-      until: controller_check.status == 200
-      delay: 5
-      retries: 12
-      tags:
-        - controller-config
-
-# Controller objects
-    - name: Add Organization
-      ansible.controller.organization:
-        name: "{{ lab_organization }}"
-        description: "ACME Corp Organization"
-        state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: false
-      tags:
-        - controller-config
-        - controller-org
-  
     - name: Add Windows EE
       ansible.controller.execution_environment:
-        name: "{{ controller_ee }}"
+        name: "Windows EE"
         image: "quay.io/ansible/ansible-runner:latest"
-        pull: missing
-        state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: "{{ controller_validate_certs }}"
-      tags:
-        - controller-config
-        - controller-ees
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 
     - name: Create student admin user
       ansible.controller.user:
@@ -318,65 +196,64 @@ cat <<EOF | tee /tmp/controller-setup.yml
         email: student@acme.example.com
         is_superuser: true
         state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: "{{ controller_validate_certs }}"
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
       register: student_user_result
-      tags:
-        - controller-config
-        - controller-users
 
     - name: Debug student user creation
       ansible.builtin.debug:
         var: student_user_result
-      tags:
-        - controller-config
-        - controller-users
 
     - name: Create Inventory
       ansible.controller.inventory:
-       name: "Workshop Inventory"
-       description: "Our Server environment"
-       organization: "Default"
-       state: present
-       controller_oauthtoken: "{{ auth_token }}"
-       controller_host: "{{ controller_hostname }}"
-       validate_certs: "{{ controller_validate_certs }}"
+        name: "Workshop Inventory"
+        description: "Our Server environment"
+        organization: "Default"
+        state: present
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 
     - name: Create Host for Workshop
       ansible.controller.host:
-       name: windows
-       description: "Windows Group"
-       inventory: "Workshop Inventory"
-       state: present
-       controller_oauthtoken: "{{ auth_token }}"
-       controller_host: "{{ controller_hostname }}"
-       validate_certs: "{{ controller_validate_certs }}"
+        name: windows
+        description: "Windows Group"
+        inventory: "Workshop Inventory"
+        state: present
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 
     - name: Create Host for Workshop
       ansible.controller.host:
-       name: student-ansible
-       description: "Ansible node"
-       inventory: "Workshop Inventory"
-       state: present
-       controller_oauthtoken: "{{ auth_token }}"
-       controller_host: "{{ controller_hostname }}"
-       validate_certs: "{{ controller_validate_certs }}"
+        name: student-ansible
+        description: "Ansible node"
+        inventory: "Workshop Inventory"
+        state: present
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 
     - name: Create Group for inventory
       ansible.controller.group:
-       name: Windows Servers
-       description: Windows Server Group
-       inventory: "Workshop Inventory"
-       hosts:
-        - windows
-       variables:
-         ansible_connection: winrm
-         ansible_port: 5986
-         ansible_winrm_server_cert_validation: ignore
-       controller_oauthtoken: "{{ auth_token }}"
-       controller_host: "{{ controller_hostname }}"
-       validate_certs: "{{ controller_validate_certs }}"
+        name: Windows Servers
+        description: Windows Server Group
+        inventory: "Workshop Inventory"
+        hosts:
+          - windows
+        variables:
+          ansible_connection: winrm
+          ansible_port: 5986
+          ansible_winrm_server_cert_validation: ignore
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 
     - name: Create Project
       ansible.controller.project:
@@ -386,9 +263,10 @@ cat <<EOF | tee /tmp/controller-setup.yml
         scm_type: git
         scm_url: "http://gitea:3000/student/workshop_project.git"
         state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: "{{ controller_validate_certs }}"
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 EOF
 
 # Install necessary collections and packages
