@@ -2,16 +2,16 @@
 
 echo "=== Windows Workshop Setup - Converting from Instruqt Pattern ==="
 
-# Copy root's SSH keys into the rhel user's home so Ansible/Git can authenticate
-if [ -d "/root/.ssh" ] && [ "$(ls -A /root/.ssh)" ]; then
-    cp -a /root/.ssh/* /home/rhel/.ssh/.
-    chown -R rhel:rhel /home/rhel/.ssh
-    echo "✅ SSH keys copied successfully"
-else
-    echo "⚠️  No SSH keys found in /root/.ssh, generating new ones..."
-    su - rhel -c 'ssh-keygen -f /home/rhel/.ssh/id_rsa -q -N ""'
-    chown -R rhel:rhel /home/rhel/.ssh
-fi
+# # Copy root's SSH keys into the rhel user's home so Ansible/Git can authenticate
+# if [ -d "/root/.ssh" ] && [ "$(ls -A /root/.ssh)" ]; then
+#     cp -a /root/.ssh/* /home/rhel/.ssh/.
+#     chown -R rhel:rhel /home/rhel/.ssh
+#     echo "✅ SSH keys copied successfully"
+# else
+#     echo "⚠️  No SSH keys found in /root/.ssh, generating new ones..."
+#     su - rhel -c 'ssh-keygen -f /home/rhel/.ssh/id_rsa -q -N ""'
+#     chown -R rhel:rhel /home/rhel/.ssh
+# fi
 
 # Create a writable workspace for the rhel user used by exercises
 mkdir -p /home/rhel/ansible
