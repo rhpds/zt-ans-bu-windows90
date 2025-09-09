@@ -210,18 +210,15 @@ cat <<EOF | tee /tmp/controller-setup.yml
             name: automation-controller
             state: restarted
 
-        - name: Ensure tower/controller is online and working
+        - name: Ensure controller is accessible
           uri:
-            url: https://localhost/api/v2/ping/
+            url: https://localhost/
             method: GET
-            user: "{{ admin_username }}"
-            password: "{{ admin_password }}"
             validate_certs: false
-            force_basic_auth: true
           register: controller_online
-          until: controller_online is success
-          delay: 3
-          retries: 5
+          until: controller_online.status == 200
+          delay: 5
+          retries: 12
 
         - name: Retry getting auth token
           ansible.controller.token:
@@ -276,18 +273,15 @@ cat <<EOF | tee /tmp/controller-setup.yml
       tags:
         - always
  
-    - name: Ensure tower/controller is online and working
+    - name: Ensure controller is accessible
       uri:
-        url: https://localhost/api/v2/ping/
+        url: https://localhost/
         method: GET
-        user: "{{ admin_username }}"
-        password: "{{ admin_password }}"
         validate_certs: false
-        force_basic_auth: true
-      register: controller_online
-      until: controller_online is success
-      delay: 3
-      retries: 5
+      register: controller_check
+      until: controller_check.status == 200
+      delay: 5
+      retries: 12
       tags:
         - controller-config
 
