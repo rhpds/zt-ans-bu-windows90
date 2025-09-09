@@ -168,6 +168,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
   connection: local
   collections:
     - ansible.controller
+    - ansible.platform
 
   tasks:
     - name: Add Windows EE
@@ -242,7 +243,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
         validate_certs: false
 
     - name: Create student user (after all other resources)
-      ansible.controller.user:
+      ansible.platform.user:
         controller_host: "https://localhost"
         controller_username: "admin"
         controller_password: "ansible123!"
@@ -270,6 +271,9 @@ ansible-galaxy collection install microsoft.ad || ansible-galaxy collection inst
 
 echo "Installing ansible.controller (try specific version first)..."
 ansible-galaxy collection install ansible.controller:2.5.0 || ansible-galaxy collection install ansible.controller || ansible-galaxy collection install ansible.controller --force
+
+echo "Installing ansible.platform..."
+ansible-galaxy collection install ansible.platform || ansible-galaxy collection install ansible.platform --force
 
 # Install Python packages
 python3 -m pip install pywinrm
