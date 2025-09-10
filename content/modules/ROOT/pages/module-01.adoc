@@ -62,7 +62,7 @@ image::1-controller-add-machine-credential.png[Add Machine Credential]
 
 === Step 4
 
-Select Create Credential image:create_cred.png[Create] to save
+Select image:create_cred.png[Create] to save
 
 == ☑️ Create SCM Credentials
 
@@ -126,7 +126,7 @@ number in SCM URL*)
 | Name | Ansible Workshop Project |
 | Description | Windows Workshop Project |
 | Organization | Default |
-| Default Execution Environment | Windows Workshop Execution Environment |
+| Execution Environment | Windows Workshop Execution Environment |
 | SCM Type | Git |
 | SCM URL | http://gitea:3000/student/workshop_project.git | URL obtained from Step 1
 | SCM BRANCH | | Intentionally blank
@@ -145,7 +145,7 @@ image::1-controller-create-project.png[Defining a Project]
 
 === Step 4
 
-Select SAVE image:create_proj.png[Save Project] to save
+Select image:create_proj.png[Save Project] to save
 
 === Step 5
 
