@@ -42,7 +42,7 @@ image::1-controller-credentials.png[Cred]
 
 === Step 2
 
-Click the image:add.png[Add] icon and add new credential
+Click the image:add_create_cred.png[Create] icon and add new credential
 
 === Step 3
 
@@ -54,15 +54,15 @@ Complete the form using the following entries:
 | Name | Windows Credential
 | Organization | Default
 | Type | Machine
-| Username | instruqt
-| Password | Passw0rd!
+| Username | student
+| Password | learn_ansible
 |===
 
 image::1-controller-add-machine-credential.png[Add Machine Credential]
 
 === Step 4
 
-Select SAVE image:at_save.png[Save]
+Select Create Credential image:create_cred.png[Create] to save
 
 == ☑️ Create SCM Credentials
 
@@ -77,11 +77,11 @@ with the following details:
 | Description | SCM credential for project sync |
 | Organization | Default |
 | Credential Type | Source Control |
-| Username | student | Replace # with your student number
-| Password | learn_ansible | Replace with your student password
+| Username | student |
+| Password | learn_ansible |
 |===
 
-Select SAVE image:at_save.png[Save]
+Select Create Credential image:create_cred.png[Create Cred] to save
 
 image::1-controller-add-scm-credential.png[Add SCM Credential]
 
@@ -113,7 +113,7 @@ Click *Projects* on the left hand panel.
 
 image::1-controller-project.png[Proj]
 
-Click the image:add.png[Add] icon and add new project
+Click the image:add_create_proj.png[Add] icon and add new project
 
 === Step 3
 
@@ -145,7 +145,7 @@ image::1-controller-create-project.png[Defining a Project]
 
 === Step 4
 
-Select SAVE image:at_save.png[Save]
+Select SAVE image:create_proj.png[Save Project] to save
 
 === Step 5
 
