@@ -30,7 +30,7 @@ cat <<EOF | tee /tmp/track-vars.yml
 controller_hostname: localhost
 controller_validate_certs: false
 ansible_python_interpreter: /usr/bin/python3
-controller_ee: windows workshop execution environment
+controller_ee: Windows Workshop Execution Environment
 student_user: student
 student_password: learn_ansible
 controller_admin_user: admin
@@ -170,7 +170,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
   tasks:
     - name: Add Windows EE
       ansible.controller.execution_environment:
-        name: "Windows EE"
+        name: "Windows Workshop Execution Environment"
         image: "quay.io/nmartins/windows_ee"
         controller_host: "https://localhost"
         controller_username: admin

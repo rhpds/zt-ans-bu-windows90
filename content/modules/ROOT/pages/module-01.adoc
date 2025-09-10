@@ -18,8 +18,8 @@ Your login credentials are:
 ....
 Controller Details:
 
-Username: student
-Password: learn_ansible
+Username: admin
+Password: ansible123!
 ....
 
 Your Automation Controller subscription has already been applied for you, so after
@@ -36,7 +36,7 @@ workshop, we are using *machine* and *source control* credentials.
 
 === Step 1
 
-Select CREDENTIALS from the left hand panel under resources
+Select CREDENTIALS from the left hand panel under Automation Execution > Infrastructure
 
 image::1-controller-credentials.png[Cred]
 
