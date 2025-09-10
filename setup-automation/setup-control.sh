@@ -226,18 +226,18 @@ cat <<EOF | tee /tmp/controller-setup.yml
         controller_password: ansible123!
         validate_certs: false
 
-    - name: Create Project
-      ansible.controller.project:
-        name: "Windows Workshop"
-        description: "Windows Getting Started Workshop Content"
-        organization: "Default"
-        scm_type: git
-        scm_url: "http://gitea:3000/student/workshop_project.git"
-        state: present
-        controller_host: "https://localhost"
-        controller_username: admin
-        controller_password: ansible123!
-        validate_certs: false
+    # - name: Create Project
+    #   ansible.controller.project:
+    #     name: "Windows Workshop"
+    #     description: "Windows Getting Started Workshop Content"
+    #     organization: "Default"
+    #     scm_type: git
+    #     scm_url: "http://gitea:3000/student/workshop_project.git"
+    #     state: present
+    #     controller_host: "https://localhost"
+    #     controller_username: admin
+    #     controller_password: ansible123!
+    #     validate_certs: false
 
     # - name: Create student user
     #   ansible.platform.user:
