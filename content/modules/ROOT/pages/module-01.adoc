@@ -162,12 +162,12 @@ launched. Inventories are divided into groups and these groups contain hosts. In
 names into Controller, or from one of Automation Controller’s supported cloud
 providers or inventory plugins from Certified Content Collections on Automation Hub.
 
-A static Inventory has already been created for you today. Let's take a look at this inventory and highlight some properties and configuration parameters.
+A static inventory has already been created for you today. Let's take a look at this inventory and highlight some properties and configuration parameters.
 
 === Step 1
 
-Click *Inventories* from the left hand panel. You will see the
-preconfigured Inventory listed. Click the Inventories' name *Workshop Inventory* or the Edit button. image:at_edit.png[Edit]
+Click *Inventories* from the left hand panel under Automation Execution > Infrastructure. You will see the
+preconfigured inventory listed. Click the inventory's name *Workshop Inventory* or the image:edit_inv.png[Edit Inventory] button. 
 
 === Step 2
 
@@ -221,4 +221,4 @@ ansible_winrm_server_cert_validation: ignore
 ....
 
 If you click the *HOSTS* button, you can view the hosts belonging to the windows group.
-You can find more information about these and other settings in our link:https://docs.ansible.com/ansible/latest/user_guide/windows.html[Windows Guides]. The authentication settings are particularly important and you will need to review them and decide which method is best for your needs.
+You can find more information about these and other settings in our link:https://docs.ansible.com/ansible/latest/user_guide/windows.html[Windows Guides^]. The authentication settings are particularly important and you will need to review them and decide which method is best for your needs.
