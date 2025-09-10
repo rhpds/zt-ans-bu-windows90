@@ -45,118 +45,118 @@ default_tag_name: "0.0.1"
 lab_organization: ACME
 EOF
 
-# Gitea setup playbook 
-cat <<EOF | tee /tmp/git-setup.yml
----
-# Gitea config
-- name: Configure Git and Gitea repository
-  hosts: localhost
-  gather_facts: false
-  connection: local
-  tags:
-    - gitea-config
+# # Gitea setup playbook 
+# cat <<EOF | tee /tmp/git-setup.yml
+# ---
+# # Gitea config
+# - name: Configure Git and Gitea repository
+#   hosts: localhost
+#   gather_facts: false
+#   connection: local
+#   tags:
+#     - gitea-config
 
-  tasks:
-    - name: Wait for Gitea to be ready
-      ansible.builtin.uri:
-        url: http://gitea:3000/api/v1/version
-        method: GET
-        status_code: 200
-      register: gitea_ready
-      until: gitea_ready.status == 200
-      delay: 5
-      retries: 12
+#   tasks:
+#     - name: Wait for Gitea to be ready
+#       ansible.builtin.uri:
+#         url: http://gitea:3000/api/v1/version
+#         method: GET
+#         status_code: 200
+#       register: gitea_ready
+#       until: gitea_ready.status == 200
+#       delay: 5
+#       retries: 12
 
-    - name: Create repo for project via API
-      ansible.builtin.uri:
-        url: http://gitea:3000/api/v1/user/repos
-        method: POST
-        body_format: json
-        body:
-          name: workshop_project
-          auto_init: false
-          private: false
-        force_basic_auth: true
-        url_password: "{{ student_password }}"
-        url_username: "{{ student_user }}"
-        status_code: [201, 409]
+#     - name: Create repo for project via API
+#       ansible.builtin.uri:
+#         url: http://gitea:3000/api/v1/user/repos
+#         method: POST
+#         body_format: json
+#         body:
+#           name: workshop_project
+#           auto_init: false
+#           private: false
+#         force_basic_auth: true
+#         url_password: "{{ student_password }}"
+#         url_username: "{{ student_user }}"
+#         status_code: [201, 409]
 
-    - name: Create repo dir
-      ansible.builtin.file:
-        path: "/tmp/workshop_project"
-        state: directory
-        mode: 0755
+#     - name: Create repo dir
+#       ansible.builtin.file:
+#         path: "/tmp/workshop_project"
+#         state: directory
+#         mode: 0755
 
-    - name: Configure git to use main repo by default
-      community.general.git_config:
-        name: init.defaultBranch
-        scope: global
-        value: main
-      tags:
-        - git
+#     - name: Configure git to use main repo by default
+#       community.general.git_config:
+#         name: init.defaultBranch
+#         scope: global
+#         value: main
+#       tags:
+#         - git
 
-    - name: Initialise track repo
-      ansible.builtin.command:
-        cmd: /usr/bin/git init
-        chdir: "/tmp/workshop_project"
-        creates: "/tmp/workshop_project/.git" 
+#     - name: Initialise track repo
+#       ansible.builtin.command:
+#         cmd: /usr/bin/git init
+#         chdir: "/tmp/workshop_project"
+#         creates: "/tmp/workshop_project/.git" 
 
-    - name: Configure git to store credentials
-      community.general.git_config:
-        name: credential.helper
-        scope: global
-        value: store --file /tmp/git-creds
+#     - name: Configure git to store credentials
+#       community.general.git_config:
+#         name: credential.helper
+#         scope: global
+#         value: store --file /tmp/git-creds
 
-    - name: Configure repo dir as git safe dir
-      community.general.git_config:
-        name: safe.directory
-        scope: global
-        value: "/tmp/workshop_project"
+#     - name: Configure repo dir as git safe dir
+#       community.general.git_config:
+#         name: safe.directory
+#         scope: global
+#         value: "/tmp/workshop_project"
 
-    - name: Store repo credentials in git-creds file
-      ansible.builtin.copy:
-        dest: /tmp/git-creds
-        mode: 0644
-        content: "http://{{ student_user }}:{{ student_password }}@gitea:3000"
+#     - name: Store repo credentials in git-creds file
+#       ansible.builtin.copy:
+#         dest: /tmp/git-creds
+#         mode: 0644
+#         content: "http://{{ student_user }}:{{ student_password }}@gitea:3000"
 
-    - name: Configure git username
-      community.general.git_config:
-        name: user.name
-        scope: global
-        value: "{{ student_user }}"
+#     - name: Configure git username
+#       community.general.git_config:
+#         name: user.name
+#         scope: global
+#         value: "{{ student_user }}"
 
-    - name: Configure git email address
-      community.general.git_config:
-        name: user.email
-        scope: global
-        value: "{{ student_user }}@local"
+#     - name: Configure git email address
+#       community.general.git_config:
+#         name: user.email
+#         scope: global
+#         value: "{{ student_user }}@local"
 
-    - name: Create generic README file
-      ansible.builtin.copy:
-        dest: /tmp/workshop_project/README.md
-        content: |
-          # Windows Getting Started Workshop
+#     - name: Create generic README file
+#       ansible.builtin.copy:
+#         dest: /tmp/workshop_project/README.md
+#         content: |
+#           # Windows Getting Started Workshop
           
-          This repository will be used during the Windows Getting Started Workshop.
+#           This repository will be used during the Windows Getting Started Workshop.
           
-          ## Getting Started
+#           ## Getting Started
           
-          Follow the lab instructions to begin working with Ansible and Windows automation.
-        mode: '0644'
+#           Follow the lab instructions to begin working with Ansible and Windows automation.
+#         mode: '0644'
 
-    - name: Add remote origin to repo
-      ansible.builtin.command:
-        cmd: "{{ item }}"
-        chdir: "/tmp/workshop_project"   
-      register: __output
-      changed_when: __output.rc == 0
-      loop:
-        - "git remote add origin http://gitea:3000/{{ student_user }}/workshop_project.git"
-        - "git checkout -b main"
-        - "git add ."
-        - "git commit -m'Initial commit'"
-        - "git push -u origin main --force"
-EOF
+#     - name: Add remote origin to repo
+#       ansible.builtin.command:
+#         cmd: "{{ item }}"
+#         chdir: "/tmp/workshop_project"   
+#       register: __output
+#       changed_when: __output.rc == 0
+#       loop:
+#         - "git remote add origin http://gitea:3000/{{ student_user }}/workshop_project.git"
+#         - "git checkout -b main"
+#         - "git add ."
+#         - "git commit -m'Initial commit'"
+#         - "git push -u origin main --force"
+# EOF
 
 # Controller setup playbook
 cat <<EOF | tee /tmp/controller-setup.yml
@@ -272,8 +272,8 @@ pip3 install pywinrm
 export ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/
 
 # Execute the setup playbooks
-echo "=== Running Git/Gitea Setup ==="
-ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
+# echo "=== Running Git/Gitea Setup ==="
+# ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
 echo "=== Running AAP Controller Setup ==="
 ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
