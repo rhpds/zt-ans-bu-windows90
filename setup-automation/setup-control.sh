@@ -32,7 +32,8 @@ controller_validate_certs: false
 ansible_python_interpreter: /usr/bin/python3
 controller_ee: Windows Workshop Execution Environment
 student_user: student
-student_password: Learn_Ans1ble!
+win_student_password: Learn_Ans1ble!
+student_password: learn_ansible
 controller_admin_user: admin
 controller_admin_password: "ansible123!"
 host_key_checking: false
@@ -301,7 +302,7 @@ cat <<EOF | tee /tmp/windows-bootstrap.yml
     - name: Ensure student user exists
       ansible.windows.win_user:
         name: "{{ student_user }}"
-        password: "{{ student_password }}"
+        password: "{{ win_student_password }}"
         state: present
         password_never_expires: yes
     - name: Ensure student is local admin

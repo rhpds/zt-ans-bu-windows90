@@ -140,12 +140,12 @@ virtualmachines:
     interface_model: "e1000e"
     networks:
       - default
-    userdata: |-
-      #ps1
-      iwr -UseBasicParsing -Uri https://raw.githubusercontent.com/nmartins0611/windows_getting_started_instruqt/main/winrm_setup.ps1 -OutFile C:\winrm_setup.ps1
-      PowerShell -ExecutionPolicy Bypass -File C:\winrm_setup.ps1
-      net user student 'learn_ansible' /add
-      net localgroup Administrators student /add
+    # userdata: |-
+    #   #ps1
+    #   iwr -UseBasicParsing -Uri https://raw.githubusercontent.com/nmartins0611/windows_getting_started_instruqt/main/winrm_setup.ps1 -OutFile C:\winrm_setup.ps1
+    #   PowerShell -ExecutionPolicy Bypass -File C:\winrm_setup.ps1
+    #   net user student 'learn_ansible' /add
+    #   net localgroup Administrators student /add
     services:
       - name: windows
         ports:
