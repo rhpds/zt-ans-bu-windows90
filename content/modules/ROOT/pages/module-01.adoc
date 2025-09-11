@@ -55,7 +55,7 @@ Complete the form using the following entries:
 | Organization | Default
 | Type | Machine
 | Username | student
-| Password | learn_ansible
+| Password | Learn_Ans1ble!
 |===
 
 image::1-controller-add-machine-credential.png[Add Machine Credential]
@@ -81,7 +81,7 @@ with the following details:
 | Password | learn_ansible |
 |===
 
-Select Create Credential image:create_cred.png[Create Cred] to save
+Select image:create_cred.png[Create Cred] to save
 
 image::1-controller-add-scm-credential.png[Add SCM Credential]
 
