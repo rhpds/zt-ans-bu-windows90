@@ -14,7 +14,7 @@ Starting at this task we are going to use Visual Studio Code as our editor. In a
 
 == ☑️ Creating a Directory Structure & Files for your Playbook
 
-There is a link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html[best practice] on the preferred directory structures for playbooks. We strongly encourage you to read and understand these practices as you develop your Ansible skills. That said, our playbook today is very basic and a complex directory structure is not necessary.
+There is a link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html[best practice^] on the preferred directory structures for playbooks. We strongly encourage you to read and understand these practices as you develop your Ansible skills. That said, our playbook today is very basic and a complex directory structure is not necessary.
 
 Instead, we are going to create a very simple directory structure for our playbook, and add just a couple of files.
 

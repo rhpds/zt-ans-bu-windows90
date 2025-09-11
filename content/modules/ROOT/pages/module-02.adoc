@@ -44,7 +44,7 @@ Click the *Next* button.
 [cols="1,2,1",options="header"]
 |===
 | Key | Value | Note
-| Execution environment | windows workshop execution environment |
+| Execution environment | Windows Workshop Execution Environment |
 |===
 
 Click the *Next* button.
@@ -52,8 +52,7 @@ Click the *Next* button.
 [cols="1,1,1",options="header"]
 |===
 | Key | Value | Note
-| Machine credential | Workshop Credential |
-| | |
+| Machine credential | Windows Credential |
 |===
 
 Once you click *LAUNCH* you will be redirected to the Job log. Every
@@ -81,7 +80,7 @@ We will now take a look at your Windows node configuration. The `setup` module q
 
 The `setup` module will run automatically at the beginning of every playbook, unless configured not to, so that this data is always available to your playbook.
 
-Lets go ahead and run the `setup` module to look at the output. Fill out the *EXECUTE COMMAND* form again with this info.
+Lets go ahead and run the `setup` module to look at the output. Fill out the *RUN COMMAND* form again with this info.
 
 [cols="1,1,2",options="header"]
 |===
@@ -96,7 +95,7 @@ Click the *Next* button.
 [cols="1,2,1",options="header"]
 |===
 | Key | Value | Note
-| Execution environment | windows workshop execution environment |
+| Execution environment | Windows Workshop Execution Environment |
 |===
 
 Click the *Next* button.
@@ -104,7 +103,7 @@ Click the *Next* button.
 [cols="1,1,1",options="header"]
 |===
 | Key | Value | Note
-| Machine credential | Workshop Credential |
+| Machine credential | Windows Credential |
 | | |
 |===
 
@@ -133,7 +132,7 @@ Click the *Next* button.
 [cols="1,2,1",options="header"]
 |===
 | Key | Value | Note
-| Execution environment | windows workshop execution environment |
+| Execution environment | Windows Workshop Execution Environment |
 |===
 
 Click the *Next* button.
@@ -141,7 +140,7 @@ Click the *Next* button.
 [cols="1,1,1",options="header"]
 |===
 | Key | Value | Note
-| Machine credential | Workshop Credential |
+| Machine credential | Windows Credential |
 |===
 
 You will notice that the log text is now orange. This is to denote that a change was made on the system versus the green that shows that no changes were made earlier.

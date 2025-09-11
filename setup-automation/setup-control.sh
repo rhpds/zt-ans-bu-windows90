@@ -215,7 +215,7 @@ cat <<EOF | tee /tmp/controller-setup.yml
 
     - name: Create Group for inventory
       ansible.controller.group:
-        name: Windows Servers
+        name: Windows_Servers
         description: Windows Server Group
         inventory: "Workshop Inventory"
         hosts:
