@@ -166,8 +166,8 @@ A static inventory has already been created for you today. Let's take a look at 
 
 === Step 1
 
-Click *Inventories* from the left hand panel under Automation Execution > Infrastructure. You will see the
-preconfigured inventory listed. Click the inventory's name *Workshop Inventory* or the image:edit_inv.png[Edit Inventory] button. 
+Click *Inventories* from the left hand panel under *Automation Execution* > *Infrastructure*. You will see the
+preconfigured inventory listed. Click the inventory's name *Workshop Inventory*. 
 
 === Step 2
 
