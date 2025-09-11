@@ -32,7 +32,7 @@ controller_validate_certs: false
 ansible_python_interpreter: /usr/bin/python3
 controller_ee: Windows Workshop Execution Environment
 student_user: student
-student_password: learn_ansible
+student_password: Learn_Ans1ble!
 controller_admin_user: admin
 controller_admin_password: "ansible123!"
 host_key_checking: false
