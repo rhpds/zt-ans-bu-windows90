@@ -262,6 +262,7 @@ EOF
 # Install necessary collections
 ansible-galaxy collection install community.general
 ansible-galaxy collection install microsoft.ad
+ansible-galaxy collection install ansible.windows
 ansible-galaxy collection install ansible.controller
 
 # Install pip3 and pywinrm for Windows connectivity
