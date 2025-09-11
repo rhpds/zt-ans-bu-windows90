@@ -186,12 +186,6 @@ virtualmachines:
     networks:
       - default
     services:
-      # - name: vscode-http
-      #   ports:
-      #     - port: 80
-      #       protocol: TCP
-      #       targetPort: 80
-      #       name: vscode
       - name: vscode-8080
         ports:
           - port: 8080
@@ -199,12 +193,6 @@ virtualmachines:
             targetPort: 8080
             name: vscode
     routes:
-      # - name: vscode-http
-      #   host: vscode
-      #   service: vscode-http
-      #   targetPort: 80
-      #   tls: true
-      #   tls_termination: Edge
       - name: vscode-8080
         host: vscode
         service: vscode-8080
