@@ -54,6 +54,7 @@ play and then understanding what each line accomplishes.
 ---
 - name: Install the iis web service
   hosts: windows
+
 ----
 
 * `---` Defines the beginning of YAML
@@ -167,7 +168,7 @@ Once the push is complete, you are ready to automate!
 ====
 Ansible (well, YAML really) can be a bit particular about formatting
 especially around indentation/spacing. When you get back to the
-office, read up on this link:https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html[YAML Syntax] a bit more and it will save you some headaches later. In the meantime, your completed playbook should look like this. Take note of the spacing and alignment.
+office, read up on this link:https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html[YAML Syntax^] a bit more and it will save you some headaches later. In the meantime, your completed playbook should look like this. Take note of the spacing and alignment.
 ====
 
 [source,yaml]
