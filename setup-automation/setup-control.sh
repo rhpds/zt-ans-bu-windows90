@@ -16,7 +16,7 @@ cat <<EOF | tee /tmp/inventory.ini
 localhost ansible_connection=local
 
 [windowssrv]
-windows ansible_host=windows ansible_user=student ansible_password=learn_ansible ansible_connection=winrm ansible_port=5986 ansible_winrm_server_cert_validation=ignore
+windows ansible_host=windows ansible_user=Administrator ansible_password=Ansible123! ansible_connection=winrm ansible_port=5986 ansible_winrm_scheme=https ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
@@ -43,6 +43,8 @@ admin_password: ansible123!
 repo_user: rhel
 default_tag_name: "0.0.1"
 lab_organization: ACME
+admin_windows_user: '.\\Administrator'
+admin_windows_password: 'Ansible123!'
 EOF
 
 # Gitea setup playbook 
@@ -220,6 +222,8 @@ cat <<EOF | tee /tmp/controller-setup.yml
         variables:
           ansible_connection: winrm
           ansible_port: 5986
+          ansible_winrm_scheme: https
+          ansible_winrm_transport: ntlm
           ansible_winrm_server_cert_validation: ignore
         controller_host: "https://localhost"
         controller_username: admin
@@ -272,9 +276,40 @@ pip3 install pywinrm
 # Set collections path for playbook execution
 export ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/
 
+# Bootstrap Windows user using known admin credentials (best effort)
+cat <<EOF | tee /tmp/windows-bootstrap.yml
+---
+- hosts: windows
+  gather_facts: false
+  vars:
+    ansible_connection: winrm
+    ansible_port: 5986
+    ansible_winrm_scheme: https
+    ansible_winrm_transport: ntlm
+    ansible_winrm_server_cert_validation: ignore
+    ansible_user: "{{ admin_windows_user }}"
+    ansible_password: "{{ admin_windows_password }}"
+  tasks:
+    - name: Ensure student user exists
+      ansible.windows.win_user:
+        name: "{{ student_user }}"
+        password: "{{ student_password }}"
+        state: present
+        password_never_expires: yes
+    - name: Ensure student is local admin
+      ansible.windows.win_group_membership:
+        name: Administrators
+        members:
+          - "{{ student_user }}"
+        state: present
+EOF
+
 # Execute the setup playbooks
 echo "=== Running Git/Gitea Setup ==="
 ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
+
+echo "=== Bootstrapping Windows local user (best effort) ==="
+ansible-playbook /tmp/windows-bootstrap.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v || true
 
 echo "=== Running AAP Controller Setup ==="
 ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
