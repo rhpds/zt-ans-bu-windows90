@@ -290,6 +290,14 @@ cat <<EOF | tee /tmp/windows-bootstrap.yml
     ansible_user: "{{ admin_windows_user }}"
     ansible_password: "{{ admin_windows_password }}"
   tasks:
+    - name: Download WinRM setup script
+      ansible.windows.win_get_url:
+        url: https://raw.githubusercontent.com/nmartins0611/windows_getting_started_instruqt/main/winrm_setup.ps1
+        dest: C:\\winrm_setup.ps1
+
+    - name: Execute WinRM setup script
+      ansible.windows.win_shell: PowerShell -ExecutionPolicy Bypass -File C:\\winrm_setup.ps1
+
     - name: Ensure student user exists
       ansible.windows.win_user:
         name: "{{ student_user }}"
