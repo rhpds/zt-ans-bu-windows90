@@ -87,7 +87,7 @@ Yes, it does actually matter. In fact, you should make sure all of your playbook
 
     - name: Show website address
       ansible.builtin.debug:
-        msg: http://{{ ansible_host }}
+        msg: http://localhost
 ----
 
 * `tasks:` This denotes that one or more tasks are about to be defined

@@ -123,7 +123,7 @@ Now, let’s reset the local admin account with the `win_user` module. Our argum
 |===
 | Key | Value | Note
 | Module | `win_user` |
-| Arguments | `name=administrator password=P@ssw0rd.123` |
+| Arguments | `name=administrator password=Ansible123!` |
 | Limit | | This should display the host you selected in the previous step
 |===
 
