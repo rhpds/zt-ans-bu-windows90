@@ -311,11 +311,18 @@ cat <<EOF | tee /tmp/windows-bootstrap.yml
           - "{{ student_user }}"
         state: present
 
+    - name: Install Chocolatey
+      ansible.windows.win_shell: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+      args:
+        executable: powershell.exe
+
     - name: Install Microsoft Edge via Chocolatey
-      community.windows.win_chocolatey:
-        name: microsoft-edge
-        state: present
-        source: https://community.chocolatey.org/api/v2/
+      ansible.windows.win_shell: choco install microsoft-edge -y --no-progress
+      args:
+        executable: powershell.exe
 EOF
 
 # Execute the setup playbooks
