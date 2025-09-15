@@ -55,7 +55,7 @@ Complete the form using the following entries:
 | Organization | Default
 | Type | Machine
 | Username | student
-| Password | Learn_Ans1ble!
+| Password | Passw0rd!
 |===
 
 image::1-controller-add-machine-credential.png[Add Machine Credential]
