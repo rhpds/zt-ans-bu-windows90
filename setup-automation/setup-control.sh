@@ -325,12 +325,12 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
         type: dword
         state: present
 
-    - name: Disable Server Manager scheduled task (extra hardening)
-      ansible.windows.win_scheduled_task:
-        name: ServerManager
-        path: \Microsoft\Windows\Server Manager\
-        state: disabled
-      ignore_errors: true
+    # - name: Disable Server Manager scheduled task (extra hardening)
+    #   ansible.windows.win_scheduled_task:
+    #     name: ServerManager
+    #     path: \Microsoft\Windows\Server Manager\
+    #     state: disabled
+    #   ignore_errors: true
 
     - name: Ensure .NET Framework 4.8 feature is installed
       ansible.windows.win_feature:
