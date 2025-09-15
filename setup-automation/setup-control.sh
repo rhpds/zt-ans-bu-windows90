@@ -277,7 +277,7 @@ pip3 install pywinrm
 export ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/
 
 # Bootstrap Windows user using known admin credentials (best effort)
-cat <<EOF | tee /tmp/windows-bootstrap.yml
+cat <<'EOF' | tee /tmp/windows-bootstrap.yml
 ---
 - hosts: windows
   gather_facts: false
@@ -312,14 +312,11 @@ cat <<EOF | tee /tmp/windows-bootstrap.yml
         state: present
 
     - name: Ensure .NET Framework 4.8 feature is installed
-      ansible.windows.win_shell: |
-        Import-Module ServerManager
-        $feature = Get-WindowsFeature -Name NET-Framework-45-Features
-        if (-not $feature.Installed) {
-          Install-WindowsFeature -Name NET-Framework-45-Features -IncludeAllSubFeature -IncludeManagementTools
-        }
-      args:
-        executable: powershell.exe
+      ansible.windows.win_feature:
+        name: NET-Framework-45-Features
+        state: present
+        include_sub_features: true
+        include_management_tools: true
 
     - name: Install Chocolatey
       ansible.windows.win_shell: |
@@ -334,10 +331,14 @@ cat <<EOF | tee /tmp/windows-bootstrap.yml
         msg: "Reboot to finalize Chocolatey/.NET installation"
         pre_reboot_delay: 5
 
-    - name: Install Microsoft Edge via Chocolatey
+    - name: Install Microsoft Edge via Chocolatey (with retries)
       ansible.windows.win_shell: choco install microsoft-edge -y --no-progress
       args:
         executable: powershell.exe
+      register: edge_install
+      retries: 3
+      delay: 20
+      until: edge_install.rc == 0
 EOF
 
 # Execute the setup playbooks
