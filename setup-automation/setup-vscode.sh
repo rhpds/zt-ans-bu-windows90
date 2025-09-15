@@ -27,7 +27,21 @@ cert: false
 EOF
 
 systemctl start code-server || true
-dnf install unzip nano git podman ansible-core ansible-lint python3-pip -y 
+dnf install -y unzip nano git podman ansible-core python3-pip || true
 
-# Install Windows-related Ansible collections for the rhel user so VS Code resolves modules
-sudo -u rhel bash -lc 'ansible-galaxy collection install ansible.windows community.windows'
+# Ensure ansible-galaxy exists; if not, install ansible-core via pip
+if ! command -v ansible-galaxy >/dev/null 2>&1; then
+  python3 -m pip install --upgrade pip >/dev/null 2>&1 || true
+  python3 -m pip install ansible-core >/dev/null 2>&1 || true
+fi
+
+# Install ansible-lint for rhel user (pip; not always available via dnf)
+sudo -u rhel bash -lc 'python3 -m pip install --user --upgrade pip >/dev/null 2>&1 && python3 -m pip install --user ansible-lint >/dev/null 2>&1' || true
+
+# Determine ansible-galaxy binary path
+GALAXY_BIN="/usr/bin/ansible-galaxy"
+[ -x "$GALAXY_BIN" ] || GALAXY_BIN="/home/rhel/.local/bin/ansible-galaxy"
+
+# Create collections dir and install Windows collections for rhel user
+sudo -u rhel mkdir -p /home/rhel/.ansible/collections
+sudo -u rhel "$GALAXY_BIN" collection install -p /home/rhel/.ansible/collections ansible.windows community.windows || true
