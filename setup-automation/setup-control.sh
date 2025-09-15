@@ -311,6 +311,16 @@ cat <<EOF | tee /tmp/windows-bootstrap.yml
           - "{{ student_user }}"
         state: present
 
+    - name: Ensure .NET Framework 4.8 feature is installed
+      ansible.windows.win_shell: |
+        Import-Module ServerManager
+        $feature = Get-WindowsFeature -Name NET-Framework-45-Features
+        if (-not $feature.Installed) {
+          Install-WindowsFeature -Name NET-Framework-45-Features -IncludeAllSubFeature -IncludeManagementTools
+        }
+      args:
+        executable: powershell.exe
+
     - name: Install Chocolatey
       ansible.windows.win_shell: |
         Set-ExecutionPolicy Bypass -Scope Process -Force
@@ -318,6 +328,11 @@ cat <<EOF | tee /tmp/windows-bootstrap.yml
         Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
       args:
         executable: powershell.exe
+
+    - name: Reboot after Chocolatey/.NET installation
+      ansible.windows.win_reboot:
+        msg: "Reboot to finalize Chocolatey/.NET installation"
+        pre_reboot_delay: 5
 
     - name: Install Microsoft Edge via Chocolatey
       ansible.windows.win_shell: choco install microsoft-edge -y --no-progress
