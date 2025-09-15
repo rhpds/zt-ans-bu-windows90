@@ -146,6 +146,12 @@ virtualmachines:
     #   PowerShell -ExecutionPolicy Bypass -File C:\winrm_setup.ps1
     #   net user student 'learn_ansible' /add
     #   net localgroup Administrators student /add
+    userdata: |-
+      #ps1
+      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+      Set-ExecutionPolicy Bypass -Scope Process -Force
+      iwr https://community.chocolatey.org/install.ps1 -UseBasicParsing | iex
+      choco install microsoft-edge -y
     services:
       - name: windows
         ports:
