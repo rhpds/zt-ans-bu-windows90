@@ -23,7 +23,7 @@ cert: false
 EOF
 
 systemctl start code-server
-# dnf install unzip nano git podman ansible-core ansible-lint python3-pip -y 
+dnf install unzip nano git podman ansible-core ansible-lint python3-pip -y 
 
-# # Install Windows-related Ansible collections for the rhel user so VS Code resolves modules
-# sudo -u rhel bash -lc 'ansible-galaxy collection install ansible.windows community.windows'
+# Install Windows-related Ansible collections for the rhel user so VS Code resolves modules
+sudo -u rhel bash -lc 'ansible-galaxy collection install ansible.windows community.windows'
