@@ -267,6 +267,7 @@ ansible-galaxy collection install community.general
 ansible-galaxy collection install microsoft.ad
 ansible-galaxy collection install ansible.windows
 ansible-galaxy collection install ansible.controller
+ansible-galaxy collection install community.windows
 
 # Install pip3 and pywinrm for Windows connectivity
 dnf install -y python3-pip
@@ -309,6 +310,12 @@ cat <<EOF | tee /tmp/windows-bootstrap.yml
         members:
           - "{{ student_user }}"
         state: present
+
+    - name: Install Microsoft Edge via Chocolatey
+      community.windows.win_chocolatey:
+        name: microsoft-edge
+        state: present
+        source: https://community.chocolatey.org/api/v2/
 EOF
 
 # Execute the setup playbooks
