@@ -18,7 +18,9 @@ containers:
       GITEA__repository__ENABLE_PUSH_CREATE_USER: "true"
       GITEA__repository__ONLY_ALLOW_PUSH_IF_GITEA_ENVIRONMENT_SET: "false"
       GITEA__security__INSTALL_LOCK: "true"
-      GITEA__server__SSH_DOMAIN: http://gitea
+      GITEA__server__DOMAIN: gitea
+      GITEA__server__ROOT_URL: http://gitea:3000/
+      GITEA__server__SSH_DOMAIN: gitea
       GITEA__service__DISABLE_REGISTRATION: "true"
       GITEA__service__REQUIRE_SIGNIN_VIEW: "false"
       GITEA__webhook__ALLOWED_HOST_LIST: '*'
@@ -28,7 +30,7 @@ containers:
       - name: gitea-data
         mountPath: /data/
       - name: gitea-etc
-        mountPath: /etc/gitea
+        mountPath: /etc/gitea/
     volumes:
       - name: gitea-data
         emptyDir: {}
@@ -38,16 +40,9 @@ containers:
         emptyDir: {}
     commands: 
         - gitea admin user create --admin --username gitea --password gitea --email dummy@dummy.com --must-change-password=false
-        - >
-          curl -X POST -H "accept: application/json" -H "Content-Type: application/json"
-          -u 'gitea:gitea' 
-          -d '{"username": "student", "full_name": "student", "description": "student"}'
-          http://localhost:3000/api/v1/orgs
-        - >
-          curl -X POST -H "accept: application/json" -H "Content-Type: application/json"
-          -u 'gitea:gitea'
-          -d '{"clone_addr": "https://github.com/ansible-tmm/windows_getting_started_90.git", "repo_name": "workshop_project", "owner": "student", "uid": 2, "private": false}'
-          http://localhost:3000/api/v1/repos/migrate
+        - sleep 10
+        - gitea admin user create --admin --username student --password learn_ansible --must-change-password=false --email student@localhost
+        - sleep 10
     memory: 2Gi
     services:
       - name: gitea
@@ -145,6 +140,18 @@ virtualmachines:
     interface_model: "e1000e"
     networks:
       - default
+    # userdata: |-
+    #   #ps1
+    #   iwr -UseBasicParsing -Uri https://raw.githubusercontent.com/nmartins0611/windows_getting_started_instruqt/main/winrm_setup.ps1 -OutFile C:\winrm_setup.ps1
+    #   PowerShell -ExecutionPolicy Bypass -File C:\winrm_setup.ps1
+    #   net user student 'learn_ansible' /add
+    #   net localgroup Administrators student /add
+    userdata: |-
+      #ps1
+      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+      Set-ExecutionPolicy Bypass -Scope Process -Force
+      iwr https://community.chocolatey.org/install.ps1 -UseBasicParsing | iex
+      choco install microsoft-edge -y
     services:
       - name: windows
         ports:
@@ -185,12 +192,6 @@ virtualmachines:
     networks:
       - default
     services:
-      # - name: vscode-http
-      #   ports:
-      #     - port: 80
-      #       protocol: TCP
-      #       targetPort: 80
-      #       name: vscode
       - name: vscode-8080
         ports:
           - port: 8080
@@ -198,12 +199,6 @@ virtualmachines:
             targetPort: 8080
             name: vscode
     routes:
-      # - name: vscode-http
-      #   host: vscode
-      #   service: vscode-http
-      #   targetPort: 80
-      #   tls: true
-      #   tls_termination: Edge
       - name: vscode-8080
         host: vscode
         service: vscode-8080

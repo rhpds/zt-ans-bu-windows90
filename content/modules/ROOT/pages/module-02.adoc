@@ -21,7 +21,7 @@ want to run an ad-hoc Command on. Select the *Run Command* button.
 
 image::2-adhoc-run-command.png[Run Command]
 
-This will pop up the *Execute Command* window. From here is where we
+This will pop up the *Run Command* window. From here is where we
 can run a single task against our hosts.
 
 Let’s start with something really basic - pinging a host. The `win_ping`
@@ -44,7 +44,7 @@ Click the *Next* button.
 [cols="1,2,1",options="header"]
 |===
 | Key | Value | Note
-| Execution environment | windows workshop execution environment |
+| Execution environment | Windows Workshop Execution Environment |
 |===
 
 Click the *Next* button.
@@ -52,11 +52,10 @@ Click the *Next* button.
 [cols="1,1,1",options="header"]
 |===
 | Key | Value | Note
-| Machine credential | Workshop Credential |
-| | |
+| Machine credential | Windows Credential |
 |===
 
-Once you click *LAUNCH* you will be redirected to the Job log. Every
+Once you click *FINSIH* you will be redirected to the Job log. Every
 job and action in Automation Controller is recorded and stored. These logs can also be exported automatically to another
 logging system such as Splunk or ELK.
 
@@ -81,7 +80,7 @@ We will now take a look at your Windows node configuration. The `setup` module q
 
 The `setup` module will run automatically at the beginning of every playbook, unless configured not to, so that this data is always available to your playbook.
 
-Lets go ahead and run the `setup` module to look at the output. Fill out the *EXECUTE COMMAND* form again with this info.
+Lets go ahead and run the `setup` module to look at the output. Fill out the *RUN COMMAND* form again with this info.
 
 [cols="1,1,2",options="header"]
 |===
@@ -96,7 +95,7 @@ Click the *Next* button.
 [cols="1,2,1",options="header"]
 |===
 | Key | Value | Note
-| Execution environment | windows workshop execution environment |
+| Execution environment | Windows Workshop Execution Environment |
 |===
 
 Click the *Next* button.
@@ -104,7 +103,7 @@ Click the *Next* button.
 [cols="1,1,1",options="header"]
 |===
 | Key | Value | Note
-| Machine credential | Workshop Credential |
+| Machine credential | Windows Credential |
 | | |
 |===
 
@@ -124,7 +123,7 @@ Now, let’s reset the local admin account with the `win_user` module. Our argum
 |===
 | Key | Value | Note
 | Module | `win_user` |
-| Arguments | `name=administrator password=P@ssw0rd.123` |
+| Arguments | `name=administrator password=Ansible123!` |
 | Limit | | This should display the host you selected in the previous step
 |===
 
@@ -133,7 +132,7 @@ Click the *Next* button.
 [cols="1,2,1",options="header"]
 |===
 | Key | Value | Note
-| Execution environment | windows workshop execution environment |
+| Execution environment | Windows Workshop Execution Environment |
 |===
 
 Click the *Next* button.
@@ -141,7 +140,7 @@ Click the *Next* button.
 [cols="1,1,1",options="header"]
 |===
 | Key | Value | Note
-| Machine credential | Workshop Credential |
+| Machine credential | Windows Credential |
 |===
 
 You will notice that the log text is now orange. This is to denote that a change was made on the system versus the green that shows that no changes were made earlier.

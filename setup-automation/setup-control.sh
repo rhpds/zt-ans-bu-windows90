@@ -1,64 +1,38 @@
 #!/bin/bash
+echo "=== Windows Workshop Setup ==="
 
-# Initial system and user setup
-dnf install -y python3-pip
-dnf install -y python3-pip python3-libsemanage
-
-cp -a /root/.ssh/* /home/rhel/.ssh/.
-chown -R rhel:rhel /home/rhel/.ssh
-
+# Create a writable workspace for the rhel user used by exercises
 mkdir -p /home/rhel/ansible
 chown -R rhel:rhel /home/rhel/ansible
-chmod 777 /home/rhel/ansible
+chmod 755 /home/rhel/ansible
 
-# Git global configuration
+# Set a generic Git identity used in the lab environment
 git config --global user.email "student@redhat.com"
 git config --global user.name "student"
 
-# Create inventory file
+# Create Ansible inventory
 cat <<EOF | tee /tmp/inventory.ini
 [ctrlnodes]
-controller.acme.example.com ansible_host=controller ansible_user=rhel ansible_connection=local
-
-[ciservers]
-# gitea ansible_user=root ansible_connection=docker
-gitea ansible_user=root
-jenkins ansible_user=root
+localhost ansible_connection=local
 
 [windowssrv]
-windows ansible_host=domainctl ansible_user=instruqt ansible_password=Passw0rd! ansible_connection=winrm ansible_port=5986 ansible_winrm_server_cert_validation=ignore
-
-[ciservers:vars]
-ansible_become_method=su
+windows ansible_host=windows ansible_user=Administrator ansible_password=Ansible123! ansible_connection=winrm ansible_port=5986 ansible_winrm_scheme=https ansible_winrm_transport=ntlm ansible_winrm_server_cert_validation=ignore
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 EOF
 
-# Create lab setup script
-cat <<EOF | tee /tmp/lab-setup.sh
-#!/bin/bash
-dnf install git nano -y
-mkdir -p /tmp/cache
-git clone https://github.com/nmartins0611/windows_getting_started_instruqt.git /tmp/cache
-
-# Configure Repo for builds
-ansible-playbook /tmp/git-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
-
-# Configure Controller
-ansible-playbook /tmp/controller-setup.yml -i /tmp/inventory.ini -e @/tmp/track-vars.yml
-EOF
-
-# Create variables file
+# Create lab variables
 cat <<EOF | tee /tmp/track-vars.yml
 ---
 # config vars
-controller_hostname: controller
+controller_hostname: localhost
 controller_validate_certs: false
 ansible_python_interpreter: /usr/bin/python3
-controller_ee: windows workshop execution environment
+controller_ee: Windows Workshop Execution Environment
 student_user: student
+win_student_password: Passw0rd!
 student_password: learn_ansible
 controller_admin_user: admin
 controller_admin_password: "ansible123!"
@@ -70,37 +44,33 @@ admin_password: ansible123!
 repo_user: rhel
 default_tag_name: "0.0.1"
 lab_organization: ACME
+admin_windows_user: '.\\Administrator'
+admin_windows_password: 'Ansible123!'
 EOF
 
-# Create Gitea setup playbook (unchanged from original)
+# Gitea setup playbook 
 cat <<EOF | tee /tmp/git-setup.yml
+---
 # Gitea config
-- name: Configure Gitea host
-  hosts: gitea
+- name: Configure Git and Gitea repository
+  hosts: localhost
   gather_facts: false
-  become: true
+  connection: local
   tags:
     - gitea-config
 
   tasks:
-    - name: Install python3 Gitea
-      ansible.builtin.raw: /sbin/apk add python3
+    - name: Wait for Gitea to be ready
+      ansible.builtin.uri:
+        url: http://gitea:3000/api/v1/version
+        method: GET
+        status_code: 200
+      register: gitea_ready
+      until: gitea_ready.status == 200
+      delay: 5
+      retries: 12
 
-    - name: Install Gitea packages
-      community.general.apk:
-        name: subversion, tar
-        state: present
-
-    - name: Create repo users
-      ansible.builtin.command: "{{ item }}"
-      become_user: git
-      register: __output
-      failed_when: __output.rc not in [ 0, 1 ]
-      changed_when: '"user already exists" not in __output.stdout'
-      loop:
-        - "/usr/local/bin/gitea admin user create --admin --username {{ student_user }} --password {{ student_password }} --must-change-password=false --email {{ student_user }}@localhost"
-
-    - name: Create repo for project 
+    - name: Create repo for project via API
       ansible.builtin.uri:
         url: http://gitea:3000/api/v1/user/repos
         method: POST
@@ -132,7 +102,7 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.command:
         cmd: /usr/bin/git init
         chdir: "/tmp/workshop_project"
-        creates: "/workshop_project/.git" 
+        creates: "/tmp/workshop_project/.git" 
 
     - name: Configure git to store credentials
       community.general.git_config:
@@ -150,24 +120,32 @@ cat <<EOF | tee /tmp/git-setup.yml
       ansible.builtin.copy:
         dest: /tmp/git-creds
         mode: 0644
-        content: "http://{{ student_user }}:{{ student_password }}@{{ 'gitea:3000' | urlencode }}"
+        content: "http://{{ student_user }}:{{ student_password }}@gitea:3000"
 
     - name: Configure git username
       community.general.git_config:
         name: user.name
         scope: global
-        value: "{{ ansible_user }}"
+        value: "{{ student_user }}"
 
     - name: Configure git email address
       community.general.git_config:
         name: user.email
         scope: global
-        value: "{{ ansible_user }}@local"
+        value: "{{ student_user }}@local"
 
-    - name: Create generic ReadME
-      ansible.builtin.file:
-       path: /tmp/workshop_project/Readme
-       state: touch
+    - name: Create generic README file
+      ansible.builtin.copy:
+        dest: /tmp/workshop_project/README.md
+        content: |
+          # Windows Getting Started Workshop
+          
+          This repository will be used during the Windows Getting Started Workshop.
+          
+          ## Getting Started
+          
+          Follow the lab instructions to begin working with Ansible and Windows automation.
+        mode: '0644'
 
     - name: Add remote origin to repo
       ansible.builtin.command:
@@ -183,362 +161,213 @@ cat <<EOF | tee /tmp/git-setup.yml
         - "git push -u origin main --force"
 EOF
 
-############################ REVISED CONTROLLER CONFIG ############################
-
-# cat <<EOF | tee /tmp/controller-setup.yml
-# ## Controller setup
-# - name: Controller config for Windows Getting Started
-#   hosts: controller.acme.example.com
-#   gather_facts: false
-  
-#   vars:
-#     # Define common controller connection parameters here for reuse
-#     controller_auth_params:
-#       controller_host: "{{ controller_hostname }}"
-#       validate_certs: "{{ controller_validate_certs }}"
-
-#   tasks:
-#     - name: Ensure controller is online and responsive
-#       ansible.builtin.uri:
-#         url: "https://{{ controller_hostname }}/api/v2/ping/"
-#         method: GET
-#         user: "{{ controller_admin_user }}"
-#         password: "{{ controller_admin_password }}"
-#         validate_certs: "{{ controller_validate_certs }}"
-#         force_basic_auth: true
-#       register: controller_online
-#       until: controller_online.status == 200
-#       retries: 10
-#       delay: 5
-
-#     - name: Create an OAuth2 token for automation
-#       ansible.controller.token:
-#         description: 'Token for lab setup automation'
-#         scope: "write"
-#         state: present
-#         controller_username: "{{ controller_admin_user }}"
-#         controller_password: "{{ controller_admin_password }}"
-#         <<: *controller_auth_params # Merge in common connection params
-#       register: oauth_token
-
-#     # Now use the created token for all subsequent tasks
-#     - name: Add Organization
-#       ansible.controller.organization:
-#         name: "{{ lab_organization }}"
-#         description: "ACME Corp Organization"
-#         state: present
-#         controller_oauthtoken: "{{ oauth_token.token }}"
-#         <<: *controller_auth_params
-
-#     - name: Add Instruqt Windows EE
-#       ansible.controller.execution_environment:
-#         name: "{{ controller_ee }}"
-#         image: "quay.io/nmartins/windows_ee"
-#         pull: missing # Pulls if not present on the system
-#         organization: "{{ lab_organization }}"
-#         state: present
-#         controller_oauthtoken: "{{ oauth_token.token }}"
-#         <<: *controller_auth_params
-        
-#     - name: Create student admin user
-#       ansible.controller.user:
-#         username: "{{ student_user }}"
-#         password: "{{ student_password }}"
-#         email: "student@acme.example.com"
-#         is_superuser: true
-#         state: present
-#         controller_oauthtoken: "{{ oauth_token.token }}"
-#         <<: *controller_auth_params
-
-#     - name: Create Workshop Inventory
-#       ansible.controller.inventory:
-#         name: "Workshop Inventory"
-#         organization: "{{ lab_organization }}"
-#         state: present
-#         controller_oauthtoken: "{{ oauth_token.token }}"
-#         <<: *controller_auth_params
-
-#     - name: Create Host for Windows Server
-#       ansible.controller.host:
-#         name: "windows"
-#         inventory: "Workshop Inventory"
-#         state: present
-#         controller_oauthtoken: "{{ oauth_token.token }}"
-#         <<: *controller_auth_params
-
-#     - name: Create Group for Windows Servers
-#       ansible.controller.group:
-#         name: "Windows Servers"
-#         inventory: "Workshop Inventory"
-#         state: present
-#         variables: |
-#           ansible_connection: winrm
-#           ansible_port: 5986
-#           ansible_winrm_server_cert_validation: ignore
-#         controller_oauthtoken: "{{ oauth_token.token }}"
-#         <<: *controller_auth_params
-        
-#     - name: Associate windows host with the Windows Servers group
-#       ansible.controller.host:
-#         name: "windows"
-#         inventory: "Workshop Inventory"
-#         groups:
-#           - "Windows Servers"
-#         state: present
-#         controller_oauthtoken: "{{ oauth_token.token }}"
-#         <<: *controller_auth_params
-# EOF
-
-# # Install necessary collections and packages
-# ansible-galaxy collection install community.general
-# ansible-galaxy collection install microsoft.ad
-# ansible-galaxy collection install ansible.controller
-# pip3 install pywinrm
-
-# # Execute the setup
-# chmod +x /tmp/lab-setup.sh
-# sh /tmp/lab-setup.sh
-
-# # Install additional tools
-# sudo dnf clean all
-# sudo dnf install -y ansible-navigator ansible-lint nc
-# pip3.9 install yamllint
-
-# # ANSIBLE_COLLECTIONS_PATH=/tmp/ansible-automation-platform-containerized-setup-bundle-2.5-9-x86_64/collections/:/root/.ansible/collections/ansible_collections/ ansible-playbook -i /tmp/inventory /tmp/setup.yml
-
-# ###########################################
-
-
-
-
-
-
-
-
-
-
-
-############################ CONTROLLER CONFIG
-
+# Controller setup playbook
 cat <<EOF | tee /tmp/controller-setup.yml
-## Controller setup
-- name: Controller config for Windows Getting Started
-  hosts: controller.acme.example.com
-  gather_facts: true
-    
+---
+- name: Configure Windows Workshop Controller 
+  hosts: localhost
+  connection: local
+  collections:
+    - ansible.controller
+
   tasks:
-   # Create auth login token
-    - name: get auth token and restart automation-controller if it fails
-      block:
-        - name: Refresh facts
-          setup:
-
-        - name: Create oauth token
-          ansible.controller.token:
-            description: 'Instruqt lab'
-            scope: "write"
-            state: present
-            controller_host: controller
-            controller_username: "{{ controller_admin_user }}"
-            controller_password: "{{ controller_admin_password }}"
-            validate_certs: false
-          register: _auth_token
-          until: _auth_token is not failed
-          delay: 3
-          retries: 5
-      rescue:
-        - name: In rescue block for auth token
-          debug:
-            msg: "failed to get auth token. Restarting automation controller service"
-
-        - name: restart the controller service
-          ansible.builtin.service:
-            name: automation-controller
-            state: restarted
-
-        - name: Ensure tower/controller is online and working
-          uri:
-            url: https://localhost/api/v2/ping/
-            method: GET
-            user: "{{ admin_username }}"
-            password: "{{ admin_password }}"
-            validate_certs: false
-            force_basic_auth: true
-          register: controller_online
-          until: controller_online is success
-          delay: 3
-          retries: 5
-
-        - name: Retry getting auth token
-          ansible.controller.token:
-            description: 'Instruqt lab'
-            scope: "write"
-            state: present
-            controller_host: controller
-            controller_username: "{{ controller_admin_user }}"
-            controller_password: "{{ controller_admin_password }}"
-            validate_certs: false
-          register: _auth_token
-          until: _auth_token is not failed
-          delay: 3
-          retries: 5
-      always:
-        - name: Create fact.d dir
-          ansible.builtin.file:
-            path: "{{ custom_facts_dir }}"
-            state: directory
-            recurse: yes
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
-            mode: 0755
-          become: true
-
-        - name: Create _auth_token custom fact
-          ansible.builtin.copy:
-            content: "{{ _auth_token.ansible_facts }}"
-            dest: "{{ custom_facts_dir }}/{{ custom_facts_file }}"
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
-            mode: 0644
-          become: true
-      check_mode: false
-      when: ansible_local.custom_facts.controller_token is undefined
-      tags:
-        - auth-token
-
-    - name: refresh facts
-      setup:
-        filter:
-          - ansible_local
-      tags:
-        - always
-
-    - name: create auth token fact
-      ansible.builtin.set_fact:
-        auth_token: "{{ ansible_local.custom_facts.controller_token }}"
-        cacheable: true
-      check_mode: false
-      when: auth_token is undefined
-      tags:
-        - always
- 
-    - name: Ensure tower/controller is online and working
-      uri:
-        url: https://localhost/api/v2/ping/
-        method: GET
-        user: "{{ admin_username }}"
-        password: "{{ admin_password }}"
-        validate_certs: false
-        force_basic_auth: true
-      register: controller_online
-      until: controller_online is success
-      delay: 3
-      retries: 5
-      tags:
-        - controller-config
-
-# Controller objects
-    - name: Add Organization
-      ansible.controller.organization:
-        name: "{{ lab_organization }}"
-        description: "ACME Corp Organization"
-        state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        validate_certs: false
-      tags:
-        - controller-config
-        - controller-org
-  
-    - name: Add Instruqt Windows EE
+    - name: Add Windows EE
       ansible.controller.execution_environment:
-        name: "{{ controller_ee }}"
+        name: "Windows Workshop Execution Environment"
         image: "quay.io/nmartins/windows_ee"
-        pull: missing
-        state: present
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: "{{ controller_validate_certs }}"
-      tags:
-        - controller-config
-        - controller-ees
-
-    - name: Create student admin user
-      ansible.controller.user:
-        superuser: true
-        username: "{{ student_user }}"
-        password: "{{ student_password }}"
-        email: student@acme.example.com
-        controller_oauthtoken: "{{ auth_token }}"
-        controller_host: "{{ controller_hostname }}"
-        validate_certs: "{{ controller_validate_certs }}"
-      tags:
-        - controller-config
-        - controller-users
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 
     - name: Create Inventory
       ansible.controller.inventory:
-       name: "Workshop Inventory"
-       description: "Our Server environment"
-       organization: "Default"
-       state: present
-       controller_config_file: "/tmp/controller.cfg"
+        name: "Workshop Inventory"
+        description: "Our Server environment"
+        organization: "Default"
+        state: present
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 
     - name: Create Host for Workshop
       ansible.controller.host:
-       name: windows
-       description: "Windows Group"
-       inventory: "Workshop Inventory"
-       state: present
-       controller_config_file: "/tmp/controller.cfg"
+        name: windows
+        description: "Windows Group"
+        inventory: "Workshop Inventory"
+        state: present
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 
     - name: Create Host for Workshop
       ansible.controller.host:
-       name: student-ansible
-       description: "Ansible node"
-       inventory: "Workshop Inventory"
-       state: present
-       controller_config_file: "/tmp/controller.cfg"
+        name: student-ansible
+        description: "Ansible node"
+        inventory: "Workshop Inventory"
+        state: present
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 
     - name: Create Group for inventory
       ansible.controller.group:
-       name: Windows
-       description: Windows Server Group
-       inventory: "Workshop Inventory"
-       hosts:
-        - windows
-       variables:
-         ansible_connection: winrm
-         ansible_port: 5986
-         ansible_winrm_server_cert_validation: ignore
-       controller_config_file: "/tmp/controller.cfg"
+        name: Windows_Servers
+        description: Windows Server Group
+        inventory: "Workshop Inventory"
+        hosts:
+          - windows
+        variables:
+          ansible_connection: winrm
+          ansible_port: 5986
+          ansible_winrm_server_cert_validation: ignore
+        controller_host: "https://localhost"
+        controller_username: admin
+        controller_password: ansible123!
+        validate_certs: false
 
-     
-       
+    # - name: Create Project
+    #   ansible.controller.project:
+    #     name: "Windows Workshop"
+    #     description: "Windows Getting Started Workshop Content"
+    #     organization: "Default"
+    #     scm_type: git
+    #     scm_url: "http://gitea:3000/student/workshop_project.git"
+    #     state: present
+    #     controller_host: "https://localhost"
+    #     controller_username: admin
+    #     controller_password: ansible123!
+    #     validate_certs: false
+
+    # - name: Create student user
+    #   ansible.platform.user:
+    #     controller_host: "https://localhost"
+    #     controller_username: "admin"
+    #     controller_password: "ansible123!"
+    #     validate_certs: false
+    #     username: "{{ student_user }}"
+    #     password: "{{ student_password }}"
+    #     email: student@acme.example.com
+    #     is_superuser: true
+    #     state: present
+    #   register: student_user_result
+    #   ignore_errors: true
+
+    # - name: Debug student user creation
+    #   ansible.builtin.debug:
+    #     var: student_user_result
+    #   when: student_user_result is defined
 EOF
 
-cat <<EOF | tee /tmp/controller.cfg
-host: localhost
-username: student
-password: learn_ansible
-verify_ssl = false
-EOF
-
-# Install necessary collections and packages
+# Install necessary collections
 ansible-galaxy collection install community.general
 ansible-galaxy collection install microsoft.ad
+ansible-galaxy collection install ansible.windows
 ansible-galaxy collection install ansible.controller
+ansible-galaxy collection install community.windows
+
+# Install pip3 and pywinrm for Windows connectivity
+dnf install -y python3-pip
 pip3 install pywinrm
 
-##### Executing:
+# Set collections path for playbook execution
+export ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/
 
-chmod +x /tmp/lab-setup.sh
+# Bootstrap Windows user using known admin credentials (best effort)
+cat <<'EOF' | tee /tmp/windows-bootstrap.yml
+---
+- hosts: windows
+  gather_facts: false
+  vars:
+    ansible_connection: winrm
+    ansible_port: 5986
+    ansible_winrm_scheme: https
+    ansible_winrm_transport: ntlm
+    ansible_winrm_server_cert_validation: ignore
+    ansible_user: "{{ admin_windows_user }}"
+    ansible_password: "{{ admin_windows_password }}"
+  tasks:
+    - name: Ensure WinRM service is running
+      ansible.windows.win_service:
+        name: WinRM
+        state: started
+        start_mode: auto
 
-#sh /tmp/lab-setup.sh
-sh /tmp/lab-setup.sh
+    - name: Enable PowerShell remoting (idempotent)
+      ansible.windows.win_shell: |
+        try { Enable-PSRemoting -Force -SkipNetworkProfileCheck } catch { }
+      args:
+        executable: powershell.exe
+      changed_when: false
+      failed_when: false
 
-sudo dnf clean all
-sudo dnf install -y ansible-navigator
-sudo dnf install -y ansible-lint
-sudo dnf install -y nc
-pip3.9 install yamllint
+    - name: Ensure student user exists
+      ansible.windows.win_user:
+        name: "{{ student_user }}"
+        password: "{{ win_student_password }}"
+        state: present
+        password_never_expires: yes
+    - name: Ensure student is local admin
+      ansible.windows.win_group_membership:
+        name: Administrators
+        members:
+          - "{{ student_user }}"
+        state: present
 
+    - name: Disable Server Manager auto-start at logon (policy, all users)
+      ansible.windows.win_regedit:
+        path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\Server\ServerManager
+        name: DoNotOpenAtLogon
+        data: 1
+        type: dword
+        state: present
+
+    # - name: Disable Server Manager scheduled task (extra hardening)
+    #   ansible.windows.win_scheduled_task:
+    #     name: ServerManager
+    #     path: \Microsoft\Windows\Server Manager\
+    #     state: disabled
+    #   ignore_errors: true
+
+    - name: Ensure .NET Framework 4.8 feature is installed
+      ansible.windows.win_feature:
+        name: NET-Framework-45-Features
+        state: present
+        include_sub_features: true
+        include_management_tools: true
+
+    - name: Install Chocolatey
+      ansible.windows.win_shell: |
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+      args:
+        executable: powershell.exe
+
+    - name: Reboot after Chocolatey/.NET installation
+      ansible.windows.win_reboot:
+        msg: "Reboot to finalize Chocolatey/.NET installation"
+        pre_reboot_delay: 5
+
+    - name: Install Microsoft Edge via Chocolatey (with retries)
+      ansible.windows.win_shell: choco install microsoft-edge -y --no-progress
+      args:
+        executable: powershell.exe
+      register: edge_install
+      retries: 3
+      delay: 20
+      until: edge_install.rc == 0
+EOF
+
+# Execute the setup playbooks
+echo "=== Running Git/Gitea Setup ==="
+ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
+
+echo "=== Bootstrapping Windows local user (best effort) ==="
+ansible-playbook /tmp/windows-bootstrap.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v || true
+
+echo "=== Running AAP Controller Setup ==="
+ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v

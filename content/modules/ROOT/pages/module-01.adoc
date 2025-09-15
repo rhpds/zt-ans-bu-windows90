@@ -18,8 +18,8 @@ Your login credentials are:
 ....
 Controller Details:
 
-Username: student
-Password: learn_ansible
+Username: admin
+Password: ansible123!
 ....
 
 Your Automation Controller subscription has already been applied for you, so after
@@ -36,13 +36,13 @@ workshop, we are using *machine* and *source control* credentials.
 
 === Step 1
 
-Select CREDENTIALS from the left hand panel under resources
+Select CREDENTIALS from the left hand panel under Automation Execution > Infrastructure
 
-image::1-controller-credentials.png[Cred]
+image::1-controller-credentials.png[Cred,link=self,window=_blank]
 
 === Step 2
 
-Click the image:add.png[Add] icon and add new credential
+Click the image:add_create_cred.png[Create,link=self,window=_blank] icon and add new credential
 
 === Step 3
 
@@ -54,15 +54,15 @@ Complete the form using the following entries:
 | Name | Windows Credential
 | Organization | Default
 | Type | Machine
-| Username | instruqt
+| Username | student
 | Password | Passw0rd!
 |===
 
-image::1-controller-add-machine-credential.png[Add Machine Credential]
+image::1-controller-add-machine-credential.png[Add Machine Credential,link=self,window=_blank]
 
 === Step 4
 
-Select SAVE image:at_save.png[Save]
+Select image:create_cred.png[Create,link=self,window=_blank] to save
 
 == ☑️ Create SCM Credentials
 
@@ -77,13 +77,13 @@ with the following details:
 | Description | SCM credential for project sync |
 | Organization | Default |
 | Credential Type | Source Control |
-| Username | student | Replace # with your student number
-| Password | learn_ansible | Replace with your student password
+| Username | student |
+| Password | learn_ansible |
 |===
 
-Select SAVE image:at_save.png[Save]
+Select image:create_cred.png[Create Cred] to save
 
-image::1-controller-add-scm-credential.png[Add SCM Credential]
+image::1-controller-add-scm-credential.png[Add SCM Credential,link=self,window=_blank]
 
 == ☑️ Creating a Project
 
@@ -102,8 +102,8 @@ Password: learn_ansible
 
 Then select your workshop project and copy the `https` url presented after clicking the "Copy" button.
 
-image::1-gitea-project.png[Proj]
-image::1-gitea-clone.png[Clone]
+image::1-gitea-project.png[Proj,link=self,window=_blank]
+image::1-gitea-clone.png[Clone,link=self,window=_blank]
 
 The repo url will be used in *Step 3*
 
@@ -111,9 +111,9 @@ The repo url will be used in *Step 3*
 
 Click *Projects* on the left hand panel.
 
-image::1-controller-project.png[Proj]
+image::1-controller-project.png[Proj,link=self,window=_blank]
 
-Click the image:add.png[Add] icon and add new project
+Click the image:add_create_proj.png[Add,link=self,window=_blank] icon and add new project
 
 === Step 3
 
@@ -126,7 +126,7 @@ number in SCM URL*)
 | Name | Ansible Workshop Project |
 | Description | Windows Workshop Project |
 | Organization | Default |
-| Default Execution Environment | Windows Workshop Execution Environment |
+| Execution Environment | Windows Workshop Execution Environment |
 | SCM Type | Git |
 | SCM URL | http://gitea:3000/student/workshop_project.git | URL obtained from Step 1
 | SCM BRANCH | | Intentionally blank
@@ -141,11 +141,11 @@ OPTIONS
 * [x] Update Revision on Launch
 * [ ] Allow Branch Override
 
-image::1-controller-create-project.png[Defining a Project]
+image::1-controller-create-project.png[Defining a Project,link=self,window=_blank]
 
 === Step 4
 
-Select SAVE image:at_save.png[Save]
+Select image:create_proj.png[Save Project,link=self,window=_blank] to save
 
 === Step 5
 
@@ -153,7 +153,7 @@ Scroll down and validate that the project has been successfully synchronized
 against the source control repository upon saving. You should see a green icon displaying "Successful"
 next to the project name in the list view. If the status does not show as "Successful", try pressing the "Sync Project" button again re-check the status.
 
-image::1-controller-project-success.png[Succesfull Sync]
+image::1-controller-project-success.png[Succesfull Sync,link=self,window=_blank]
 
 == ☑️ Inventories
 
@@ -162,19 +162,19 @@ launched. Inventories are divided into groups and these groups contain hosts. In
 names into Controller, or from one of Automation Controller’s supported cloud
 providers or inventory plugins from Certified Content Collections on Automation Hub.
 
-A static Inventory has already been created for you today. Let's take a look at this inventory and highlight some properties and configuration parameters.
+A static inventory has already been created for you today. Let's take a look at this inventory and highlight some properties and configuration parameters.
 
 === Step 1
 
-Click *Inventories* from the left hand panel. You will see the
-preconfigured Inventory listed. Click the Inventories' name *Workshop Inventory* or the Edit button. image:at_edit.png[Edit]
+Click *Inventories* from the left hand panel under *Automation Execution* > *Infrastructure*. You will see the
+preconfigured inventory listed. Click the inventory's name *Workshop Inventory*. 
 
 === Step 2
 
 You are now viewing the Inventory. From here, you can add Hosts,
 Groups, or even Variables specific to this Inventory.
 
-image::1-controller-edit-inventory.png[Edit Inventory]
+image::1-controller-edit-inventory.png[Edit Inventory,link=self,window=_blank]
 
 We will be viewing the hosts, so click the *HOSTS* button.
 
@@ -185,13 +185,13 @@ inventory. You will also see which groups a host is associated with.
 Hosts can be associated with multiple groups. These groups can later be used to narrow down the exact hosts we will later run our
 automation on.
 
-image::1-controller-hosts-view.png[Hosts View]
+image::1-controller-hosts-view.png[Hosts View,link=self,window=_blank]
 
 === Step 4
 
 If you click the *GROUPS* button and then select the *Windows* group, you can inspect variables set at the group level that will apply to all hosts in that group.
 
-image::1-controller-group-edit.png[Group Edit]
+image::1-controller-group-edit.png[Group Edit,link=self,window=_blank]
 
 Today, we have already defined a handful of variables to tell Controller how to connect to hosts in this group. You do not have to define these variables as
 a Group variable here, they could also be Host variables or reside
@@ -200,7 +200,7 @@ directly in your Template or Playbook. However, because these variables will be 
 By default, Ansible will attempt to use SSH to connect to any Host, so
 for Windows we need to tell it utilize a different connection method, in
 this case,
-link:https://docs.ansible.com/ansible/latest/user_guide/windows_winrm.html[WinRM].
+link:https://docs.ansible.com/ansible/latest/user_guide/windows_winrm.html[WinRM^].
 
 ....
 ansible_connection: winrm
@@ -221,4 +221,4 @@ ansible_winrm_server_cert_validation: ignore
 ....
 
 If you click the *HOSTS* button, you can view the hosts belonging to the windows group.
-You can find more information about these and other settings in our link:https://docs.ansible.com/ansible/latest/user_guide/windows.html[Windows Guides]. The authentication settings are particularly important and you will need to review them and decide which method is best for your needs.
+You can find more information about these and other settings in our link:https://docs.ansible.com/ansible/latest/user_guide/windows.html[Windows Guides^]. The authentication settings are particularly important and you will need to review them and decide which method is best for your needs.
