@@ -317,6 +317,21 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
           - "{{ student_user }}"
         state: present
 
+    - name: Disable Server Manager auto-start at logon (policy, all users)
+      ansible.windows.win_regedit:
+        path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\Server\ServerManager
+        name: DoNotOpenAtLogon
+        data: 1
+        type: dword
+        state: present
+
+    - name: Disable Server Manager scheduled task (extra hardening)
+      ansible.windows.win_scheduled_task:
+        name: ServerManager
+        path: \Microsoft\Windows\Server Manager\
+        state: disabled
+      ignore_errors: true
+
     - name: Ensure .NET Framework 4.8 feature is installed
       ansible.windows.win_feature:
         name: NET-Framework-45-Features
