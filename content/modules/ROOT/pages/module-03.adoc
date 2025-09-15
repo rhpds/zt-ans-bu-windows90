@@ -127,10 +127,10 @@ Yes, it does actually matter. In fact, you should make sure all of your playbook
 ----
     - name: Show website address
       ansible.builtin.debug:
-        msg: http://{{ ansible_host }}
+        msg: http://localhost
 ----
 
-* This task uses the `debug` module to post a message at the end of playbook execution. This particular message prints out `http://` + the variable name that contains the IP address of the host we're running the playbook on (our Windows IIS server)
+* This task uses the `debug` module to post a message at the end of playbook execution.
 
 == ☑️ Saving your playbook
 
@@ -195,5 +195,5 @@ office, read up on this link:https://docs.ansible.com/ansible/latest/reference_a
 
     - name: Show website address
       ansible.builtin.debug:
-        msg: http://{{ ansible_host }}
+        msg: http://localhost
 ----

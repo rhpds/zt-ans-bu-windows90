@@ -55,7 +55,7 @@ Click the *Next* button.
 | Machine credential | Windows Credential |
 |===
 
-Once you click *LAUNCH* you will be redirected to the Job log. Every
+Once you click *FINSIH* you will be redirected to the Job log. Every
 job and action in Automation Controller is recorded and stored. These logs can also be exported automatically to another
 logging system such as Splunk or ELK.
 
