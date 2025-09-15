@@ -223,8 +223,6 @@ cat <<EOF | tee /tmp/controller-setup.yml
         variables:
           ansible_connection: winrm
           ansible_port: 5986
-          ansible_winrm_scheme: https
-          ansible_winrm_transport: ntlm
           ansible_winrm_server_cert_validation: ignore
         controller_host: "https://localhost"
         controller_username: admin
