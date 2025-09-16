@@ -98,13 +98,12 @@ Username: student
 Password: learn_ansible
 ....
 
++
 Then select your workshop project and copy the `https` url presented after clicking the "Copy" button.
 
 
-
-
-+
 image::1-gitea-project.png[Project,link="1-gitea-project.png"]
+
 image::1-gitea-clone.png[Clone,link=self]
 
 +
