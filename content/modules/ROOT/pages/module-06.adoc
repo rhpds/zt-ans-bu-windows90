@@ -14,7 +14,7 @@ Let’s begin with seeing how your iis-basic-playbook will break down into a rol
 
 ### Steps
 
-1. In Visual Studio Code, navigate to explorer and your *WORKSHOP_PROJECT* section where you previously made `iis_advanced`.
+. In Visual Studio Code, navigate to explorer and your *WORKSHOP_PROJECT* section where you previously made `iis_advanced`.
 
 image::6-vscode-existing-folders.png[iis_advanced,link=self,window=_blank]
 
@@ -46,7 +46,7 @@ In this section, we will separate out the major parts of your playbook including
 
 ### Steps
 
-1. Make a backup copy of `site.yml`, then create a new `site.yml`.
+. Make a backup copy of `site.yml`, then create a new `site.yml`.
 
 Navigate to your `iis_advanced` folder, right click `site.yml`, click `rename`, and call it `site.yml.backup`
 

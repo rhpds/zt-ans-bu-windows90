@@ -27,7 +27,7 @@ familiar to the one you created in exercise 3
 
 ### Steps
 
-1. Within Visual Studio Code, create a new directory in your git repo and
+. Within Visual Studio Code, create a new directory in your git repo and
 create a site.yml file.
 
 In the Explorer accordion you should have a *WORKSHOP_PROJECT* section where
@@ -119,7 +119,7 @@ After that, you will define a task to start the IIS service.
 
 ### Steps
 
-1. Create a `templates` directory in your project directory and create a
+. Create a `templates` directory in your project directory and create a
 template as follows:
 
 Ensure your *iis_advanced folder* is highlighted and then hover over
