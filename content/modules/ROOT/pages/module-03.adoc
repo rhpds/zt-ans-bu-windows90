@@ -18,13 +18,13 @@ There is a link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_bes
 
 Instead, we are going to create a very simple directory structure for our playbook, and add just a couple of files.
 
-=== Step 1
+### Steps
 
-Navigate to the `vscode` tab.
+1. Navigate to the `vscode` tab.
 
 For this lab, we have already created a repository for you, and we just need to clone it. Open a new terminal in vscode.
 
-image::3-new-term.png[VS Code Terminal]
+image::3-new-term.png[VS Code Terminal,link=self,window=_blank]
 
 Now clone the repo.
 ....
@@ -33,16 +33,14 @@ git clone http://gitea:3000/student/workshop_project.git
 
 Navigate to the `workshop_project` directory, we are going to create our playbooks here.
 
-=== Step 2
-
-Create a directory called *iis_basic* and a file called `install_iis.yml`.
+2. Create a directory called *iis_basic* and a file called `install_iis.yml`.
 
 Hover over the *WORKSHOP_PROJECT* section and click the *New Folder* button. Create a folder called `iis_basic`. Then click that folder so it is selected. Right click the new folder you’ve created and create a file
 called `install_iis.yml`.
 
 You should now have an editor open in the right pane that can be used for creating your playbook.
 
-image::3-vscode-create-folders.png[Empty install_iis.yml]
+image::3-vscode-create-folders.png[Empty install_iis.yml,link=self,window=_blank]
 
 == ☑️ Define your play
 
@@ -155,7 +153,7 @@ git push
 
 We will have a a popup in vscode for us to authenticate:
 
-image::3-vs-auth.png[VS Code AUTH]
+image::3-vs-auth.png[VS Code AUTH,link=self,window=_blank]
 
 ....
 Username: student

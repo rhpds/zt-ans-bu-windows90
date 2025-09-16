@@ -25,15 +25,15 @@ https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html#handl
 To begin, we are going to create a new playbook, but it should look very
 familiar to the one you created in exercise 3
 
-=== Step 1
+### Steps
 
-Within Visual Studio Code, create a new directory in your git repo and
+1. Within Visual Studio Code, create a new directory in your git repo and
 create a site.yml file.
 
 In the Explorer accordion you should have a *WORKSHOP_PROJECT* section where
 you previously made `iis_basic`.
 
-image::5-vscode-existing-folders.png[Student Playbooks]
+image::5-vscode-existing-folders.png[Student Playbooks,link=self,window=_blank]
 
 [#creating-iis-site]
 == ☑️ Creating *iis_advanced* & `site.yml`
@@ -50,11 +50,9 @@ Type `site.yml` and hit enter.
 You should now have an editor open in the right pane that can be used
 for creating your playbook.
 
-image::5-vscode-create-folders.png[Empty site.yml]
+image::5-vscode-create-folders.png[Empty site.yml,link=self,window=_blank]
 
-=== Step 2
-
-Add a play definition and some variables to your playbook. These include
+2. Add a play definition and some variables to your playbook. These include
 addtional packages your playbook will install on your web servers, plus
 some web server specific configurations.
 
@@ -75,9 +73,7 @@ some web server specific configurations.
 
 ----
 
-=== Step 3
-
-Add a new task called *install IIS*. After writing the playbook, click
+3. Add a new task called *install IIS*. After writing the playbook, click
 `File` > `Save` to save your changes.
 
 [source,yaml]
@@ -103,7 +99,7 @@ Add a new task called *install IIS*. After writing the playbook, click
       with_items: "{{ iis_sites }}"
       notify: Restart iisservice
 ----
-image::5-vscode-iis-yaml.png[site.yml part 1]
+image::5-vscode-iis-yaml.png[site.yml part 1,link=self,window=_blank]
 
 [quote]
 ____
@@ -121,9 +117,9 @@ ____
 
 After that, you will define a task to start the IIS service.
 
-=== Step 1
+### Steps
 
-Create a `templates` directory in your project directory and create a
+1. Create a `templates` directory in your project directory and create a
 template as follows:
 
 Ensure your *iis_advanced folder* is highlighted and then hover over
@@ -147,11 +143,9 @@ for creating your template. Enter the following details:
 </body>
 </html>
 ----
-image::5-vscode-template.png[index.html template]
+image::5-vscode-template.png[index.html template,link=self,window=_blank]
 
-=== Step 2
-
-Edit back your playbook, `site.yml`, by opening your firewall ports and
+2. Edit back your playbook, `site.yml`, by opening your firewall ports and
 writing the template. Use single quotes for `win_template` in order to
 not escape the forward slash.
 
@@ -197,9 +191,9 @@ the a task. We will start with the former.
 The `handlers` block should start after a one-level indentation, that
 is, two spaces. It should align with the `tasks` block.
 
-=== Step 1
+### Steps
 
-Define a handler.
+1. Define a handler.
 
 [source,yaml]
 ----
@@ -304,9 +298,9 @@ intended. If not, now is the time for us to fix it up. The playbook below should
 [#creating-job-template]
 == ☑️ Create your Job Template
 
-=== Step 1
+### Steps
 
-Before we can create our Job Template, you must first go resync your
+1. Before we can create our Job Template, you must first go resync your
 Project again. So do that now.
 
 [quote]
@@ -318,9 +312,7 @@ to Controller before it will become available in the Job Template playbook
 dropdown.
 ____
 
-=== Step 2
-
-To test this playbook, we need to create a new Job Template to run this
+2. To test this playbook, we need to create a new Job Template to run this
 playbook. So go to *Template* and click *+ Create template* and select `Create job template`
 to create a second job template.
 
@@ -369,13 +361,9 @@ Complete the form using the following values
 |
 |===
 
-=== Step 3
+3. Click image:create_job_temp.png[Save] and on the following page, select the *Survey* tab.
 
-Click image:create_job_temp.png[Save] and on the following page, select the *Survey* tab.
-
-=== Step 4
-
-Create a new survey with following values
+4. Create a new survey with following values
 
 [cols="1,2,1",options="header"]
 |===
@@ -408,20 +396,18 @@ Create a new survey with following values
 |
 |===
 
-image::5-survey.png[Survey Form]
+image::5-survey.png[Survey Form,link=self,window=_blank]
 
-=== Step 5
-
-Select SAVE image:create_survey_quest.png[Add] and remember to flip the *Survey enabled* switch image:survey_enabled.png[Survey enabled switch]
+5. Select SAVE image:create_survey_quest.png[Add] and remember to flip the *Survey enabled* switch image:survey_enabled.png[Survey enabled switch]
 
 [#running-new-playbook]
 == ☑️ Running your new playbook
 
 Now let’s run it and see how it works.
 
-=== Step 1
+### Steps
 
-Select TEMPLATES
+1. Select TEMPLATES
 
 [quote]
 ____
@@ -430,14 +416,10 @@ Alternatively, if you haven’t navigated away from the job templates
 creation page, you can scroll down to see all existing job templates
 ____
 
-=== Step 2
-
-Click the rocketship icon image:at_launch_icon.png[Add] for the
+2. Click the rocketship icon image:at_launch_icon.png[Add] for the
 *IIS Advanced* Job Template.
 
-=== Step 3
-
-When prompted, enter your desired test message
+3. When prompted, enter your desired test message
 
 After it launches, you should be redirected and can watch the output of
 the job in real time.

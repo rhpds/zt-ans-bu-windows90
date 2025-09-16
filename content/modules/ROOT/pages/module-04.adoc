@@ -11,21 +11,17 @@ sync your Project so that Controller knows about it. To do this, visit Controlle
 *Projects* under *Automation Execution* and then click the sync icon next to your project. Once
 this is complete, you can create the job template.
 
-image::4-project-sync.png[Project Sync]
+image::4-project-sync.png[Project Sync,link=self,window=_blank]
 
 == ☑️ Creating your Job Template
 
-=== Step 1
+### Steps
 
-Select *Templates* under *Automation Execution*
+1. Select *Templates* under *Automation Execution*
 
-=== Step 2
+2. Click the image:create_temp.png[Add] icon, and select Create Job Template
 
-Click the image:create_temp.png[Add] icon, and select Create Job Template
-
-=== Step 3
-
-Complete the form using the following values
+3. Complete the form using the following values
 
 [cols="1,2,1",options="header"]
 |===
@@ -74,19 +70,15 @@ Complete the form using the following values
 |
 |===
 
-image::4-create-job-template.png[Create Job Template]
+image::4-create-job-template.png[Create Job Template,link=self,window=_blank]
 
-=== Step 4
-
-Click the blue Create job template icon to save.
-image:create_job_temp.png[Create Job Template]
+4. Click the blue Create job template icon to save.
+image:create_job_temp.png[Create Job Template,link=self,window=_blank]
 
 On the resulting page, select the *Survey* tab and press the *Create survey question* button
-image::create_survey_quest.png[Create Survey]
+image::create_survey_quest.png[Create Survey,link=self,window=_blank]
 
-=== Step 5
-
-Complete the survey form with following values
+5. Complete the survey form with following values
 
 [cols="1,2,1",options="header"]
 |===
@@ -121,7 +113,7 @@ Complete the survey form with following values
 
 After configuring your survey, click *Create survey question*. On the resulting page, turn on the survey you just created.
 
-image::4-survey-created.png[Survey creating]
+image::4-survey-created.png[Survey creating,link=self,window=_blank]
 
 == ☑️ Running the Template
 
@@ -129,49 +121,37 @@ Now that you’ve successfully created your Job Template, you are ready to
 launch it. Once you do, you will be redirected to a job screen which is
 refreshing in real time showing you the status of the job.
 
-=== Step 1
+### Steps
 
-Select TEMPLATES
+1. Select TEMPLATES
 
-=== Step 2
+2. Click the rocketship icon image:at_launch_icon.png[Add] for the *IIS Basic Job Template*
 
-Click the rocketship icon image:at_launch_icon.png[Add] for the *IIS Basic Job Template*
+3. When prompted, enter your desired test message
 
-=== Step 3
+image::4-survey-prompt.png[Survey Prompt,link=self,window=_blank]
 
-When prompted, enter your desired test message
+4. Select *NEXT* and preview the inputs.
 
-image::4-survey-prompt.png[Survey Prompt]
+5. Select FINISH image:4-survey-launch.png[SurveyL]
 
-=== Step 4
-
-Select *NEXT* and preview the inputs.
-
-=== Step 5
-
-Select FINISH image:4-survey-launch.png[SurveyL]
-
-=== Step 6
-
-Sit back, watch the magic happen
+6. Sit back, watch the magic happen
 
 Once again you should be presented with a Job log page. Selecting the *Details* tab should show you the variable you passed into the playbook among other details.
 
-image::4-job-summary-details.png[Job Summary]
+image::4-job-summary-details.png[Job Summary,link=self,window=_blank]
 
 Next you will be able to see details on the play and each task in the
 playbook.
 
-image::4-job-summary-output.png[Play and Task Output]
+image::4-job-summary-output.png[Play and Task Output,link=self,window=_blank]
 
-=== Step 7
-
-When the job has successfully completed, navigate to your `windows` tab. This is your Windows host. Open Microsoft Edge from the Windows desktop and navigate to: http://localhost
+7. When the job has successfully completed, navigate to your `windows` tab. This is your Windows host. Open Microsoft Edge from the Windows desktop and navigate to: http://localhost
 
 If all went well, you should see something like this, but with your own
 custom message of course.
 
-image::4-website-output.png[New Website with Personalized Test Message]
+image::4-website-output.png[New Website with Personalized Test Message,link=self,window=_blank]
 
 == ☑️ Extra Credit
 

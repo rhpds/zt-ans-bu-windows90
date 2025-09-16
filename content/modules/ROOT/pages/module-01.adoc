@@ -34,19 +34,15 @@ project content from a version control system.
 There are many link:https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.5/html/using_automation_execution/controller-credentials#ref-controller-credential-types[types of credentials^] including machine, network, and various cloud providers. For this
 workshop, we are using *machine* and *source control* credentials.
 
-=== Step 1
+### Steps
 
-Select CREDENTIALS from the left hand panel under Automation Execution > Infrastructure
+1. Select CREDENTIALS from the left hand panel under Automation Execution > Infrastructure
 
 image::1-controller-credentials.png[Cred,link=self,window=_blank]
 
-=== Step 2
+2. Click the image:add_create_cred.png[Create,link=self,window=_blank] icon and add new credential
 
-Click the image:add_create_cred.png[Create,link=self,window=_blank] icon and add new credential
-
-=== Step 3
-
-Complete the form using the following entries:
+3. Complete the form using the following entries:
 
 [cols="1,1",options="header"]
 |===
@@ -60,9 +56,7 @@ Complete the form using the following entries:
 
 image::1-controller-add-machine-credential.png[Add Machine Credential,link=self,window=_blank]
 
-=== Step 4
-
-Select image:create_cred.png[Create,link=self,window=_blank] to save
+4. Select image:create_cred.png[Create,link=self,window=_blank] to save
 
 == ☑️ Create SCM Credentials
 
@@ -89,9 +83,9 @@ image::1-controller-add-scm-credential.png[Add SCM Credential,link=self,window=_
 
 A *Project* is a logical collection of Ansible content, represented in Controller. You can manage projects by placing your ansible content into a source code management (SCM) system supported by Controller, including Git and Subversion.
 
-=== Step 1
+### Steps
 
-In this environment, playbooks are stored in a git repository available on the workshop Gitea instance. Before a *Project* can be created in Automation Controller, the git URL for the repository is needed. In order to obtain the URL of your project, login to the Gitea instance, found on the `gitea` tab. You can login to gitea with the following credentials:
+1. In this environment, playbooks are stored in a git repository available on the workshop Gitea instance. Before a *Project* can be created in Automation Controller, the git URL for the repository is needed. In order to obtain the URL of your project, login to the Gitea instance, found on the `gitea` tab. You can login to gitea with the following credentials:
 
 ....
 Gitea Details:
@@ -107,17 +101,13 @@ image::1-gitea-clone.png[Clone,link=self,window=_blank]
 
 The repo url will be used in *Step 3*
 
-=== Step 2
-
-Click *Projects* on the left hand panel.
+2. Click *Projects* on the left hand panel.
 
 image::1-controller-project.png[Proj,link=self,window=_blank]
 
 Click the image:add_create_proj.png[Add,link=self,window=_blank] icon and add new project
 
-=== Step 3
-
-Complete the form using the following entries (*using your student
+3. Complete the form using the following entries (*using your student
 number in SCM URL*)
 
 [cols="1,2,2",options="header"]
@@ -143,13 +133,9 @@ OPTIONS
 
 image::1-controller-create-project.png[Defining a Project,link=self,window=_blank]
 
-=== Step 4
+4. Select image:create_proj.png[Save Project,link=self,window=_blank] to save
 
-Select image:create_proj.png[Save Project,link=self,window=_blank] to save
-
-=== Step 5
-
-Scroll down and validate that the project has been successfully synchronized
+5. Scroll down and validate that the project has been successfully synchronized
 against the source control repository upon saving. You should see a green icon displaying "Successful"
 next to the project name in the list view. If the status does not show as "Successful", try pressing the "Sync Project" button again re-check the status.
 
@@ -164,32 +150,26 @@ providers or inventory plugins from Certified Content Collections on Automation 
 
 A static inventory has already been created for you today. Let's take a look at this inventory and highlight some properties and configuration parameters.
 
-=== Step 1
+### Steps
 
-Click *Inventories* from the left hand panel under *Automation Execution* > *Infrastructure*. You will see the
+1. Click *Inventories* from the left hand panel under *Automation Execution* > *Infrastructure*. You will see the
 preconfigured inventory listed. Click the inventory's name *Workshop Inventory*. 
 
-=== Step 2
-
-You are now viewing the Inventory. From here, you can add Hosts,
+2. You are now viewing the Inventory. From here, you can add Hosts,
 Groups, or even Variables specific to this Inventory.
 
 image::1-controller-edit-inventory.png[Edit Inventory,link=self,window=_blank]
 
 We will be viewing the hosts, so click the *HOSTS* button.
 
-=== Step 3
-
-In the Hosts view, we can see every host associated with this
+3. In the Hosts view, we can see every host associated with this
 inventory. You will also see which groups a host is associated with.
 Hosts can be associated with multiple groups. These groups can later be used to narrow down the exact hosts we will later run our
 automation on.
 
 image::1-controller-hosts-view.png[Hosts View,link=self,window=_blank]
 
-=== Step 4
-
-If you click the *GROUPS* button and then select the *Windows* group, you can inspect variables set at the group level that will apply to all hosts in that group.
+4. If you click the *GROUPS* button and then select the *Windows* group, you can inspect variables set at the group level that will apply to all hosts in that group.
 
 image::1-controller-group-edit.png[Group Edit,link=self,window=_blank]
 
