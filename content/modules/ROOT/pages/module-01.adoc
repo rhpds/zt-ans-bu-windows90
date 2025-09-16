@@ -39,9 +39,9 @@ workshop, we are using *machine* and *source control* credentials.
 . Select CREDENTIALS from the left hand panel under *Automation Execution* > *Infrastructure*
 
 +
-image::1-controller-credentials.png[Cred,link=self,window=_blank]
+image::1-controller-credentials.png[Cred,link=self]
 
-. Click the image:add_create_cred.png[Create,link=self,window=_blank] icon and add new credential
+. Click the image:add_create_cred.png[Create,link=self] icon and add new credential
 
 . Complete the form using the following entries:
 
@@ -57,9 +57,9 @@ image::1-controller-credentials.png[Cred,link=self,window=_blank]
 |===
 
 +
-image::1-controller-add-machine-credential.png[Add Machine Credential,link=self,window=_blank]
+image::1-controller-add-machine-credential.png[Add Machine Credential,link=self]
 
-. Select image:create_cred.png[Create,link=self,window=_blank] to save
+. Select image:create_cred.png[Create,link=self] to save
 
 == ☑️ Create SCM Credentials
 
@@ -80,7 +80,7 @@ with the following details:
 
 Select image:create_cred.png[Create Cred] to save
 
-image::1-controller-add-scm-credential.png[Add SCM Credential,link=self,window=_blank]
+image::1-controller-add-scm-credential.png[Add SCM Credential,link=self]
 
 == ☑️ Creating a Project
 
@@ -101,9 +101,10 @@ Then select your workshop project and copy the `https` url presented after click
 
 
 
+
 +
-image::1-gitea-project.png[Proj,link=self,window=_blank]
-image::1-gitea-clone.png[Clone,link=self,window=_blank]
+image::1-gitea-project.png[Proj,link=self]
+image::1-gitea-clone.png[Clone,link=self]
 
 The repo url will be used in *Step 3*
 
@@ -112,9 +113,9 @@ The repo url will be used in *Step 3*
 . Click *Projects* on the left hand panel.
 
 +
-image::1-controller-project.png[Proj,link=self,window=_blank]
+image::1-controller-project.png[Proj,link=self]
 
-. Click the image:add_create_proj.png[Add,link=self,window=_blank] icon and add new project
+. Click the image:add_create_proj.png[Add,link=self] icon and add new project
 
 . Complete the form using the following entries (*using your student
 number in SCM URL*)
@@ -142,15 +143,17 @@ OPTIONS
 * [x] Update Revision on Launch
 * [ ] Allow Branch Override
 
-image::1-controller-create-project.png[Defining a Project,link=self,window=_blank]
++
+image::1-controller-create-project.png[Defining a Project,link=self]
 
-. Select image:create_proj.png[Save Project,link=self,window=_blank] to save
+. Select image:create_proj.png[Save Project,link=self] to save
 
 . Scroll down and validate that the project has been successfully synchronized
 against the source control repository upon saving. You should see a green icon displaying "Successful"
 next to the project name in the list view. If the status does not show as "Successful", try pressing the "Sync Project" button again re-check the status.
 
-image::1-controller-project-success.png[Succesfull Sync,link=self,window=_blank]
++
+image::1-controller-project-success.png[Succesfull Sync,link=self]
 
 == ☑️ Inventories
 
@@ -170,9 +173,9 @@ preconfigured inventory listed. Click the inventory's name *Workshop Inventory*.
 Groups, or even Variables specific to this Inventory.
 
 +
-image::1-controller-edit-inventory.png[Edit Inventory,link=self,window=_blank]
+image::1-controller-edit-inventory.png[Edit Inventory,link=self]
 
-We will be viewing the hosts, so click the *HOSTS* button.
+. We will be viewing the hosts, so click the *HOSTS* button.
 
 . In the Hosts view, we can see every host associated with this
 inventory. You will also see which groups a host is associated with.
@@ -180,12 +183,12 @@ Hosts can be associated with multiple groups. These groups can later be used to 
 automation on.
 
 +
-image::1-controller-hosts-view.png[Hosts View,link=self,window=_blank]
+image::1-controller-hosts-view.png[Hosts View,link=self]
 
 . If you click the *GROUPS* button and then select the *Windows* group, you can inspect variables set at the group level that will apply to all hosts in that group.
 
 +
-image::1-controller-group-edit.png[Group Edit,link=self,window=_blank]
+image::1-controller-group-edit.png[Group Edit,link=self]
 
 Today, we have already defined a handful of variables to tell Controller how to connect to hosts in this group. You do not have to define these variables as
 a Group variable here, they could also be Host variables or reside

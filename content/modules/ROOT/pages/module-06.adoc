@@ -17,7 +17,7 @@ Let’s begin with seeing how your iis-basic-playbook will break down into a rol
 . In Visual Studio Code, navigate to explorer and your *WORKSHOP_PROJECT* section where you previously made `iis_advanced`.
 
 +
-image::6-vscode-existing-folders.png[iis_advanced,link=self,window=_blank]
+image::6-vscode-existing-folders.png[iis_advanced,link=self]
 
 . Select the *iis_advanced* folder.
 
@@ -39,7 +39,7 @@ and selecting *New Folder*
 
 The finished structure will look like this:
 
-image::6-create-role.png[Role Structure,link=self,window=_blank]
+image::6-create-role.png[Role Structure,link=self]
 
 == ☑️ Breaking up `site.yml` to create the role
 
@@ -66,7 +66,7 @@ Create a blank new file called `site.yml` in the same folder
 
 ----
 
-image::6-new-site.png[New site.yml,link=self,window=_blank]
+image::6-new-site.png[New site.yml,link=self]
 
 . Add a default variable to your role. Edit the `roles\iis_simple\defaults\main.yml` as follows:
 
@@ -233,7 +233,7 @@ When prompted, enter your desired test message
 
 If successful, your standard output should look similar to the figure below. Note that most of the tasks return OK because we’ve previously configured the servers and services are already running.
 
-image::6-job-output.png[Job output,link=self,window=_blank]
+image::6-job-output.png[Job output,link=self]
 
 When the job has successfully completed, verify that http://localhost:8080 and http://localhost:8081 are working.
 
