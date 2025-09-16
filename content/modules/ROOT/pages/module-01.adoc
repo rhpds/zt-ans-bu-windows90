@@ -39,7 +39,7 @@ workshop, we are using *machine* and *source control* credentials.
 . Select CREDENTIALS from the left hand panel under *Automation Execution* > *Infrastructure*
 
 +
-image::1-controller-credentials.png[Cred, width=300, link="1-controller-credentials.png"]
+image::1-controller-credentials.png[Cred, width=300, link="../assets/images/1-controller-credentials.png"]
 
 . Click the image:add_create_cred.png[Create,link=self] icon and add new credential
 
