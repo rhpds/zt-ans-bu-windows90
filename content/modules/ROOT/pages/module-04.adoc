@@ -15,7 +15,7 @@ image::4-project-sync.png[Project Sync,link=self,window=_blank]
 
 == ☑️ Creating your Job Template
 
-### Steps
+=== Steps
 
 . Select *Templates* under *Automation Execution*
 +
@@ -123,7 +123,7 @@ Now that you’ve successfully created your Job Template, you are ready to
 launch it. Once you do, you will be redirected to a job screen which is
 refreshing in real time showing you the status of the job.
 
-### Steps
+=== Steps
 
 . Select TEMPLATES
 +

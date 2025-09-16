@@ -10,7 +10,7 @@ quickly, to many remote nodes.
 
  
 
-### Steps
+=== Steps
 
 . To start, we will need to go to our Inventory. So click *Inventories*
 on the left panel, and then click the name of our Inventory *Workshop Inventory*. Now that you are on the Inventory Details page, we

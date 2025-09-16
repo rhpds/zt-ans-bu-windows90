@@ -25,7 +25,7 @@ https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html#handl
 To begin, we are going to create a new playbook, but it should look very
 familiar to the one you created in exercise 3
 
-### Steps
+=== Steps
 
 . Within Visual Studio Code, create a new directory in your git repo and
 create a site.yml file.
@@ -117,7 +117,7 @@ ____
 
 After that, you will define a task to start the IIS service.
 
-### Steps
+=== Steps
 
 . Create a `templates` directory in your project directory and create a
 template as follows:
@@ -191,7 +191,7 @@ the a task. We will start with the former.
 The `handlers` block should start after a one-level indentation, that
 is, two spaces. It should align with the `tasks` block.
 
-### Steps
+=== Steps
 
 1. Define a handler.
 

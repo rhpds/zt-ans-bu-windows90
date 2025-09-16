@@ -12,7 +12,7 @@ Let’s begin with seeing how your iis-basic-playbook will break down into a rol
 
 == ☑️ Creating your directory structure
 
-### Steps
+=== Steps
 
 . In Visual Studio Code, navigate to explorer and your *WORKSHOP_PROJECT* section where you previously made `iis_advanced`.
 
@@ -45,7 +45,7 @@ image::6-create-role.png[Role Structure,link=self,window=_blank]
 
 In this section, we will separate out the major parts of your playbook including `vars:`, `tasks:`, `template:`, and `handlers:`.
 
-### Steps
+=== Steps
 
 . Make a backup copy of `site.yml`, then create a new `site.yml`.
 
