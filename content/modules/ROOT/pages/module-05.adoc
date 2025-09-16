@@ -33,7 +33,7 @@ create a site.yml file.
 In the Explorer accordion you should have a *WORKSHOP_PROJECT* section where
 you previously made `iis_basic`.
 
-image::5-vscode-existing-folders.png[Student Playbooks,link=self]
+image::5-vscode-existing-folders.png[Student Playbooks]
 
 [#creating-iis-site]
 == ☑️ Creating *iis_advanced* & `site.yml`
@@ -50,7 +50,7 @@ Type `site.yml` and hit enter.
 You should now have an editor open in the right pane that can be used
 for creating your playbook.
 
-image::5-vscode-create-folders.png[Empty site.yml,link=self]
+image::5-vscode-create-folders.png[Empty site.yml]
 
 2. Add a play definition and some variables to your playbook. These include
 addtional packages your playbook will install on your web servers, plus
@@ -99,7 +99,7 @@ some web server specific configurations.
       with_items: "{{ iis_sites }}"
       notify: Restart iisservice
 ----
-image::5-vscode-iis-yaml.png[site.yml part 1,link=self]
+image::5-vscode-iis-yaml.png[site.yml part 1]
 
 [quote]
 ____
@@ -143,7 +143,7 @@ for creating your template. Enter the following details:
 </body>
 </html>
 ----
-image::5-vscode-template.png[index.html template,link=self]
+image::5-vscode-template.png[index.html template]
 
 2. Edit back your playbook, `site.yml`, by opening your firewall ports and
 writing the template. Use single quotes for `win_template` in order to
@@ -396,7 +396,7 @@ Complete the form using the following values
 |
 |===
 
-image::5-survey.png[Survey Form,link=self]
+image::5-survey.png[Survey Form]
 
 5. Select SAVE image:create_survey_quest.png[Add] and remember to flip the *Survey enabled* switch image:survey_enabled.png[Survey enabled switch]
 
