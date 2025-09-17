@@ -137,7 +137,8 @@ Yes, it does actually matter. In fact, you should make sure all of your playbook
 * This task uses the `debug` module to post a message at the end of playbook execution.
 
 Your final playbook should match the one below:
-image::3-vscode-playbook.png[Final playbook,link=self,window=_blank]
+
+image:3-vscode-playbook.png[Final playbook,link=self,window=_blank]
 
 
 == ☑️ Saving your playbook
