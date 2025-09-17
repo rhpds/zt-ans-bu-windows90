@@ -160,7 +160,7 @@ Bottom line, you need to read up on https://docs.ansible.com/ansible/latest/play
   notify: restart iis service
 
 - name: Open port for site on the firewall
-  ansible.windows.win_firewall_rule:
+  community.windows.win_firewall_rule:
     name: "iisport{{ item.port }}"
     enable: true
     state: present
