@@ -29,12 +29,12 @@ For this lab, we have already created a repository for you, and we just need to 
 image::3-new-term.png[VS Code Terminal,link=self,window=_blank]
 
 . Now clone the repo.
++
 ....
 git clone http://gitea:3000/student/workshop_project.git
 ....
 
-+
-Navigate to the `workshop_project` directory, we are going to create our playbooks here.
+. Navigate to the `workshop_project` directory, we are going to create our playbooks here.
 
 . Create a directory called *iis_basic* and a file called `install_iis.yml`.
 
