@@ -8,7 +8,7 @@ quickly, to many remote nodes.
 
 ---
 
-== Running the win_ping command
+== ☑️ Running the win_ping command
 
 To start, we will need to go to our Inventory. So click *Inventories*
 on the left panel, and then click the name of our Inventory *Workshop Inventory*. Now that you are on the Inventory Details page, we
@@ -72,7 +72,7 @@ coded STATUS of either SUCCESS, FAILURE, CHANGED, or SKIPPING.
 
 ---
 
-== Running the setup command
+== ☑️ Running the setup command
 
 We will now take a look at your Windows node configuration. The `setup` module queries the remote host for various data and returns that data as Ansible facts. This data is useful to determine things such as operating system version, hardware configuration, among other data points. This can then be used in your playbook for all sorts of reasons such as determining whether a task should even run, or determining what the name of a package should be based upon the operating system version.
 
@@ -116,7 +116,7 @@ If you click the three dots shown on line 21 in the above output, you will see a
 
 ---
 
-== Running the win_user command
+== ☑️ Running the win_user command
 
 Now, let’s reset the local admin account with the `win_user` module. Our arguments parameter is going to get a little more complex now.
 
