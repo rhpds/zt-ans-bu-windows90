@@ -140,6 +140,7 @@ OPTIONS
 * [x] Update Revision on Launch
 * [ ] Allow Branch Override
 
++
 image::1-controller-create-project.png[Defining a Project]
 
 . Select image:create_proj.png[Save Project,link=self] to save
