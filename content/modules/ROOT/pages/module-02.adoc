@@ -109,7 +109,11 @@ You should see output like this:
 
 image::2-adhoc-run-setup-output.png[Setup Log Details]
 
-(NOTE: If you click the three dots shown on line 21 in the above output, you will see all the facts returned by the `setup` module.)
+
+[NOTE]
+====
+If you click the three dots shown on line 21 in the above output, you will see all the facts returned by the `setup` module.)
+====
 
 ---
 
