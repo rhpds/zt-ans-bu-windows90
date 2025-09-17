@@ -13,11 +13,11 @@ Ansible exists to make tasks simple and repeatable. We also know that not all sy
 For a full understanding of variables, loops, and handlers; check out
 our Ansible documentation on these subjects.
 
-https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html[*Ansible Variables*]
+link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html[Ansible Variables^]
 
-https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html[*Ansible Loops*]
+link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_loops.html[Ansible Loops^]
 
-https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html#handlers[*Ansible Handlers*]
+link:https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html#handlers[Ansible Handlers^]
 
 [#creating-the-playbook]
 == ☑️ Creating the Playbook
@@ -25,15 +25,13 @@ https://docs.ansible.com/ansible/latest/user_guide/playbooks_handlers.html#handl
 To begin, we are going to create a new playbook, but it should look very
 familiar to the one you created in exercise 3
 
-=== Step 1
-
 Within Visual Studio Code, create a new directory in your git repo and
 create a site.yml file.
 
 In the Explorer accordion you should have a *WORKSHOP_PROJECT* section where
 you previously made `iis_basic`.
 
-image::5-vscode-existing-folders.png[Student Playbooks]
+image::5-vscode-existing-folders.png[Student Playbooks,link=self,window=_blank]
 
 [#creating-iis-site]
 == ☑️ Creating *iis_advanced* & `site.yml`
@@ -50,14 +48,14 @@ Type `site.yml` and hit enter.
 You should now have an editor open in the right pane that can be used
 for creating your playbook.
 
-image::5-vscode-create-folders.png[Empty site.yml]
+image::5-vscode-create-folders.png[Empty site.yml,link=self,window=_blank]
 
-=== Step 2
-
-Add a play definition and some variables to your playbook. These include
+=== Steps
+. Add a play definition and some variables to your playbook. These include
 addtional packages your playbook will install on your web servers, plus
 some web server specific configurations.
 
++
 [source,yaml]
 ----
 ---
@@ -75,11 +73,9 @@ some web server specific configurations.
 
 ----
 
-=== Step 3
+. Add a new task called *install IIS*. After writing the playbook, click `File` > `Save` to save your changes.
 
-Add a new task called *install IIS*. After writing the playbook, click
-`File` > `Save` to save your changes.
-
++
 [source,yaml]
 ----
   tasks:
@@ -103,39 +99,44 @@ Add a new task called *install IIS*. After writing the playbook, click
       with_items: "{{ iis_sites }}"
       notify: Restart iisservice
 ----
-image::5-vscode-iis-yaml.png[site.yml part 1]
 
-[quote]
-____
-*What is happening here!?*
-* `vars:` You’ve told Ansible the next thing it sees will be a variable name
-* `iis_sites` You are defining a list-type variable called iis_sites. What follows is a list of each site with it’s related variables
-* `win_file:` This module is used to create, modify, delete files, directories, and symlinks.
-* `{{ item }}` You are telling Ansible that this will expand into a list item. Each item has several variables like `name`, `port`, and `path`.
-* `with_items: "{{ iis_sites }}` This is your loop which is instructing Ansible to perform this task on every `item` in `iis_sites`
-* `notify: Restart iisservice` This statement is a `handler`, so we’ll come back to it in Section 3.
-____
+[NOTE]
+====
+What is happening here!?
+
+- `vars:` You’ve told Ansible the next thing it sees will be a variable name
+- `iis_sites` You are defining a list-type variable called iis_sites. What follows is a list of each site with its related variables
+- `win_file:` This module is used to create, modify, delete files, directories, and symlinks.
+- `{{ item }}` You are telling Ansible that this will expand into a list item. Each item has several variables like `name`, `port`, and `path`.
+- `with_items: "{{ iis_sites }}"` This is your loop which is instructing Ansible to perform this task on every `item` in `iis_sites`
+- `notify: Restart iisservice` This statement is a `handler`, so we’ll come back to it in Section 3.
+====
 
 [#open-firewall]
 == ☑️ Opening Firewall and Deploying Files
 
 After that, you will define a task to start the IIS service.
 
-=== Step 1
+=== Steps
 
-Create a `templates` directory in your project directory and create a
+. Create a `templates` directory in your project directory and create a
 template as follows:
 
++
 Ensure your *iis_advanced folder* is highlighted and then hover over
 the *WORKSHOP_PROJECT* section and click the *New Folder* button
 
++
 Type `templates` and hit enter. The right-click the *templates* folder and click the *New File* button.
 
++
 Type `index.html.j2` and hit enter.
 
++
 You should now have an editor open in the right pane that can be used
 for creating your template. Enter the following details:
 
++
 [source,html]
 ----
 <html>
@@ -147,14 +148,15 @@ for creating your template. Enter the following details:
 </body>
 </html>
 ----
-image::5-vscode-template.png[index.html template]
 
-=== Step 2
++
+image::5-vscode-template.png[index.html template,link=self,window=_blank]
 
-Edit back your playbook, `site.yml`, by opening your firewall ports and
+. Edit back your playbook, `site.yml`, by opening your firewall ports and
 writing the template. Use single quotes for `win_template` in order to
 not escape the forward slash.
 
++
 [source,yaml]
 ----
     - name: Open port for site on the firewall
@@ -174,16 +176,16 @@ not escape the forward slash.
         dest: '{{ item.path }}\index.html'
       with_items: "{{ iis_sites }}"
 ----
-[quote]
-____
-*Note*
 
-*So… what did I just write?*
-* `win_firewall_rule:` This module is used to create, modify, and update firewall rules. Note in the case of AWS there are also security group rules which may impact communication. We’ve opened these for the ports in this example.
-* `win_template:` This module specifies that a jinja2 template is being used and deployed.
-* `with_items:` used in Ansible to transform data inside a template expression, i.e. filters.
-* `debug:` Again, like in the `iis_basic` playbook, this task displays the URLs to access the sites we are creating for this exercise
-____
+[NOTE]
+====
+So… what did I just write?
+
+- `win_firewall_rule:` This module is used to create, modify, and update firewall rules. Note in the case of AWS there are also security group rules which may impact communication. We’ve opened these for the ports in this example.
+- `win_template:` This module specifies that a jinja2 template is being used and deployed.
+- `with_items:` used in Ansible to transform data inside a template expression, i.e., filters.
+- `debug:` Again, like in the `iis_basic` playbook, this task displays the URLs to access the sites we are creating for this exercise
+====
 
 [#defining-using-handlers]
 == ☑️ Defining and Using Handlers
@@ -197,9 +199,7 @@ the a task. We will start with the former.
 The `handlers` block should start after a one-level indentation, that
 is, two spaces. It should align with the `tasks` block.
 
-=== Step 1
-
-Define a handler.
+Define the handler in your playbook.
 
 [source,yaml]
 ----
@@ -211,12 +211,13 @@ Define a handler.
         start_mode: auto
 ----
 
-[quote]
-____
+[NOTE]
+====
 *You can’t have a former if you don’t mention the latter*
-* `handler:` This is telling the *play* that the `tasks:` are over, and now we are defining `handlers:`. Everything below that looks the same as any other task, i.e. you give it a name, a module, and the options for that module. This is the definition of a handler.
-* `notify: Restart iisservice` …and here is your latter. Finally! The `notify` statement is the invocation of a handler by name. Quite the reveal, we know. You already noticed that you’ve added a `notify` statement to the `win_iis_website` task, now you know why.
-____
+
+- `handler:` This is telling the *play* that the `tasks:` are over, and now we are defining `handlers:`. Everything below that looks the same as any other task, i.e. you give it a name, a module, and the options for that module. This is the definition of a handler.
+- `notify: Restart iisservice` …and here is your latter. Finally! The `notify` statement is the invocation of a handler by name. Quite the reveal, we know. You already noticed that you’ve added a `notify` statement to the `win_iis_website` task, now you know why.
+====
 
 [#commit-and-review]
 == ☑️ Commit and Review
@@ -243,8 +244,8 @@ intended. If not, now is the time for us to fix it up. The playbook below should
 [source,yaml]
 ----
 ---
-- hosts: windows
-  name: This is a play within a playbook
+- name: This is a play within a playbook
+  hosts: windows
   vars:
     iis_sites:
       - name: 'Ansible Playbook Test'
@@ -304,28 +305,28 @@ intended. If not, now is the time for us to fix it up. The playbook below should
 [#creating-job-template]
 == ☑️ Create your Job Template
 
-=== Step 1
+=== Steps
 
-Before we can create our Job Template, you must first go resync your
+. Before we can create our Job Template, you must first go resync your
 Project again. So do that now.
 
-[quote]
-____
-*Note*
++
+[NOTE]
+====
 You must do this anytime you create a new *base* playbook file that
 you will be selecting via a Job Template. The new file must be synced
 to Controller before it will become available in the Job Template playbook
 dropdown.
-____
+====
 
-=== Step 2
-
-To test this playbook, we need to create a new Job Template to run this
+. To test this playbook, we need to create a new Job Template to run this
 playbook. So go to *Template* and click *+ Create template* and select `Create job template`
 to create a second job template.
 
++
 Complete the form using the following values
 
++
 [cols="1,2,1",options="header"]
 |===
 | Key
@@ -369,14 +370,11 @@ Complete the form using the following values
 |
 |===
 
-=== Step 3
+. Click image:create_job_temp.png[Save] and on the following page, select the *Survey* tab.
 
-Click image:create_job_temp.png[Save] and on the following page, select the *Survey* tab.
+. Create a new survey with following values
 
-=== Step 4
-
-Create a new survey with following values
-
++
 [cols="1,2,1",options="header"]
 |===
 | Key
@@ -408,38 +406,34 @@ Create a new survey with following values
 |
 |===
 
-image::5-survey.png[Survey Form]
++
+image::5-survey.png[Survey Form,link=self,window=_blank]
 
-=== Step 5
-
-Select SAVE image:create_survey_quest.png[Add] and remember to flip the *Survey enabled* switch image:survey_enabled.png[Survey enabled switch]
+. Select SAVE image:create_survey_quest.png[Add] and remember to flip the *Survey enabled* switch image:survey_enabled.png[Survey enabled switch]
 
 [#running-new-playbook]
 == ☑️ Running your new playbook
 
 Now let’s run it and see how it works.
 
-=== Step 1
+=== Steps
 
-Select TEMPLATES
+. Select TEMPLATES
 
-[quote]
-____
-*Note*
++
+[NOTE]
+====
 Alternatively, if you haven’t navigated away from the job templates
 creation page, you can scroll down to see all existing job templates
-____
+====
 
-=== Step 2
+. Click the rocketship icon image:at_launch_icon.png[Add] for the *IIS Advanced* Job Template.
 
-Click the rocketship icon image:at_launch_icon.png[Add] for the
-*IIS Advanced* Job Template.
+. When prompted, enter your desired test message
 
-=== Step 3
-
-When prompted, enter your desired test message
-
++
 After it launches, you should be redirected and can watch the output of
 the job in real time.
 
++
 When the job has successfully completed, you can navigate back to the `windows` tab and verify the you can get to http://localhost:8080 on the Microsoft Edge browser.
