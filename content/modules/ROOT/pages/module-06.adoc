@@ -1,7 +1,5 @@
 = 6. Roles
 
-== ☑️ Pre-work Information
-
 Although it is possible to write a playbook in one file as we’ve done throughout this workshop, eventually you’ll want to reuse files and start to organize things.
 
 Ansible Roles are the way we do this. When you create a role, you deconstruct your playbook into parts and those parts sit in a directory structure. This is considered best practice and will save you a lot of time in the future.
@@ -49,12 +47,15 @@ In this section, we will separate out the major parts of your playbook including
 
 . Make a backup copy of `site.yml`, then create a new `site.yml`.
 
++
 Navigate to your `iis_advanced` folder, right click `site.yml`, click `rename`, and call it `site.yml.backup`
 
++
 Create a blank new file called `site.yml` in the same folder
 
 . Update site.yml to look like to only call your role. It should look like below:
 
++
 [source,yaml]
 ----
 --
@@ -66,10 +67,12 @@ Create a blank new file called `site.yml` in the same folder
 
 ----
 
++
 image::6-new-site.png[New site.yml,link=self,window=_blank]
 
 . Add a default variable to your role. Edit the `roles\iis_simple\defaults\main.yml` as follows:
 
++
 [source,yaml]
 ----
 ---
@@ -86,6 +89,7 @@ iis_sites:
 
 . Add some role-specific variables to your role in `roles\iis_simple\vars\main.yml`.
 
++
 [source,yaml]
 ----
 ---
@@ -94,10 +98,9 @@ iis_test_message: "Hello World! My test IIS Server"
 
 ----
 
-[quote]
-____
-*Note*
-
++
+[NOTE]
+====
 *Hey, wait… did we just put variables in two seperate places?*
 
 Yes… yes we did. Variables can live in quite a few places. Just to
@@ -111,10 +114,11 @@ name a few:
 * On a boat, in a moat, with a goat *(disclaimer: this is a complete lie)*
 
 Bottom line, you need to read up on https://docs.ansible.com/ansible/latest/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable[variable precedence^] to understand both where to define variables and which locations take precedence. In this exercise, we are using role defaults to define a couple of variables and these are the most malleable. After that, we defined some variables in `/vars` which have a higher precedence than defaults and can’t be overridden as a default variable.
-____
+====
 
 . Create your role handler in `roles\iis_simple\handlers\main.yml`.
 
++
 [source,yaml]
 ----
 ---
@@ -129,6 +133,7 @@ ____
 
 . Add tasks to your role in `roles\iis_simple\tasks\main.yml`.
 
++
 [source,yaml]
 ----
 ---
@@ -174,8 +179,10 @@ ____
 ----
 . Add your index.html template.
 
++
 Right-click `roles\iis_simple\templates` and create a new file called `index.html.j2` with the following content:
 
++
 [source,html]
 ----
 <html>
@@ -187,54 +194,57 @@ Right-click `roles\iis_simple\templates` and create a new file called `index.htm
 </body>
 </html>
 ----
+
++
 Now, remember we still have a *templates* folder at the base level of this playbook, so we will delete that now. Right click it and Select
 *Delete*.
 
-. *Step 8: Commit*
+. *Commit*
 
++
 Click File → Save All to ensure all your files are saved.
 
++
 Push to your repository !
+
++
 ....
 git add *
 git commit -m "Updating with iis role"
 git push
 ....
 
++
 Once the changes have been pushed, dont forget to sync your project on controller!
 
 == ☑️ Running your new Playbook
 
 Now that you’ve successfully separated your original playbook into a role, let’s run it and see how it works. We don’t need to create a new template, as we are re-using the one from Exercise 5. When we run the template again, it will automatically refresh from git and launch our new role.
 
-=== Step 1
+=== Steps
 
-Before we can modify our Job Template, you must first go resync your Project again. So do that now.
+. Before we can modify our Job Template, you must first go resync your Project again. So do that now.
 
-=== Step 2
+. Select TEMPLATES
 
-Select TEMPLATES
-
-[quote]
-____
-*Note*
-
++
+[NOTE]
+====
 Alternatively, if you haven’t navigated away from the job templates
 creation page, you can scroll down to see all existing job templates
-____
+====
 
-=== Step 3
+. Click the rocketship icon image:at_launch_icon.png[Add] for the *IIS Advanced* Job Template.
 
-Click the rocketship icon image:at_launch_icon.png[Add] for the *IIS Advanced* Job Template.
+. When prompted, enter your desired test message
 
-=== Step 4
-
-When prompted, enter your desired test message
-
++
 If successful, your standard output should look similar to the figure below. Note that most of the tasks return OK because we’ve previously configured the servers and services are already running.
 
++
 image::6-job-output.png[Job output,link=self,window=_blank]
 
++
 When the job has successfully completed, verify that http://localhost:8080 and http://localhost:8081 are working.
 
 == ☑️ Review
