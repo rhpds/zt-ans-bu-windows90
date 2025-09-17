@@ -24,7 +24,7 @@ Instead, we are going to create a very simple directory structure for our playbo
 
 For this lab, we have already created a repository for you, and we just need to clone it. Open a new terminal in vscode.
 
-image::3-new-term.png[VS Code Terminal]
+image::3-new-term.png[VS Code Terminal,link=self,window=_blank]
 
 Now clone the repo.
 ....
@@ -40,7 +40,7 @@ called `install_iis.yml`.
 
 You should now have an editor open in the right pane that can be used for creating your playbook.
 
-image::3-vscode-create-folders.png[Empty install_iis.yml]
+image::3-vscode-create-folders.png[Empty install_iis.yml,link=self,window=_blank]
 
 == ☑️ Define your play
 
@@ -153,7 +153,7 @@ git push
 
 We will have a a popup in vscode for us to authenticate:
 
-image::3-vs-auth.png[VS Code AUTH]
+image::3-vs-auth.png[VS Code AUTH,link=self,window=_blank]
 
 ....
 Username: student

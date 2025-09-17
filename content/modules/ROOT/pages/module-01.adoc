@@ -39,7 +39,7 @@ workshop, we are using *machine* and *source control* credentials.
 . Select *CREDENTIALS* from the left hand panel under *Automation Execution* > *Infrastructure*
 
 +
-image::1-controller-credentials.png[Cred]
+image::1-controller-credentials.png[Cred,link=self,window=_blank]
 
 . Click the image:add_create_cred.png[Create,link=self] icon and add new credential
 
@@ -57,7 +57,7 @@ image::1-controller-credentials.png[Cred]
 |===
 
 +
-image::1-controller-add-machine-credential.png[Add Machine Credential]
+image::1-controller-add-machine-credential.png[Add Machine Credential,link=self,window=_blank]
 
 . Select image:create_cred.png[Create,link=self] to save
 
@@ -80,7 +80,7 @@ with the following details:
 
 Select image:create_cred.png[Create Cred] to save
 
-image::1-controller-add-scm-credential.png[Add SCM Credential]
+image::1-controller-add-scm-credential.png[Add SCM Credential,link=self,window=_blank]
 
 == ☑️ Creating a Project
 
@@ -99,9 +99,9 @@ Password: learn_ansible
 
 Then select your workshop project and copy the `https` url presented after clicking the "Copy" button.
 
-image::1-gitea-project.png[Project]
+image::1-gitea-project.png[Project,link=self,window=_blank]
 
-image::1-gitea-clone.png[Clone]
+image::1-gitea-clone.png[Clone,link=self,window=_blank]
 
 The repo url will be used in *Step 3*
 
@@ -110,7 +110,7 @@ The repo url will be used in *Step 3*
 . Click *Projects* on the left hand panel under *Automation Execution*.
 
 +
-image::1-controller-project.png[Proj]
+image::1-controller-project.png[Proj,link=self,window=_blank]
 
 . Click the image:add_create_proj.png[Add,link=self] icon and add new project
 
@@ -141,7 +141,7 @@ OPTIONS
 * [ ] Allow Branch Override
 
 +
-image::1-controller-create-project.png[Defining a Project]
+image::1-controller-create-project.png[Defining a Project,link=self,window=_blank]
 
 . Select image:create_proj.png[Save Project,link=self] to save
 
@@ -150,7 +150,7 @@ against the source control repository upon saving. You should see a green icon d
 next to the project name in the list view. If the status does not show as "Successful", try pressing the "Sync Project" button again re-check the status.
 
 +
-image::1-controller-project-success.png[Succesfull Sync]
+image::1-controller-project-success.png[Succesfull Sync,link=self,window=_blank]
 
 == ☑️ Inventories
 
@@ -170,7 +170,7 @@ preconfigured inventory listed. Click the inventory's name *Workshop Inventory*.
 Groups, or even Variables specific to this Inventory.
 
 +
-image::1-controller-edit-inventory.png[Edit Inventory]
+image::1-controller-edit-inventory.png[Edit Inventory,link=self,window=_blank]
 
 . We will be viewing the hosts, so click the *HOSTS* button.
 
@@ -180,12 +180,12 @@ Hosts can be associated with multiple groups. These groups can later be used to 
 automation on.
 
 +
-image::1-controller-hosts-view.png[Hosts View]
+image::1-controller-hosts-view.png[Hosts View,link=self,window=_blank]
 
 . If you click the *GROUPS* button and then select the *Windows* group, you can inspect variables set at the group level that will apply to all hosts in that group.
 
 +
-image::1-controller-group-edit.png[Group Edit]
+image::1-controller-group-edit.png[Group Edit,link=self,window=_blank]
 
 Today, we have already defined a handful of variables to tell Controller how to connect to hosts in this group. You do not have to define these variables as
 a Group variable here, they could also be Host variables or reside
