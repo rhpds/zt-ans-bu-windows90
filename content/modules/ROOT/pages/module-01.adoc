@@ -182,7 +182,7 @@ automation on.
 +
 image::1-controller-hosts-view.png[Hosts View,link=self,window=_blank]
 
-. If you click the *GROUPS* button and then select the *Windows* group, you can inspect variables set at the group level that will apply to all hosts in that group.
+. If you click the *GROUPS* button and then select the *Windows_Servers* group, you can inspect variables set at the group level that will apply to all hosts in that group.
 
 +
 image::1-controller-group-edit.png[Group Edit,link=self,window=_blank]
