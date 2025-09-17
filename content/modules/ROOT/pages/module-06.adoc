@@ -58,7 +58,7 @@ Create a blank new file called `site.yml` in the same folder
 +
 [source,yaml]
 ----
---
+---
 - name: This is my role-based playbook
   hosts: windows
 
@@ -151,7 +151,7 @@ Bottom line, you need to read up on https://docs.ansible.com/ansible/latest/play
   with_items: "{{ iis_sites }}"
 
 - name: Create IIS site
-  ansible.windows.win_iis_website:
+  community.windows.win_iis_website:
     name: "{{ item.name }}"
     state: started
     port: "{{ item.port }}"
