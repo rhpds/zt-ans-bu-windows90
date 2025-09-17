@@ -244,8 +244,8 @@ intended. If not, now is the time for us to fix it up. The playbook below should
 [source,yaml]
 ----
 ---
-- hosts: windows
-  name: This is a play within a playbook
+- name: This is a play within a playbook
+  hosts: windows
   vars:
     iis_sites:
       - name: 'Ansible Playbook Test'
