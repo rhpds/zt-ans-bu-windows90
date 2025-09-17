@@ -75,7 +75,7 @@ image::4-create-job-template.png[Create Job Template,link=self,window=_blank]
  
 . Click the image:create_job_temp.png[Create Job Template,link=self,window=_blank] button to save
 
-. On the resulting page, select the *Survey* tab and press the image::create_survey_quest.png[Create Survey,link=self,window=_blank] button
+. On the resulting page, select the *Survey* tab and press the image:create_survey_quest.png[Create Survey,link=self,window=_blank] button
 
 +
 Complete the survey form with following values
@@ -113,9 +113,9 @@ Complete the survey form with following values
 |===
 
 +
-After configuring your survey, click image::create_survey_quest.png[Survey creating,link=self,window=_blank]
-+
-On the resulting page, turn on the survey you just created.
+After configuring your survey, click image:create_survey_quest.png[Survey creating,link=self,window=_blank]
+
+. On the resulting page, turn on the survey you just created.
 
 +
 image::4-survey-created.png[Survey creating,link=self,window=_blank]
