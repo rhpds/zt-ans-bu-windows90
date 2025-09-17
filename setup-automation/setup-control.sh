@@ -140,7 +140,7 @@ cat <<EOF | tee /tmp/git-setup.yml
         content: |
           # Windows Getting Started Workshop
           
-          This repository will be used during the Windows Getting Started Workshop.
+          This repository will be used during the Ansible Automation with Windows Workshop.
           
           ## Getting Started
           
