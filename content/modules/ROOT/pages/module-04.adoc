@@ -21,7 +21,7 @@ image::4-project-sync.png[Project Sync,link=self,window=_blank]
 +
 . Click the image:create_temp.png[Add,link=self,window=_blank] icon, and select Create Job Template
 +
-. Complete the form using the following values
+Complete the form using the following values
 +
 [cols="1,2,1",options="header"]
 |===
@@ -69,19 +69,18 @@ image::4-project-sync.png[Project Sync,link=self,window=_blank]
 | [x] ENABLE FACT STORAGE
 |
 |===
-. 
+
++
 image::4-create-job-template.png[Create Job Template,link=self,window=_blank]
-. 
-. Click the blue Create job template icon to save.
-. 
-image:create_job_temp.png[Create Job Template,link=self,window=_blank]
-. 
-On the resulting page, select the *Survey* tab and press the *Create survey question* button
-. 
-image::create_survey_quest.png[Create Survey,link=self,window=_blank]
-. 
-. Complete the survey form with following values
-. 
+ 
+. Click the image:create_job_temp.png[Create Job Template,link=self,window=_blank] button to save
+
+. On the resulting page, select the *Survey* tab and press the image::create_survey_quest.png[Create Survey,link=self,window=_blank] button
+
++
+Complete the survey form with following values
+
++
 [cols="1,2,1",options="header"]
 |===
 | Key
@@ -112,10 +111,15 @@ image::create_survey_quest.png[Create Survey,link=self,window=_blank]
 | *Be creative, keep it clean, we’re all professionals here*
 |
 |===
-. 
-After configuring your survey, click *Create survey question*. On the resulting page, turn on the survey you just created.
-. 
+
++
+After configuring your survey, click image::create_survey_quest.png[Survey creating,link=self,window=_blank]
++
+On the resulting page, turn on the survey you just created.
+
++
 image::4-survey-created.png[Survey creating,link=self,window=_blank]
+
 
 == ☑️ Running the Template
 
@@ -125,35 +129,41 @@ refreshing in real time showing you the status of the job.
 
 === Steps
 
-. Select TEMPLATES
-+
+. Select *Templates* under *Automation Execution*
+
 . Click the rocketship icon image:at_launch_icon.png[Add,link=self,window=_blank] for the *IIS Basic Job Template*
-+
+
 . When prompted, enter your desired test message
+
 +
-. 
 image::4-survey-prompt.png[Survey Prompt,link=self,window=_blank]
-. 
+
 . Select *NEXT* and preview the inputs.
-. 
+
 . Select FINISH image:4-survey-launch.png[SurveyL,link=self,window=_blank]
-. 
+
 . Sit back, watch the magic happen
-. 
+
++
 Once again you should be presented with a Job log page. Selecting the *Details* tab should show you the variable you passed into the playbook among other details.
-. 
+
++
 image::4-job-summary-details.png[Job Summary,link=self,window=_blank]
-. 
+
++
 Next you will be able to see details on the play and each task in the
 playbook.
-. 
+
++
 image::4-job-summary-output.png[Play and Task Output,link=self,window=_blank]
-. 
+
 . When the job has successfully completed, navigate to your `windows` tab. This is your Windows host. Open Microsoft Edge from the Windows desktop and navigate to: http://localhost
-. 
+
++
 If all went well, you should see something like this, but with your own
 custom message of course.
-. 
+
++
 image::4-website-output.png[New Website with Personalized Test Message,link=self,window=_blank]
 
 == ☑️ Extra Credit
