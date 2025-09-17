@@ -36,7 +36,7 @@ workshop, we are using *machine* and *source control* credentials.
 
 === Steps
 
-. Select CREDENTIALS from the left hand panel under *Automation Execution* > *Infrastructure*
+. Select *CREDENTIALS* from the left hand panel under *Automation Execution* > *Infrastructure*
 
 +
 image::1-controller-credentials.png[Cred]
@@ -131,16 +131,15 @@ number in SCM URL*)
 | SCM CREDENTIAL | Git Credential |
 |===
 
++
 OPTIONS
 
-+
 * [ ] Clean
 * [ ] Delete
 * [ ] Track submodules
 * [x] Update Revision on Launch
 * [ ] Allow Branch Override
 
-+
 image::1-controller-create-project.png[Defining a Project]
 
 . Select image:create_proj.png[Save Project,link=self] to save
