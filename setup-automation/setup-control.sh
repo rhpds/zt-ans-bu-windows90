@@ -347,6 +347,13 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
       args:
         executable: powershell.exe
 
+    - name: Execute slmgr /rearm with elevated privileges
+      ansible.windows.win_powershell:
+        script: slmgr /rearm
+      become: yes
+      become_method: runas
+      register: rearm_result
+
     - name: Reboot after Chocolatey/.NET installation
       ansible.windows.win_reboot:
         msg: "Reboot to finalize Chocolatey/.NET installation"
@@ -361,6 +368,7 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
       delay: 20
       until: edge_install.rc == 0
 EOF
+
 
 # Execute the setup playbooks
 echo "=== Running Git/Gitea Setup ==="
