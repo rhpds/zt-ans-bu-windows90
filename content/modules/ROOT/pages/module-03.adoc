@@ -149,7 +149,7 @@ And that should do it. You should now have a fully written playbook called `inst
 
 But wait!!! We haven’t committed our changes from our *local* copy to *git*. We need to setup our identity for git! so enter the following in terminal:
 
-....pages
+....
 git config --global user.email "student@ansible.com"
 git config --global user.name "Student"
 ....
@@ -162,7 +162,7 @@ git commit -m "adding install_iis.yml"
 git push
 ....
 
-We will have a a popup in vscode for us to authenticate:
+We will have a pop-up in vscode for us to authenticate:
 
 image::3-vs-auth.png[VS Code AUTH,link=self,window=_blank]
 
