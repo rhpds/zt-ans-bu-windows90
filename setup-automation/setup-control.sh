@@ -391,9 +391,15 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
     #   become: yes
     #   become_method: runas
     #   register: rearm_result
-    - name: Execute slmgr /rearm (Batch mode to suppress UI popup)
-      ansible.windows.win_shell: cscript //B %windir%\system32\slmgr.vbs /rearm
-      register: rearm_result
+    - name: Execute slmgr /rearm (non-interactive)
+      ansible.windows.win_command: >
+        cscript.exe //B //NoLogo %windir%\system32\slmgr.vbs /rearm
+      become: yes
+      become_method: runas
+      become_user: Administrator
+      register: slmgr_result
+      changed_when: false
+      failed_when: false
 
     - name: Reboot after Chocolatey/.NET installation
       ansible.windows.win_reboot:
