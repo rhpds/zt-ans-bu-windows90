@@ -385,11 +385,14 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
       args:
         executable: powershell.exe
 
-    - name: Execute slmgr /rearm with elevated privileges
-      ansible.windows.win_powershell:
-        script: slmgr /rearm
-      become: yes
-      become_method: runas
+    # - name: Execute slmgr /rearm with elevated privileges
+    #   ansible.windows.win_powershell:
+    #     script: slmgr /rearm
+    #   become: yes
+    #   become_method: runas
+    #   register: rearm_result
+    - name: Execute slmgr /rearm (Batch mode to suppress UI popup)
+      ansible.windows.win_shell: cscript //B %windir%\system32\slmgr.vbs /rearm
       register: rearm_result
 
     - name: Reboot after Chocolatey/.NET installation
