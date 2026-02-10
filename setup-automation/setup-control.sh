@@ -410,7 +410,7 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
     #   register: rearm_result
 
     - name: Execute slmgr /rearm (Clean & Silent)
-      ansible.windows.win_shell: cscript.exe //B //NoLogo %windir%\system32\slmgr.vbs /rearm
+      ansible.windows.win_shell: cscript.exe //B //NoLogo C:\Windows\System32\slmgr.vbs /rearm
       register: slmgr_result
 
     - name: Reboot after Chocolatey/slmgr setup
@@ -418,7 +418,7 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
         msg: "Reboot to finalize Chocolatey/slmgr setup"
         pre_reboot_delay: 5
 
-    - name: Set MapsBroker to manual and stopped (silence Server Manager)
+    - name: Set MapsBroker to manual and stopped 
       ansible.windows.win_service:
         name: MapsBroker
         start_mode: manual
