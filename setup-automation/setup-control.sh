@@ -385,29 +385,33 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
     #   become: yes
     #   become_method: runas
     #   register: rearm_result
-    - name: Execute slmgr /rearm
-      ansible.windows.win_powershell:
-        script: |
-          $Action = New-ScheduledTaskAction -Execute "cscript.exe" -Argument "//B //NoLogo %windir%\system32\slmgr.vbs /rearm"
+    # - name: Execute slmgr /rearm
+    #   ansible.windows.win_powershell:
+    #     script: |
+    #       $Action = New-ScheduledTaskAction -Execute "cscript.exe" -Argument "//B //NoLogo %windir%\system32\slmgr.vbs /rearm"
 
-          $Principal = New-ScheduledTaskPrincipal -UserId "Administrator" -RunLevel Highest
+    #       $Principal = New-ScheduledTaskPrincipal -UserId "Administrator" -RunLevel Highest
 
-          $TaskName = "TempSLMGRRearm"
-          Register-ScheduledTask -TaskName $TaskName -Action $Action -Principal $Principal -Force | Out-Null
+    #       $TaskName = "TempSLMGRRearm"
+    #       Register-ScheduledTask -TaskName $TaskName -Action $Action -Principal $Principal -Force | Out-Null
 
-          Start-ScheduledTask -TaskName $TaskName
+    #       Start-ScheduledTask -TaskName $TaskName
 
-          $TaskState = (Get-ScheduledTask -TaskName $TaskName).State
-          while ($TaskState -eq "Running") {
-            Start-Sleep -Seconds 1
-            $TaskState = (Get-ScheduledTask -TaskName $TaskName).State
-          }
+    #       $TaskState = (Get-ScheduledTask -TaskName $TaskName).State
+    #       while ($TaskState -eq "Running") {
+    #         Start-Sleep -Seconds 1
+    #         $TaskState = (Get-ScheduledTask -TaskName $TaskName).State
+    #       }
 
-          Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
-      become: yes
-      become_method: runas
-      become_user: Administrator
-      register: rearm_result
+    #       Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
+    #   become: yes
+    #   become_method: runas
+    #   become_user: Administrator
+    #   register: rearm_result
+
+    - name: Execute slmgr /rearm (Clean & Silent)
+      ansible.windows.win_shell: cscript.exe //B //NoLogo %windir%\system32\slmgr.vbs /rearm
+      register: slmgr_result
 
     - name: Reboot after Chocolatey/slmgr setup
       ansible.windows.win_reboot:
