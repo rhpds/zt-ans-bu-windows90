@@ -1,4 +1,30 @@
 #!/bin/bash
+
+retry() {
+    for i in {1..3}; do
+        echo "Attempt $i: $2"
+        if $1; then
+            return 0
+        fi
+        [ $i -lt 3 ] && sleep 5
+    done
+    echo "Failed after 3 attempts: $2"
+    exit 1
+}
+
+retry "subscription-manager clean"
+retry "curl -k -L https://${SATELLITE_URL}/pub/katello-server-ca.crt -o /etc/pki/ca-trust/source/anchors/${SATELLITE_URL}.ca.crt"
+retry "update-ca-trust"
+KATELLO_INSTALLED=$(rpm -qa | grep -c katello)
+if [ $KATELLO_INSTALLED -eq 0 ]; then
+  retry "rpm -Uhv https://${SATELLITE_URL}/pub/katello-ca-consumer-latest.noarch.rpm"
+fi
+subscription-manager status
+if [ $? -ne 0 ]; then
+    retry "subscription-manager register --org=${SATELLITE_ORG} --activationkey=${SATELLITE_ACTIVATIONKEY}"
+fi
+retry "dnf install -y python3-pip python3-libsemanage"
+
 echo "=== Windows Workshop Setup ==="
 
 # Create a writable workspace for the rhel user used by exercises
@@ -228,38 +254,6 @@ cat <<EOF | tee /tmp/controller-setup.yml
         controller_username: admin
         controller_password: ansible123!
         validate_certs: false
-
-    # - name: Create Project
-    #   ansible.controller.project:
-    #     name: "Windows Workshop"
-    #     description: "Windows Getting Started Workshop Content"
-    #     organization: "Default"
-    #     scm_type: git
-    #     scm_url: "http://gitea:3000/student/workshop_project.git"
-    #     state: present
-    #     controller_host: "https://localhost"
-    #     controller_username: admin
-    #     controller_password: ansible123!
-    #     validate_certs: false
-
-    # - name: Create student user
-    #   ansible.platform.user:
-    #     controller_host: "https://localhost"
-    #     controller_username: "admin"
-    #     controller_password: "ansible123!"
-    #     validate_certs: false
-    #     username: "{{ student_user }}"
-    #     password: "{{ student_password }}"
-    #     email: student@acme.example.com
-    #     is_superuser: true
-    #     state: present
-    #   register: student_user_result
-    #   ignore_errors: true
-
-    # - name: Debug student user creation
-    #   ansible.builtin.debug:
-    #     var: student_user_result
-    #   when: student_user_result is defined
 EOF
 
 # Install necessary collections
@@ -269,15 +263,14 @@ ansible-galaxy collection install ansible.windows
 ansible-galaxy collection install ansible.controller
 ansible-galaxy collection install community.windows
 
-# Install pip3 and pywinrm for Windows connectivity
-dnf install -y python3-pip
+# Install pywinrm for Windows connectivity
 pip3 install pywinrm
 
 # Set collections path for playbook execution
 export ANSIBLE_COLLECTIONS_PATH=/root/.ansible/collections/ansible_collections/
 
-# Bootstrap Windows user using known admin credentials (best effort)
-cat <<'EOF' | tee /tmp/windows-bootstrap.yml
+
+cat <<'EOF' | tee /tmp/windows-setup.yml
 ---
 - hosts: windows
   gather_facts: false
@@ -317,20 +310,13 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
           - "{{ student_user }}"
         state: present
 
-    - name: Disable Server Manager auto-start at logon (policy, all users)
+    - name: Disable Server Manager auto-start at logon
       ansible.windows.win_regedit:
         path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\Server\ServerManager
         name: DoNotOpenAtLogon
         data: 1
         type: dword
         state: present
-
-    # - name: Disable Server Manager scheduled task (extra hardening)
-    #   ansible.windows.win_scheduled_task:
-    #     name: ServerManager
-    #     path: \Microsoft\Windows\Server Manager\
-    #     state: disabled
-    #   ignore_errors: true
 
     - name: Ensure .NET Framework 4.8 feature is installed
       ansible.windows.win_feature:
@@ -347,19 +333,22 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
       args:
         executable: powershell.exe
 
-    - name: Execute slmgr /rearm with elevated privileges
-      ansible.windows.win_powershell:
-        script: slmgr /rearm
-      become: yes
-      become_method: runas
-      register: rearm_result
+    - name: Execute slmgr /rearm 
+      ansible.windows.win_shell: cscript.exe //B //NoLogo C:\Windows\System32\slmgr.vbs /rearm
+      register: slmgr_result
 
-    - name: Reboot after Chocolatey/.NET installation
+    - name: Reboot after Chocolatey/slmgr setup
       ansible.windows.win_reboot:
-        msg: "Reboot to finalize Chocolatey/.NET installation"
+        msg: "Reboot to finalize Chocolatey/slmgr setup"
         pre_reboot_delay: 5
 
-    - name: Install Microsoft Edge via Chocolatey (with retries)
+    - name: Set MapsBroker to manual and stopped
+      ansible.windows.win_service:
+        name: MapsBroker
+        start_mode: manual
+        state: stopped
+
+    - name: Install Microsoft Edge via Chocolatey
       ansible.windows.win_shell: choco install microsoft-edge -y --no-progress
       args:
         executable: powershell.exe
@@ -367,6 +356,16 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
       retries: 3
       delay: 20
       until: edge_install.rc == 0
+
+    - name: Verify Edge installed
+      ansible.windows.win_stat:
+        path: C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe
+      register: edge_bin
+
+    - name: Fail if Edge not installed
+      ansible.builtin.fail:
+        msg: 'Edge did not install; check Chocolatey logs on the VM'
+      when: not edge_bin.stat.exists
 EOF
 
 
@@ -375,7 +374,7 @@ echo "=== Running Git/Gitea Setup ==="
 ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
 
 echo "=== Bootstrapping Windows local user (best effort) ==="
-ansible-playbook /tmp/windows-bootstrap.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v || true
+ansible-playbook /tmp/windows-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v || true
 
 echo "=== Running AAP Controller Setup ==="
 ansible-playbook /tmp/controller-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
