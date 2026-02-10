@@ -18,13 +18,7 @@ retry() {
     exit 1
 }
 
-2 weeks ago
-
-Update setup-control.sh
 retry "subscription-manager clean"
-2 weeks ago
-
-Update setup-control.sh
 retry "curl -k -L https://${SATELLITE_URL}/pub/katello-server-ca.crt -o /etc/pki/ca-trust/source/anchors/${SATELLITE_URL}.ca.crt"
 retry "update-ca-trust"
 KATELLO_INSTALLED=$(rpm -qa | grep -c katello)
@@ -391,20 +385,40 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
     #   become: yes
     #   become_method: runas
     #   register: rearm_result
-    - name: Execute slmgr /rearm (non-interactive)
-      ansible.windows.win_command: >
-        cscript.exe //B //NoLogo %windir%\system32\slmgr.vbs /rearm
+    - name: Execute slmgr /rearm
+      ansible.windows.win_powershell:
+        script: |
+          $Action = New-ScheduledTaskAction -Execute "cscript.exe" -Argument "//B //NoLogo %windir%\system32\slmgr.vbs /rearm"
+
+          $Principal = New-ScheduledTaskPrincipal -UserId "Administrator" -RunLevel Highest
+
+          $TaskName = "TempSLMGRRearm"
+          Register-ScheduledTask -TaskName $TaskName -Action $Action -Principal $Principal -Force | Out-Null
+
+          Start-ScheduledTask -TaskName $TaskName
+
+          $TaskState = (Get-ScheduledTask -TaskName $TaskName).State
+          while ($TaskState -eq "Running") {
+            Start-Sleep -Seconds 1
+            $TaskState = (Get-ScheduledTask -TaskName $TaskName).State
+          }
+
+          Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
       become: yes
       become_method: runas
       become_user: Administrator
-      register: slmgr_result
-      changed_when: false
-      failed_when: false
+      register: rearm_result
 
-    - name: Reboot after Chocolatey/.NET installation
+    - name: Reboot after Chocolatey/slmgr setup
       ansible.windows.win_reboot:
-        msg: "Reboot to finalize Chocolatey/.NET installation"
+        msg: "Reboot to finalize Chocolatey/slmgr setup"
         pre_reboot_delay: 5
+
+    - name: Set MapsBroker to manual and stopped (silence Server Manager)
+      ansible.windows.win_service:
+        name: MapsBroker
+        start_mode: manual
+        state: stopped
 
     - name: Install Microsoft Edge via Chocolatey (with retries)
       ansible.windows.win_shell: choco install microsoft-edge -y --no-progress
@@ -414,6 +428,16 @@ cat <<'EOF' | tee /tmp/windows-bootstrap.yml
       retries: 3
       delay: 20
       until: edge_install.rc == 0
+
+    - name: Verify Edge installed
+      ansible.windows.win_stat:
+        path: C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe
+      register: edge_bin
+
+    - name: Fail if Edge not installed
+      ansible.builtin.fail:
+        msg: 'Edge did not install; check Chocolatey logs on the VM'
+      when: not edge_bin.stat.exists
 EOF
 
 
