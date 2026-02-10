@@ -1,4 +1,11 @@
 #!/bin/bash
+curl -k  -L https://${SATELLITE_URL}/pub/katello-server-ca.crt -o /etc/pki/ca-trust/source/anchors/${SATELLITE_URL}.ca.crt
+update-ca-trust
+rpm -Uhv https://${SATELLITE_URL}/pub/katello-ca-consumer-latest.noarch.rpm || true
+
+subscription-manager status >/dev/null 2>&1 || \
+  subscription-manager register --org=${SATELLITE_ORG} --activationkey=${SATELLITE_ACTIVATIONKEY} --force
+
 echo "=== Windows Workshop Setup ==="
 
 # Create a writable workspace for the rhel user used by exercises
