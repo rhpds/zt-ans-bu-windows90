@@ -19,7 +19,7 @@ image::4-project-sync.png[Project Sync,link=self,window=_blank]
 
 . Select *Templates* under *Automation Execution*
 +
-. Click the image:create_temp.png[Add,link=self,window=_blank] icon, and select Create Job Template
+. Click the image:create_temp.png[Add,link=self,window=_blank] icon, and select *Create job template*
 +
 Complete the form using the following values
 +
@@ -37,35 +37,35 @@ Complete the form using the following values
 | Template for the iis-basic playbook
 |
 
-| JOB TYPE
+| Job type
 | Run
 |
 
-| INVENTORY
+| Inventory
 | Workshop Inventory
 |
 
-| PROJECT
+| Project
 | Ansible Workshop Project
 |
 
-| Execution Environment
-| Windows Workshop Execution Environment
-|
-
-| PLAYBOOK
+| playbook
 | `iis_basic/install_iis.yml`
 |
 
-| CREDENTIAL
+| Execution environment
+| Windows Workshop Execution Environment
+|
+
+| Credential
 | Name: *Windows Credential*
 |
 
-| LIMIT
+| Limit
 | windows
 |
 
-| OPTIONS
+| Options
 | [x] ENABLE FACT STORAGE
 |
 |===
@@ -87,28 +87,28 @@ Complete the survey form with following values
 | Value
 | Note
 
-| QUESTION
+| Question
 | Please enter a test message for your new website
 |
 
-| DESCRIPTION
+| Description
 | Website test message prompt
 |
 
-| ANSWER VARIABLE NAME
+| Answer variable name
 | `iis_test_message`
 |
 
-| ANSWER TYPE
+| Answer type
 | Text
 |
 
-| MINIMUM/MAXIMUM LENGTH
+| Minimum/Maximum Length
 |
 | Use the defaults
 
-| DEFAULT ANSWER
-| *Be creative, keep it clean, we’re all professionals here*
+| Default answer
+| *Be creative and keep it clean, we are all professionals here..*
 |
 |===
 
@@ -140,7 +140,7 @@ image::4-survey-prompt.png[Survey Prompt,link=self,window=_blank]
 
 . Select *NEXT* and preview the inputs.
 
-. Select FINISH image:4-survey-launch.png[SurveyL,link=self,window=_blank]
+. Select *FINISH*
 
 . Sit back, watch the magic happen
 
