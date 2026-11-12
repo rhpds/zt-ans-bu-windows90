@@ -42,7 +42,7 @@ Click the *Next* button.
 [cols="1,2",options="header"]
 |===
 | Key | Value
-| Execution environment | Windows Workshop Execution Environment
+| Execution Environment | Windows Workshop Execution Environment
 |===
 
 Click the *Next* button.
@@ -50,8 +50,10 @@ Click the *Next* button.
 [cols="1,1",options="header"]
 |===
 | Key | Value
-| Machine credential | Windows Credential
+| Credential | Windows Credential
 |===
+
+Click the *Next* button.
 
 Once you click *FINSIH* you will be redirected to the Job log. Every
 job and action in Automation Controller is recorded and stored. These logs can also be exported automatically to another
@@ -93,7 +95,7 @@ Click the *Next* button.
 [cols="1,2",options="header"]
 |===
 | Key | Value
-| Execution environment | Windows Workshop Execution Environment
+| Execution Environment | Windows Workshop Execution Environment
 |===
 
 Click the *Next* button.
@@ -101,18 +103,12 @@ Click the *Next* button.
 [cols="1,1",options="header"]
 |===
 | Key | Value
-| Machine credential | Windows Credential
+| Credential | Windows Credential
 |===
 
 You should see output like this:
 
 image::2-adhoc-run-setup-output.png[Setup Log Details,link=self,window=_blank]
-
-
-[NOTE]
-====
-If you click the three dots shown on line 21 in the above output, you will see all the facts returned by the `setup` module.)
-====
 
 ---
 
@@ -133,7 +129,7 @@ Click the *Next* button.
 [cols="1,2",options="header"]
 |===
 | Key | Value
-| Execution environment | Windows Workshop Execution Environment
+| Execution Environment | Windows Workshop Execution Environment
 |===
 
 Click the *Next* button.
@@ -141,7 +137,7 @@ Click the *Next* button.
 [cols="1,1",options="header"]
 |===
 | Key | Value
-| Machine credential | Windows Credential
+| Credential | Windows Credential
 |===
 
 You will notice that the log text is now orange. This is to denote that a change was made on the system versus the green that shows that no changes were made earlier.
