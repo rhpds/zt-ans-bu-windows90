@@ -277,31 +277,6 @@ cat <<'EOF' | tee /tmp/windows-setup.yml
       args:
         executable: powershell.exe
 
-    - name: Check whether Microsoft Edge is already installed
-      ansible.windows.win_stat:
-        path: C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
-      register: edge_bin
-
-    - name: Install Microsoft Edge when first boot did not
-      when: not edge_bin.stat.exists
-      ansible.windows.win_shell: C:\ProgramData\chocolatey\bin\choco.exe install microsoft-edge -y --no-progress
-      args:
-        executable: powershell.exe
-      register: edge_install
-      retries: 3
-      delay: 20
-      until: edge_install.rc == 0
-
-    - name: Confirm Microsoft Edge is installed
-      ansible.windows.win_stat:
-        path: C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe
-      register: edge_installed
-
-    - name: Fail if Edge is not installed
-      ansible.builtin.fail:
-        msg: 'Edge did not install; check Chocolatey logs on the VM'
-      when: not edge_installed.stat.exists
-
     - name: Set MapsBroker to manual and stopped
       ansible.windows.win_service:
         name: MapsBroker
