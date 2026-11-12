@@ -12,18 +12,32 @@ retry() {
     exit 1
 }
 
-retry "subscription-manager clean"
-retry "curl -k -L https://${SATELLITE_URL}/pub/katello-server-ca.crt -o /etc/pki/ca-trust/source/anchors/${SATELLITE_URL}.ca.crt"
-retry "update-ca-trust"
+# AWS images disable RHSM repo management since they use RHUI.
+# Re-enable it so Satellite registration creates proper repo files.
+sed -i 's/^manage_repos.*=.*0/manage_repos = 1/' /etc/rhsm/rhsm.conf
+
+retry "subscription-manager clean" "Cleaning subscription manager"
+retry "curl -k -L https://${SATELLITE_URL}/pub/katello-server-ca.crt -o /etc/pki/ca-trust/source/anchors/${SATELLITE_URL}.ca.crt" "Downloading Satellite CA"
+retry "update-ca-trust" "Updating CA trust"
 KATELLO_INSTALLED=$(rpm -qa | grep -c katello)
-if [ $KATELLO_INSTALLED -eq 0 ]; then
-  retry "rpm -Uhv https://${SATELLITE_URL}/pub/katello-ca-consumer-latest.noarch.rpm"
+if [ "$KATELLO_INSTALLED" -eq 0 ]; then
+  retry "rpm -Uhv https://${SATELLITE_URL}/pub/katello-ca-consumer-latest.noarch.rpm" "Installing Katello CA consumer"
 fi
 subscription-manager status
 if [ $? -ne 0 ]; then
-    retry "subscription-manager register --org=${SATELLITE_ORG} --activationkey=${SATELLITE_ACTIVATIONKEY}"
+    retry "subscription-manager register --org=${SATELLITE_ORG} --activationkey=${SATELLITE_ACTIVATIONKEY}" "Registering with Satellite"
 fi
-retry "dnf install -y python3-pip python3-libsemanage"
+
+# Disable broken AWS RHUI repos and amazon-id plugin
+dnf config-manager --set-disabled '*rhui*' 2>/dev/null || true
+if [ -f /etc/dnf/plugins/amazon-id.conf ]; then
+    sed -i 's/enabled.*=.*1/enabled=0/' /etc/dnf/plugins/amazon-id.conf
+fi
+
+# Enable RHEL 9 repos from Satellite
+subscription-manager repos --enable=rhel-9-for-x86_64-baseos-rpms --enable=rhel-9-for-x86_64-appstream-rpms
+
+retry "dnf install -y python3-pip python3-libsemanage" "Installing python packages"
 
 echo "=== Windows Workshop Setup ==="
 
