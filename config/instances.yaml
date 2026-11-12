@@ -63,10 +63,10 @@ containers:
         tls_termination: Edge
 virtualmachines:
   - name: "control"
-    image: "base-zero-aap-2.5-container-ce"
-    memory: "16G"
+    image: "aap-2.7-2-cehm-20260630"
+    memory: "32G"
     cores: 4
-    image_size: "30Gi"
+    image_size: "70Gi"
    # disk_type: "scsi"
    # bootloader: "efi"
     tags:
@@ -80,7 +80,7 @@ virtualmachines:
       password: ansible123!
       chpasswd: { expire: False }
       runcmd:
-        - sed -i "s/PasswordAuthentication no/PasswordAuthentication yes/" /etc/ssh/sshd_config
+        - echo "PasswordAuthentication yes" > /etc/ssh/sshd_config.d/50-cloud-init.conf
         - systemctl reload sshd
     services:
       - name: control-https
@@ -98,38 +98,38 @@ virtualmachines:
         tls_termination: reencrypt
         tls_destinationCACertificate: |
           -----BEGIN CERTIFICATE-----
-          MIIF1jCCA76gAwIBAgIUBQZlbUZlOmMKhspO9U4/nTJAXAEwDQYJKoZIhvcNAQEL
+          MIIF1jCCA76gAwIBAgIUVGPtWdIAzaYcfh4q6N+SFxa9OS0wDQYJKoZIhvcNAQEL
           BQAwgYIxCzAJBgNVBAYTAlVTMRcwFQYDVQQIDA5Ob3J0aCBDYXJvbGluYTEQMA4G
           A1UEBwwHUmFsZWlnaDEQMA4GA1UECgwHUmVkIEhhdDEQMA4GA1UECwwHQW5zaWJs
-          ZTEkMCIGA1UEAwwbQW5zaWJsZSBBdXRvbWF0aW9uIFBsYXRmb3JtMB4XDTI1MDQy
-          MzA4MjEyOVoXDTM1MDQyMTA4MjEyOVowgYIxCzAJBgNVBAYTAlVTMRcwFQYDVQQI
+          ZTEkMCIGA1UEAwwbQW5zaWJsZSBBdXRvbWF0aW9uIFBsYXRmb3JtMB4XDTI2MDYz
+          MDIwNDE0OVoXDTM2MDYyNzIwNDE0OVowgYIxCzAJBgNVBAYTAlVTMRcwFQYDVQQI
           DA5Ob3J0aCBDYXJvbGluYTEQMA4GA1UEBwwHUmFsZWlnaDEQMA4GA1UECgwHUmVk
           IEhhdDEQMA4GA1UECwwHQW5zaWJsZTEkMCIGA1UEAwwbQW5zaWJsZSBBdXRvbWF0
-          aW9uIFBsYXRmb3JtMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA2Ytu
-          a9MM9qr0UBvlIJPXmeSjzQXmx+CJwQAhDoR8MgOkjvWjjEdsX4VHBfQTO58d5sPr
-          oNg95GRe9y9Gjt6Lh7szLk70Q766Ncq8OIBYieiVKctIV+ZZmX7+bBcyzbII/0C9
-          Ili3lNd+XKfl5vmCWoYyuQncC1FZgVpHqZDP/+RCCMThdKEvugbQUmXF6pmEFF7Z
-          8PxYpxnVDX2ipOfWcjZDm6pTBd5+dzXHQVsWe25kY6QW0zEYzPJb3q0gP7oNz1uV
-          rXgYBnKQ8NdoSGtS7w9bvSw28Bf1ZFTvBKeCxWNeoJbiszqdsDd6PEwb4uE1Tr6D
-          qsLfPgvQzngQ+a7YrZ+M6GskQkfk+ZWMK8h6066p27Tzs6/9jMiCFuKwRuKWy9Qi
-          DdCSnwVIw4VB40ysoAHprxBHq4y/YJ2RDiC9EehTXsQf/uAy3M7KBBjVGlMfXxUE
-          NfjbeMdSQip04jKQGhJf8teXTymfcjlGaoCtymB+h4s3hc1T7DjfR0Q1Gd3AIL/p
-          lHOgU4TMBzeghqeDRbY4YQRSI1aF/hzTvAJzMaONs161buKOQ47O5UGGJYHHlJbf
-          aI0s3Mhld1YvIFk78A4tFI9GIwzj4IzVmCv4MZHg2BXKAU6m3Y6bYNabqP6Ho4Fs
-          DZOVkMvwTGKGfRxjdp0kx6HxNmjnVDMXGM9g8cECAwEAAaNCMEAwDgYDVR0PAQH/
-          BAQDAgIEMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFFugxH0taHxJ0/d71phl
-          a1Vt78fTMA0GCSqGSIb3DQEBCwUAA4ICAQApZCo7gI0xdk2TxjOcq+BdNsOvKjWL
-          ADceDM78oPy0xpgKd2u9INITzIY2f4KGcepXslnlMQQvny80N1LXu9Tkn4rhoU03
-          DXb9bXSr44T3fIf4JFU2iv5Hb6Az/DiQ3o9fZnhpW0AmzR1LmZUuFBJZefFBMMKl
-          s2W9C3f3nUPzi1qrGSXszXXbIDYsRMhax/MxWR9mxITuN3T6PhW8A1LyQ8dWRCLw
-          jFFcNuGjlR8w16XhRCw8uA1RzVwNWoUGvMiapboR25N0DLVCG8qf/mdEI4re8MhM
-          EYHugB/e7vRx6iV9ov7jJSB8BrBPWy/7ncebWIf8OvjM2UcUk0hciAQGD4Udbb3s
-          LGcpjZRJDrnpBdp+CJMCNNjoI0wLbmRDEVPGOSkJSmnj+8VTlQ5s+Dxvj2hh/rq7
-          APwxbIl1YBpTx65KwhacJbXSByk8bnwEQdRo240kC5ggC6twb/vvslRortZtyfqw
-          E/xGAKc9LOIFiqk1f0IU2ssEBvSFvYjypXsGnFITamNN2lMS2k5XQIA4avwWsoO4
-          rRLV87ua9S7g31PTYCMJBGw/B3PXhXjJG/eXgLyhEoUQP/fqeGiPEBzagyo71qL5
-          fH5qke1XR5LFGpndX1GuSVBhdZq94x0aGXWTQCDNIPQ3QtrQ64PBF1vRFdJ6o/FI
-          uEOWpQhGYHMC0A==
+          aW9uIFBsYXRmb3JtMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAvezK
+          CQJvMlpju7a+BdEDwLOzW1/svKWnU3jiW58R36ftglZq2FtLSfT11CJ+khjVQsfa
+          WCgQIU0QvKurWLWbq5ACcsptZ8RTSy/oQWlKJqjF8t6PlJcGdCLy9d+zsaJP6K05
+          IwKABLCBisepXf4GNJzSe+tGXq2tT+8hldS6Xo/zeNsDN7QX+n/JnbyOoGAC4rlp
+          5vTTQMPDaMZYLrhTEzLNoY8PSaZIOZUCJnrBgTFJYWp8PN92XuE9AuCK5CIoiZga
+          yrTKl5z3YhLo6hx52qzhWhjbBm9gll3tVfxIzpEoBzfAmHDSu8LXNYhMwprOD41P
+          EmjyE9QfdBdTHO67MSEe8VgD6P7AQla9xXuy7ChjcQfLEponfWzdqA7qksneIUEa
+          QGBhuUagRssH3fWhgW91VdpJesRvhJLHR/UI85p99j3EkUYlhFdYHFGSjImSLhHr
+          2DReta/Q4Sj66rTSJjjQCLcxvCaTPzRFPLHR2adn6j3UF1C6eUxshE6fQdtGCOma
+          ARigrRake5p5WxOvxNFGgXEEOrxzeY4m1Y+2kHojwVNFUqhJPUJNGoXq3c7uqcvd
+          wksTq+F0qrYczQ0yq4ErwPq5etjdG7DoQJ/VHL0sxtSB4cD9dXYsB3ZANm6P9LHK
+          Q/quMmaBrUri8BRwC4h/a5QVNrx1DoXRF/uLfvkCAwEAAaNCMEAwDgYDVR0PAQH/
+          BAQDAgIEMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFNOIAvAqnlTbd8at9ZlU
+          JyRzo5XRMA0GCSqGSIb3DQEBCwUAA4ICAQC6workqBiG9GJ5brH8YJtgIuQaOI0b
+          vkppSjzox01zyRSxgZWdudZjVsGM+ZaHdCuUlBKT4K5dSW7X+PCFKmMmXAFERb1+
+          ZCf5Gz4WoMi1Gy7LMLCU7zH0T6uSR7+400TIcilhdc50MrwkahdW2/01Qxww5mPv
+          /0onYYwGMQdXyIkVsHk6TN546nCnopEKZeR6EUCV8Zn/Rnq8gKgu/fYUy5XoVHe7
+          T5oTukKZAwXtPj1CUeqd8T3uC26sc3xajI8Qw92zX5uDpSqEfRtFr+u6YdRoN3b/
+          H4R/MmP1Ko9Y+LBTihK1T6afs35d0XndfEvUWJDdOfoHmHzq7CL0QTRe76pe5F8R
+          9oaP17RCpqzf5aBVgftng8QgJc4ODKKmWeVDJ7T/4INIxnjQm0bXhD9QkFi9uEtJ
+          /yyGJjkH3CjDt4w3okYPzLCbA9zpoA1zwr4QWDFEadQrwEB36Sx4LEu0+GMicpad
+          J3f2y70NfgQMv8aJAOxH8QvkLU+ORCaUcZiw1NPLu+YMBOECtBtoD4wph2W5UTB1
+          s9OFcAQSBiDzyZsCLGXp1goc2JZDPHbU2iFtqBvdwNRH3z2T8v7u7SFmkbrqkxHH
+          +1wp72F2cdzig52epPASbAKsZhHU+d3feKGtglf/hkNmE99ma4fTAh8HZ8hu5Rxk
+          5vSdMHKkmMRv0w==
           -----END CERTIFICATE-----
 
   - name: "windows"

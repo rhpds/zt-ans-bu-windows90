@@ -168,8 +168,17 @@ cat <<EOF | tee /tmp/controller-setup.yml
       when: "'win_chocolatey' not in job_settings.json.AD_HOC_COMMANDS"
 EOF
 
-# Collections used by the setup playbooks. Student jobs use the Windows execution environment.
-ansible-galaxy collection install ansible.windows ansible.controller
+# ansible.controller must match the controller on the AAP 2.7 image.
+# ansible.windows is used by the Windows prep playbook on this node.
+# Student jobs use the Windows execution environment.
+AAP_CONTROLLER_COLLECTION=/root/ansible-automation-platform-containerized-setup/collections/ansible_collections/ansible/controller
+mkdir -p /root/.ansible/collections/ansible_collections/ansible
+if [ -d "$AAP_CONTROLLER_COLLECTION" ]; then
+  cp -a "$AAP_CONTROLLER_COLLECTION" /root/.ansible/collections/ansible_collections/ansible/
+else
+  ansible-galaxy collection install ansible.controller
+fi
+ansible-galaxy collection install ansible.windows
 
 # Install pywinrm for Windows connectivity
 pip3 install pywinrm

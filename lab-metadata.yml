@@ -8,7 +8,7 @@ lab:
   
   # Detailed description for description.adoc generation
   description:
-    summary: "Learn core Windows automation with Red Hat Ansible Automation Platform using the automation controller web UI."
+    summary: "Learn core Windows automation with Red Hat Ansible Automation Platform 2.7 using the automation controller web UI."
     
     goal: "Master Windows automation on Ansible Automation Platform, from ad-hoc commands and roles through patching, package management, and workflows."
     concepts:
