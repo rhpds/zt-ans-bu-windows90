@@ -39,64 +39,6 @@ subscription-manager repos --enable=rhel-9-for-x86_64-baseos-rpms --enable=rhel-
 
 retry "dnf install -y python3-pip python3-libsemanage" "Installing python packages"
 
-# This lab does not use Automation Hub. Stop and disable its containers on the
-# AAP 2.7 image so provision does not keep Hub running.
-echo "=== Disabling Automation Hub ==="
-disable_automation_hub_for_user() {
-  local user="$1"
-  local uid runtime units
-  uid="$(id -u "$user" 2>/dev/null)" || return 1
-  loginctl enable-linger "$user" >/dev/null 2>&1 || true
-  runtime="/run/user/${uid}"
-  [ -d "$runtime" ] || return 1
-  units="$(
-    sudo -u "$user" \
-      XDG_RUNTIME_DIR="$runtime" \
-      DBUS_SESSION_BUS_ADDRESS="unix:path=${runtime}/bus" \
-      systemctl --user list-unit-files 'automation-hub*' --no-legend 2>/dev/null \
-      | awk '{print $1}' \
-      | grep -E '^automation-hub' \
-      || true
-  )"
-  if [ -z "$units" ]; then
-    return 1
-  fi
-  echo "Stopping Automation Hub units for user ${user}:"
-  echo "$units"
-  # shellcheck disable=SC2086
-  sudo -u "$user" \
-    XDG_RUNTIME_DIR="$runtime" \
-    DBUS_SESSION_BUS_ADDRESS="unix:path=${runtime}/bus" \
-    systemctl --user stop $units || true
-  # shellcheck disable=SC2086
-  sudo -u "$user" \
-    XDG_RUNTIME_DIR="$runtime" \
-    DBUS_SESSION_BUS_ADDRESS="unix:path=${runtime}/bus" \
-    systemctl --user disable $units || true
-  return 0
-}
-
-HUB_DISABLED=0
-HUB_USERS=""
-for unit_file in /home/*/.config/systemd/user/automation-hub*.service /root/.config/systemd/user/automation-hub*.service; do
-  [ -e "$unit_file" ] || continue
-  owner="$(stat -c '%U' "$unit_file" 2>/dev/null || true)"
-  case " ${HUB_USERS} " in
-    *" ${owner} "*) ;;
-    *) HUB_USERS="${HUB_USERS} ${owner}" ;;
-  esac
-done
-for candidate in aap rhel root ${HUB_USERS}; do
-  [ -n "$candidate" ] || continue
-  if disable_automation_hub_for_user "$candidate"; then
-    HUB_DISABLED=1
-    break
-  fi
-done
-if [ "$HUB_DISABLED" -eq 0 ]; then
-  echo "No Automation Hub systemd user units found; continuing without Hub changes"
-fi
-
 echo "=== Windows Workshop Setup ==="
 
 # Create a writable workspace for the rhel user used by exercises

@@ -51,7 +51,7 @@ image::1-controller-credentials.png[Cred,link=self,window=_blank]
 | Key | Value
 | Name | Windows Credential
 | Organization | Default
-| Type | Machine
+| Credential Type | Machine
 | Username | student
 | Password | Passw0rd!
 |===
@@ -125,10 +125,10 @@ number in SCM URL*)
 | Description | Windows Workshop Project |
 | Organization | Default |
 | Execution Environment | Windows Workshop Execution Environment |
-| SCM Type | Git |
-| SCM URL | http://gitea:3000/student/workshop_project.git | URL obtained from Step 1
-| SCM BRANCH | | Intentionally blank
-| SOURCE CONTROL CREDENTIAL | Git Credential |
+| Source control type | Git |
+| Source control URL | http://gitea:3000/student/workshop_project.git | URL obtained from Step 1
+| SCM branch | | Intentionally blank
+| Source control credential | Git Credential |
 |===
 
 +
