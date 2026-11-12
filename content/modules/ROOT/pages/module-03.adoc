@@ -36,6 +36,9 @@ git clone http://gitea:3000/student/workshop_project.git
 
 . Navigate to the `workshop_project` directory, we are going to create our playbooks here.
 
++
+image::3-open-project.png[VS Code Terminal,link=self,window=_blank]
+
 . Create a directory called *iis_basic* and a file called `install_iis.yml`.
 
 +
