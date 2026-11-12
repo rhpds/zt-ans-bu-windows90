@@ -367,6 +367,26 @@ cat <<'EOF' | tee /tmp/windows-setup.yml
           - Administrators
           - "{{ student_user }}"
         action: add
+
+    # Kick off the download and return immediately. Students work modules 1-6
+    # while Critical/Security updates download. Module 7 still installs and reboots.
+    - name: Start Critical and Security update downloads in the background
+      ansible.windows.win_updates:
+        category_names:
+          - CriticalUpdates
+          - SecurityUpdates
+        state: downloaded
+        reboot: false
+        server_selection: windows_update
+      async: 7200
+      poll: 0
+      register: windows_update_download
+      failed_when: false
+
+    - name: Show background Windows Update download job id
+      ansible.builtin.debug:
+        var: windows_update_download.ansible_job_id
+      when: windows_update_download.ansible_job_id is defined
 EOF
 
 
