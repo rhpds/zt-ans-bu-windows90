@@ -349,10 +349,6 @@ Complete the form using the following values
 | Workshop Inventory
 |
 
-| Execution Environment
-| Windows Workshop Execution Environment
-|
-
 | Project
 | Ansible Workshop Project
 |
@@ -361,11 +357,15 @@ Complete the form using the following values
 | `iis_advanced/site.yml`
 |
 
+| Execution environment
+| Windows Workshop Execution Environment
+|
+
 | Credentials
 | Windows Credential
 |
 
-| OPTIONS
+| Options
 | [x] Enable Fact Storage
 |
 |===
@@ -402,7 +402,7 @@ Complete the form using the following values
 |
 
 | Default Answer
-| Be creative, keep it clean, we’re all professionals here
+| Be creative and keep it clean, we are all professionals here..
 |
 |===
 
