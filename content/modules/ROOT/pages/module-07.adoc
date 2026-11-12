@@ -76,7 +76,7 @@ Then open *Templates* and click *Create template* → *Create job template*.
 | Playbook
 | `win_updates/site.yml`
 
-| Execution Environment
+| Execution environment
 | Windows Workshop Execution Environment
 
 | Credentials
