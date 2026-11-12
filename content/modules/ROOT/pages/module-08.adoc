@@ -31,7 +31,7 @@ Click *Next*.
 |===
 | Field | Value
 
-| Execution environment
+| Execution Environment
 | Windows Workshop Execution Environment
 |===
 
@@ -41,7 +41,7 @@ Click *Next*.
 |===
 | Field | Value
 
-| Machine credential
+| Credential
 | Windows Credential
 |===
 
@@ -107,7 +107,10 @@ Add this playbook:
         msg: Python version is {{ check_python_version.stdout_lines[0] }} and Node.js version is {{ check_node_version.stdout_lines[0] }}
 ----
 
-`gather_facts` is disabled because this play does not use the discovered host facts. The first task removes any existing Python and Node.js packages> This will be skipped in this run, but a later exercise runs this job again after the packages have been installed and updated. The `win_command` tasks record the installed versions, and the debug task prints them.
+[NOTE]
+====
+`gather_facts` is disabled because this play does not use the discovered host facts. The first task removes any existing Python and Node.js packages. This will be skipped in this run, but a later exercise runs this job again after the packages have been installed and updated. The `win_command` tasks record the installed versions, and the debug task prints them.
+====
 
 Save, commit, and push:
 
@@ -121,7 +124,7 @@ In automation controller, sync *Ansible Workshop Project*.
 
 image::8-project-sync.png[Sync the project,link=self,window=_blank]
 
-Create a job template. Click image:8-add.png[Add,link=self,window=_blank] and select *Create job template*.
+Then open *Templates* and click *Create template* → *Create job template*.
 
 [cols="1,2",options="header"]
 |===
@@ -142,11 +145,11 @@ Create a job template. Click image:8-add.png[Add,link=self,window=_blank] and se
 | Project
 | Ansible Workshop Project
 
-| Execution Environment
-| Windows Workshop Execution Environment
-
 | Playbook
 | `chocolatey/install_packages.yml`
+
+| Execution environment
+| Windows Workshop Execution Environment
 
 | Credentials
 | Windows Credential
@@ -201,7 +204,7 @@ Create `chocolatey/update_packages.yml`:
 
 Commit and push the file, then sync the project.
 
-You can copy the install template instead of starting from a blank form. On *Templates*, click the copy icon image:8-copy.png[Copy,link=self,window=_blank] next to *Chocolatey - Install Packages*, then edit the copy.
+You can copy the install template instead of starting from a blank form. On *Templates*, click the kebab menu and select *Duplicate template*, then edit the copy.
 
 [cols="1,2",options="header"]
 |===
@@ -222,11 +225,11 @@ You can copy the install template instead of starting from a blank form. On *Tem
 | Project
 | Ansible Workshop Project
 
-| Execution Environment
-| Windows Workshop Execution Environment
-
 | Playbook
 | `chocolatey/update_packages.yml`
+
+| Execution Environment
+| Windows Workshop Execution Environment
 
 | Credentials
 | Windows Credential
@@ -259,7 +262,7 @@ image::8-update-packages-job-run-successful.png[Update packages job output,link=
         var: ansible_chocolatey
 ----
 
-The facts are stored in `ansible_chocolatey`. Commit, push, and sync the project, then create this job template.
+The facts are stored in `ansible_chocolatey`. Commit, push, and sync the project, then create the following job template.
 
 [cols="1,2",options="header"]
 |===
@@ -280,11 +283,11 @@ The facts are stored in `ansible_chocolatey`. Commit, push, and sync the project
 | Project
 | Ansible Workshop Project
 
-| Execution Environment
-| Windows Workshop Execution Environment
-
 | Playbook
 | `chocolatey/chocolatey_configuration.yml`
+
+| Execution environment
+| Windows Workshop Execution Environment
 
 | Credentials
 | Windows Credential
