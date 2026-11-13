@@ -368,25 +368,83 @@ cat <<'EOF' | tee /tmp/windows-setup.yml
           - "{{ student_user }}"
         action: add
 
-    # Kick off the download and return immediately. Students work modules 1-6
-    # while Critical/Security updates download. Module 7 still installs and reboots.
-    - name: Start Critical and Security update downloads in the background
-      ansible.windows.win_updates:
-        category_names:
-          - CriticalUpdates
-          - SecurityUpdates
-        state: downloaded
-        reboot: false
-        server_selection: windows_update
-      async: 7200
-      poll: 0
-      register: windows_update_download
-      failed_when: false
+    # ansible async around win_updates is unreliable because win_updates already
+    # uses a scheduled task. Start a detached SYSTEM task instead so Critical and
+    # Security updates download and install while students work modules 1-6.
+    # Module 7 still installs anything left and handles reboot.
+    - name: Stage background Windows Update prep script
+      ansible.windows.win_copy:
+        dest: C:\Windows\Temp\lab-wu-prestage.ps1
+        content: |
+          $log = 'C:\Windows\Temp\lab-wu-prestage.log'
+          function Write-Log([string]$Message) {
+            "{0} {1}" -f (Get-Date -Format o), $Message | Out-File -FilePath $log -Append -Encoding utf8
+          }
+          try {
+            Write-Log 'Starting Windows Update prestage'
+            $session = New-Object -ComObject Microsoft.Update.Session
+            $searcher = $session.CreateUpdateSearcher()
+            $searcher.ServerSelection = 2
+            $result = $searcher.Search("IsInstalled=0 and Type='Software' and IsHidden=0")
+            $targets = New-Object -ComObject Microsoft.Update.UpdateColl
+            foreach ($update in $result.Updates) {
+              $categoryNames = @($update.Categories | ForEach-Object { $_.Name })
+              $wanted = $false
+              foreach ($categoryName in $categoryNames) {
+                if ($categoryName -match 'Critical Updates|Security Updates') {
+                  $wanted = $true
+                  break
+                }
+              }
+              if (-not $wanted) { continue }
+              Write-Log ("Selected: " + $update.Title)
+              if (-not $update.EulaAccepted) { $update.AcceptEula() | Out-Null }
+              [void]$targets.Add($update)
+            }
+            if ($targets.Count -eq 0) {
+              Write-Log 'No Critical or Security updates to prestage'
+              return
+            }
+            $downloader = $session.CreateUpdateDownloader()
+            $downloader.Updates = $targets
+            Write-Log ('Downloading {0} update(s)' -f $targets.Count)
+            $downloadResult = $downloader.Download()
+            Write-Log ('Download result code: {0}' -f $downloadResult.ResultCode)
+            $toInstall = New-Object -ComObject Microsoft.Update.UpdateColl
+            foreach ($update in $targets) {
+              if ($update.IsDownloaded) { [void]$toInstall.Add($update) }
+            }
+            if ($toInstall.Count -eq 0) {
+              Write-Log 'No updates were downloaded'
+              return
+            }
+            $installer = $session.CreateUpdateInstaller()
+            $installer.Updates = $toInstall
+            $installer.AllowSourcePrompts = $false
+            Write-Log ('Installing {0} update(s) without waiting for reboot' -f $toInstall.Count)
+            $installResult = $installer.Install()
+            Write-Log ('Install result code: {0}; reboot required: {1}' -f $installResult.ResultCode, $installResult.RebootRequired)
+          } catch {
+            Write-Log ("ERROR: " + $_)
+          }
 
-    - name: Show background Windows Update download job id
-      ansible.builtin.debug:
-        var: windows_update_download.ansible_job_id
-      when: windows_update_download.ansible_job_id is defined
+    - name: Start background Windows Update prep as a SYSTEM scheduled task
+      ansible.windows.win_shell: |
+        $name = 'LabWindowsUpdatePrestage'
+        Unregister-ScheduledTask -TaskName $name -Confirm:$false -ErrorAction SilentlyContinue
+        $action = New-ScheduledTaskAction `
+          -Execute 'powershell.exe' `
+          -Argument '-NoProfile -ExecutionPolicy Bypass -File C:\Windows\Temp\lab-wu-prestage.ps1'
+        $principal = New-ScheduledTaskPrincipal `
+          -UserId 'SYSTEM' `
+          -LogonType ServiceAccount `
+          -RunLevel Highest
+        Register-ScheduledTask -TaskName $name -Action $action -Principal $principal -Force | Out-Null
+        Start-ScheduledTask -TaskName $name
+        Get-ScheduledTask -TaskName $name | Select-Object TaskName, State | Format-List
+      args:
+        executable: powershell.exe
+      failed_when: false
 EOF
 
 
