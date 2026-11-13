@@ -63,7 +63,7 @@ Click *Add step* and select the *Windows Updates* job template.
 
 image::9-win-workflow-2.png[Add the Windows Updates node,link=self,window=_blank]
 
-Click *Next*, then *Finish*.
+Keep the survey defaults and click *Next*, then *Finish*.
 
 === IIS Advanced
 
@@ -92,7 +92,7 @@ Select *IIS Advanced*.
 
 image::9-win-workflow-4.png[Link IIS Advanced,link=self,window=_blank]
 
-Click *Next*, then *Finish*. IIS runs even when the update job fails.
+Enter your survey answer and click *Next*, then *Finish*. IIS runs even when the update job fails.
 
 === Chocolatey
 
