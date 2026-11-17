@@ -349,10 +349,6 @@ Complete the form using the following values
 | Workshop Inventory
 |
 
-| Execution Environment
-| Windows Workshop Execution Environment
-|
-
 | Project
 | Ansible Workshop Project
 |
@@ -361,11 +357,15 @@ Complete the form using the following values
 | `iis_advanced/site.yml`
 |
 
+| Execution environment
+| Windows Workshop Execution Environment
+|
+
 | Credentials
 | Windows Credential
 |
 
-| OPTIONS
+| Options
 | [x] Enable Fact Storage
 |
 |===
@@ -402,7 +402,7 @@ Complete the form using the following values
 |
 
 | Default Answer
-| Be creative, keep it clean, we’re all professionals here
+| Be creative and keep it clean, we are all professionals here..
 |
 |===
 
@@ -436,4 +436,8 @@ After it launches, you should be redirected and can watch the output of
 the job in real time.
 
 +
-When the job has successfully completed, you can navigate back to the `windows` tab and verify the you can get to http://localhost:8080 on the Microsoft Edge browser.
+When the job has successfully completed, you can navigate back to the `windows` tab and verify the you can get to http://localhost:8080 on the browser.
+
+== Troubleshooting
+
+If you have encountered an issue or have noticed something not quite right, please link:https://github.com/ansible/workshops/issues/new?labels=ansibe-builder&title=Issue+with+Windows+automation+90&assignees=amoyament[open an issue on GitHub^].

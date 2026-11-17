@@ -12,18 +12,32 @@ retry() {
     exit 1
 }
 
-retry "subscription-manager clean"
-retry "curl -k -L https://${SATELLITE_URL}/pub/katello-server-ca.crt -o /etc/pki/ca-trust/source/anchors/${SATELLITE_URL}.ca.crt"
-retry "update-ca-trust"
+# AWS images disable RHSM repo management since they use RHUI.
+# Re-enable it so Satellite registration creates proper repo files.
+sed -i 's/^manage_repos.*=.*0/manage_repos = 1/' /etc/rhsm/rhsm.conf
+
+retry "subscription-manager clean" "Cleaning subscription manager"
+retry "curl -k -L https://${SATELLITE_URL}/pub/katello-server-ca.crt -o /etc/pki/ca-trust/source/anchors/${SATELLITE_URL}.ca.crt" "Downloading Satellite CA"
+retry "update-ca-trust" "Updating CA trust"
 KATELLO_INSTALLED=$(rpm -qa | grep -c katello)
-if [ $KATELLO_INSTALLED -eq 0 ]; then
-  retry "rpm -Uhv https://${SATELLITE_URL}/pub/katello-ca-consumer-latest.noarch.rpm"
+if [ "$KATELLO_INSTALLED" -eq 0 ]; then
+  retry "rpm -Uhv https://${SATELLITE_URL}/pub/katello-ca-consumer-latest.noarch.rpm" "Installing Katello CA consumer"
 fi
 subscription-manager status
 if [ $? -ne 0 ]; then
-    retry "subscription-manager register --org=${SATELLITE_ORG} --activationkey=${SATELLITE_ACTIVATIONKEY}"
+    retry "subscription-manager register --org=${SATELLITE_ORG} --activationkey=${SATELLITE_ACTIVATIONKEY}" "Registering with Satellite"
 fi
-retry "dnf install -y python3-pip python3-libsemanage"
+
+# Disable broken AWS RHUI repos and amazon-id plugin
+dnf config-manager --set-disabled '*rhui*' 2>/dev/null || true
+if [ -f /etc/dnf/plugins/amazon-id.conf ]; then
+    sed -i 's/enabled.*=.*1/enabled=0/' /etc/dnf/plugins/amazon-id.conf
+fi
+
+# Enable RHEL 9 repos from Satellite
+subscription-manager repos --enable=rhel-9-for-x86_64-baseos-rpms --enable=rhel-9-for-x86_64-appstream-rpms
+
+retry "dnf install -y python3-pip python3-libsemanage" "Installing python packages"
 
 echo "=== Windows Workshop Setup ==="
 
@@ -72,119 +86,6 @@ default_tag_name: "0.0.1"
 lab_organization: ACME
 admin_windows_user: '.\\Administrator'
 admin_windows_password: 'Ansible123!'
-EOF
-
-# Gitea setup playbook 
-cat <<EOF | tee /tmp/git-setup.yml
----
-# Gitea config
-- name: Configure Git and Gitea repository
-  hosts: localhost
-  gather_facts: false
-  connection: local
-  tags:
-    - gitea-config
-
-  tasks:
-    - name: Wait for Gitea to be ready
-      ansible.builtin.uri:
-        url: http://gitea:3000/api/v1/version
-        method: GET
-        status_code: 200
-      register: gitea_ready
-      until: gitea_ready.status == 200
-      delay: 5
-      retries: 12
-
-    - name: Create repo for project via API
-      ansible.builtin.uri:
-        url: http://gitea:3000/api/v1/user/repos
-        method: POST
-        body_format: json
-        body:
-          name: workshop_project
-          auto_init: false
-          private: false
-        force_basic_auth: true
-        url_password: "{{ student_password }}"
-        url_username: "{{ student_user }}"
-        status_code: [201, 409]
-
-    - name: Create repo dir
-      ansible.builtin.file:
-        path: "/tmp/workshop_project"
-        state: directory
-        mode: 0755
-
-    - name: Configure git to use main repo by default
-      community.general.git_config:
-        name: init.defaultBranch
-        scope: global
-        value: main
-      tags:
-        - git
-
-    - name: Initialise track repo
-      ansible.builtin.command:
-        cmd: /usr/bin/git init
-        chdir: "/tmp/workshop_project"
-        creates: "/tmp/workshop_project/.git" 
-
-    - name: Configure git to store credentials
-      community.general.git_config:
-        name: credential.helper
-        scope: global
-        value: store --file /tmp/git-creds
-
-    - name: Configure repo dir as git safe dir
-      community.general.git_config:
-        name: safe.directory
-        scope: global
-        value: "/tmp/workshop_project"
-
-    - name: Store repo credentials in git-creds file
-      ansible.builtin.copy:
-        dest: /tmp/git-creds
-        mode: 0644
-        content: "http://{{ student_user }}:{{ student_password }}@gitea:3000"
-
-    - name: Configure git username
-      community.general.git_config:
-        name: user.name
-        scope: global
-        value: "{{ student_user }}"
-
-    - name: Configure git email address
-      community.general.git_config:
-        name: user.email
-        scope: global
-        value: "{{ student_user }}@local"
-
-    - name: Create generic README file
-      ansible.builtin.copy:
-        dest: /tmp/workshop_project/README.md
-        content: |
-          # Windows Getting Started Workshop
-          
-          This repository will be used during the Ansible Automation with Windows Workshop.
-          
-          ## Getting Started
-          
-          Follow the lab instructions to begin working with Ansible and Windows automation.
-        mode: '0644'
-
-    - name: Add remote origin to repo
-      ansible.builtin.command:
-        cmd: "{{ item }}"
-        chdir: "/tmp/workshop_project"   
-      register: __output
-      changed_when: __output.rc == 0
-      loop:
-        - "git remote add origin http://gitea:3000/{{ student_user }}/workshop_project.git"
-        - "git checkout -b main"
-        - "git add ."
-        - "git commit -m'Initial commit'"
-        - "git push -u origin main --force"
 EOF
 
 # Controller setup playbook
@@ -254,14 +155,44 @@ cat <<EOF | tee /tmp/controller-setup.yml
         controller_username: admin
         controller_password: ansible123!
         validate_certs: false
+
+    - name: Read the modules allowed for ad hoc jobs
+      ansible.builtin.uri:
+        url: https://localhost/api/controller/v2/settings/jobs/
+        method: GET
+        url_username: admin
+        url_password: ansible123!
+        force_basic_auth: true
+        validate_certs: false
+        return_content: true
+      register: job_settings
+
+    - name: Allow win_chocolatey in Run command
+      ansible.builtin.uri:
+        url: https://localhost/api/controller/v2/settings/jobs/
+        method: PATCH
+        url_username: admin
+        url_password: ansible123!
+        force_basic_auth: true
+        validate_certs: false
+        body_format: json
+        status_code: 200
+        body:
+          AD_HOC_COMMANDS: "{{ job_settings.json.AD_HOC_COMMANDS + ['win_chocolatey'] }}"
+      when: "'win_chocolatey' not in job_settings.json.AD_HOC_COMMANDS"
 EOF
 
-# Install necessary collections
-ansible-galaxy collection install community.general
-ansible-galaxy collection install microsoft.ad
+# ansible.controller must match the controller on the AAP 2.7 image.
+# ansible.windows is used by the Windows prep playbook on this node.
+# Student jobs use the Windows execution environment.
+AAP_CONTROLLER_COLLECTION=/root/ansible-automation-platform-containerized-setup/collections/ansible_collections/ansible/controller
+mkdir -p /root/.ansible/collections/ansible_collections/ansible
+if [ -d "$AAP_CONTROLLER_COLLECTION" ]; then
+  cp -a "$AAP_CONTROLLER_COLLECTION" /root/.ansible/collections/ansible_collections/ansible/
+else
+  ansible-galaxy collection install ansible.controller
+fi
 ansible-galaxy collection install ansible.windows
-ansible-galaxy collection install ansible.controller
-ansible-galaxy collection install community.windows
 
 # Install pywinrm for Windows connectivity
 pip3 install pywinrm
@@ -324,8 +255,21 @@ cat <<'EOF' | tee /tmp/windows-setup.yml
         state: present
         include_sub_features: true
         include_management_tools: true
+      register: dotnet_feature
 
-    - name: Install Chocolatey
+    - name: Reboot when the .NET feature install requires it
+      ansible.windows.win_reboot:
+        msg: "Reboot to finish .NET feature installation"
+        pre_reboot_delay: 5
+      when: dotnet_feature.reboot_required | default(false)
+
+    - name: Check whether Chocolatey is already installed
+      ansible.windows.win_stat:
+        path: C:\ProgramData\chocolatey\bin\choco.exe
+      register: choco_bin
+
+    - name: Install Chocolatey when first boot did not
+      when: not choco_bin.stat.exists
       ansible.windows.win_shell: |
         Set-ExecutionPolicy Bypass -Scope Process -Force
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -333,46 +277,178 @@ cat <<'EOF' | tee /tmp/windows-setup.yml
       args:
         executable: powershell.exe
 
-    - name: Execute slmgr /rearm 
-      ansible.windows.win_shell: cscript.exe //B //NoLogo C:\Windows\System32\slmgr.vbs /rearm
-      register: slmgr_result
-
-    - name: Reboot after Chocolatey/slmgr setup
-      ansible.windows.win_reboot:
-        msg: "Reboot to finalize Chocolatey/slmgr setup"
-        pre_reboot_delay: 5
-
     - name: Set MapsBroker to manual and stopped
       ansible.windows.win_service:
         name: MapsBroker
         start_mode: manual
         state: stopped
 
-    - name: Install Microsoft Edge via Chocolatey
-      ansible.windows.win_shell: choco install microsoft-edge -y --no-progress
+    - name: Check whether the Windows license is about to expire
+      ansible.windows.win_shell: |
+        $output = & cscript.exe //Nologo C:\Windows\System32\slmgr.vbs /xpr | Out-String
+        Write-Output $output
+        if ($output -match 'permanently activated') { exit 0 }
+        if ($output -match 'Notification' -or $output -match 'grace period has expired') { exit 2 }
+        if ($output -match '(\d{1,2}/\d{1,2}/\d{4})') {
+          $expires = [datetime]::Parse($Matches[1], [cultureinfo]'en-US')
+          if ($expires -lt (Get-Date).AddDays(2)) { exit 2 }
+        }
+        exit 0
+      register: license_check
+      changed_when: false
+      failed_when: license_check.rc not in [0, 2]
+
+    - name: Rearm Windows when the grace period is nearly over
+      when: license_check.rc == 2
+      ansible.windows.win_shell: cscript.exe //B //NoLogo C:\Windows\System32\slmgr.vbs /rearm
+
+    - name: Reboot when a license rearm has to take effect
+      when: license_check.rc == 2
+      ansible.windows.win_reboot:
+        msg: "Reboot to apply Windows license rearm"
+        pre_reboot_delay: 5
+
+    - name: Remove Windows Update policies that point at WSUS or block the service
+      ansible.windows.win_regedit:
+        path: "{{ item.path }}"
+        name: "{{ item.name }}"
+        state: absent
+      loop:
+        - path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate
+          name: WUServer
+        - path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate
+          name: WUStatusServer
+        - path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate
+          name: DoNotConnectToWindowsUpdateInternetLocations
+        - path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate
+          name: DisableWindowsUpdateAccess
+        - path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU
+          name: UseWUServer
+      failed_when: false
+
+    - name: Leave Windows Update enabled without installing before the exercise
+      ansible.windows.win_regedit:
+        path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU
+        name: "{{ item.name }}"
+        data: "{{ item.data | int }}"
+        type: dword
+      loop:
+        - name: NoAutoUpdate
+          data: 0
+        - name: AUOptions
+          data: 2
+
+    - name: Download Windows updates over HTTPS instead of peer caching
+      ansible.windows.win_regedit:
+        path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization
+        name: DODownloadMode
+        data: 0
+        type: dword
+
+    - name: Ensure services required by win_updates are running
+      ansible.windows.win_service:
+        name: "{{ item.name }}"
+        start_mode: "{{ item.mode }}"
+        state: started
+      loop:
+        - name: Schedule
+          mode: auto
+        - name: cryptsvc
+          mode: auto
+        - name: bits
+          mode: manual
+        - name: wuauserv
+          mode: manual
+
+    - name: Allow Administrators to run the Windows Update scheduled task
+      ansible.windows.win_user_right:
+        name: SeBatchLogonRight
+        users:
+          - Administrators
+          - "{{ student_user }}"
+        action: add
+
+    # ansible async around win_updates is unreliable because win_updates already
+    # uses a scheduled task. Start a detached SYSTEM task instead so Critical and
+    # Security updates download and install while students work modules 1-6.
+    # Module 7 still installs anything left and handles reboot.
+    - name: Stage background Windows Update prep script
+      ansible.windows.win_copy:
+        dest: C:\Windows\Temp\lab-wu-prestage.ps1
+        content: |
+          $log = 'C:\Windows\Temp\lab-wu-prestage.log'
+          function Write-Log([string]$Message) {
+            "{0} {1}" -f (Get-Date -Format o), $Message | Out-File -FilePath $log -Append -Encoding utf8
+          }
+          try {
+            Write-Log 'Starting Windows Update prestage'
+            $session = New-Object -ComObject Microsoft.Update.Session
+            $searcher = $session.CreateUpdateSearcher()
+            $searcher.ServerSelection = 2
+            $result = $searcher.Search("IsInstalled=0 and Type='Software' and IsHidden=0")
+            $targets = New-Object -ComObject Microsoft.Update.UpdateColl
+            foreach ($update in $result.Updates) {
+              $categoryNames = @($update.Categories | ForEach-Object { $_.Name })
+              $wanted = $false
+              foreach ($categoryName in $categoryNames) {
+                if ($categoryName -match 'Critical Updates|Security Updates') {
+                  $wanted = $true
+                  break
+                }
+              }
+              if (-not $wanted) { continue }
+              Write-Log ("Selected: " + $update.Title)
+              if (-not $update.EulaAccepted) { $update.AcceptEula() | Out-Null }
+              [void]$targets.Add($update)
+            }
+            if ($targets.Count -eq 0) {
+              Write-Log 'No Critical or Security updates to prestage'
+              return
+            }
+            $downloader = $session.CreateUpdateDownloader()
+            $downloader.Updates = $targets
+            Write-Log ('Downloading {0} update(s)' -f $targets.Count)
+            $downloadResult = $downloader.Download()
+            Write-Log ('Download result code: {0}' -f $downloadResult.ResultCode)
+            $toInstall = New-Object -ComObject Microsoft.Update.UpdateColl
+            foreach ($update in $targets) {
+              if ($update.IsDownloaded) { [void]$toInstall.Add($update) }
+            }
+            if ($toInstall.Count -eq 0) {
+              Write-Log 'No updates were downloaded'
+              return
+            }
+            $installer = $session.CreateUpdateInstaller()
+            $installer.Updates = $toInstall
+            $installer.AllowSourcePrompts = $false
+            Write-Log ('Installing {0} update(s) without waiting for reboot' -f $toInstall.Count)
+            $installResult = $installer.Install()
+            Write-Log ('Install result code: {0}; reboot required: {1}' -f $installResult.ResultCode, $installResult.RebootRequired)
+          } catch {
+            Write-Log ("ERROR: " + $_)
+          }
+
+    - name: Start background Windows Update prep as a SYSTEM scheduled task
+      ansible.windows.win_shell: |
+        $name = 'LabWindowsUpdatePrestage'
+        Unregister-ScheduledTask -TaskName $name -Confirm:$false -ErrorAction SilentlyContinue
+        $action = New-ScheduledTaskAction `
+          -Execute 'powershell.exe' `
+          -Argument '-NoProfile -ExecutionPolicy Bypass -File C:\Windows\Temp\lab-wu-prestage.ps1'
+        $principal = New-ScheduledTaskPrincipal `
+          -UserId 'SYSTEM' `
+          -LogonType ServiceAccount `
+          -RunLevel Highest
+        Register-ScheduledTask -TaskName $name -Action $action -Principal $principal -Force | Out-Null
+        Start-ScheduledTask -TaskName $name
+        Get-ScheduledTask -TaskName $name | Select-Object TaskName, State | Format-List
       args:
         executable: powershell.exe
-      register: edge_install
-      retries: 3
-      delay: 20
-      until: edge_install.rc == 0
-
-    - name: Verify Edge installed
-      ansible.windows.win_stat:
-        path: C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe
-      register: edge_bin
-
-    - name: Fail if Edge not installed
-      ansible.builtin.fail:
-        msg: 'Edge did not install; check Chocolatey logs on the VM'
-      when: not edge_bin.stat.exists
+      failed_when: false
 EOF
 
 
 # Execute the setup playbooks
-echo "=== Running Git/Gitea Setup ==="
-ansible-playbook /tmp/git-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v
-
 echo "=== Bootstrapping Windows local user (best effort) ==="
 ansible-playbook /tmp/windows-setup.yml -e @/tmp/track-vars.yml -i /tmp/inventory.ini -v || true
 
