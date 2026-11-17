@@ -36,6 +36,9 @@ git clone http://gitea:3000/student/workshop_project.git
 
 . Navigate to the `workshop_project` directory, we are going to create our playbooks here.
 
++
+image::3-open-project.png[VS Code Terminal,link=self,window=_blank]
+
 . Create a directory called *iis_basic* and a file called `install_iis.yml`.
 
 +
@@ -182,4 +185,4 @@ office, read up on this link:https://docs.ansible.com/ansible/latest/reference_a
 
 == Troubleshooting
 
-If you have encountered an issue or have noticed something not quite right, please link:https://github.com/ansible/workshops/issues/new?labels=ansibe-builder&title=Issue+with+Windows+automation+90&assignees=amoyament[open an issue on GitHub].
+If you have encountered an issue or have noticed something not quite right, please link:https://github.com/ansible/workshops/issues/new?labels=ansibe-builder&title=Issue+with+Windows+automation+90&assignees=amoyament[open an issue on GitHub^].

@@ -31,7 +31,7 @@ Credentials are utilized by Controller for authentication when launching jobs
 against machines, synchronizing with inventory sources, and importing
 project content from a version control system.
 
-There are many link:https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.5/html/using_automation_execution/controller-credentials#ref-controller-credential-types[types of credentials^] including machine, network, and various cloud providers. For this
+There are many link:https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.7/secure-assembly_controller_custom_credentials[types of credentials^] including machine, network, and various cloud providers. For this
 workshop, we are using *machine* and *source control* credentials.
 
 === Steps
@@ -51,7 +51,7 @@ image::1-controller-credentials.png[Cred,link=self,window=_blank]
 | Key | Value
 | Name | Windows Credential
 | Organization | Default
-| Type | Machine
+| Credential Type | Machine
 | Username | student
 | Password | Passw0rd!
 |===
@@ -125,10 +125,10 @@ number in SCM URL*)
 | Description | Windows Workshop Project |
 | Organization | Default |
 | Execution Environment | Windows Workshop Execution Environment |
-| SCM Type | Git |
-| SCM URL | http://gitea:3000/student/workshop_project.git | URL obtained from Step 1
-| SCM BRANCH | | Intentionally blank
-| SCM CREDENTIAL | Git Credential |
+| Source control type | Git |
+| Source control URL | http://gitea:3000/student/workshop_project.git | URL obtained from Step 1
+| SCM branch | | Intentionally blank
+| Source control credential | Git Credential |
 |===
 
 +
@@ -220,4 +220,4 @@ You can find more information about these and other settings in our link:https:/
 
 == Troubleshooting
 
-If you have encountered an issue or have noticed something not quite right, please link:https://github.com/ansible/workshops/issues/new?labels=ansibe-builder&title=Issue+with+Windows+automation+90&assignees=amoyament[open an issue on GitHub].
+If you have encountered an issue or have noticed something not quite right, please link:https://github.com/ansible/workshops/issues/new?labels=ansibe-builder&title=Issue+with+Windows+automation+90&assignees=amoyament[open an issue on GitHub^].
